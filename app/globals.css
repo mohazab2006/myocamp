@@ -91,7 +91,7 @@ img {
 
 .nav-cta,
 .button,
-.menu-button {
+.mobile-menu summary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -108,11 +108,47 @@ img {
   color: var(--pine);
 }
 
-.menu-button {
+.mobile-menu {
   display: none;
+  position: relative;
+}
+
+.mobile-menu summary {
   width: 44px;
+  list-style: none;
   background: oklch(98% 0.012 82 / 0.12);
   color: var(--cream);
+  cursor: pointer;
+}
+
+.mobile-menu summary::-webkit-details-marker {
+  display: none;
+}
+
+.mobile-menu div {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  display: grid;
+  gap: 4px;
+  min-width: 220px;
+  padding: 10px;
+  border: 1px solid oklch(93% 0.018 85 / 0.4);
+  border-radius: 22px;
+  background: var(--pine);
+  box-shadow: var(--shadow);
+}
+
+.mobile-menu a {
+  padding: 12px 14px;
+  border-radius: 14px;
+  color: oklch(94% 0.016 86 / 0.88);
+  font-weight: 750;
+}
+
+.mobile-menu a:hover {
+  background: oklch(98% 0.012 82 / 0.1);
+  color: var(--brass);
 }
 
 .hero {
@@ -654,8 +690,8 @@ p {
     display: none;
   }
 
-  .menu-button {
-    display: inline-flex;
+  .mobile-menu {
+    display: block;
   }
 
   .story-section,

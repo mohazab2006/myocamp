@@ -87,9 +87,18 @@ export default function Home() {
         <a className="nav-cta" href="#register">
           Register <ArrowUpRight size={16} />
         </a>
-        <button className="menu-button" aria-label="Open navigation">
-          <Menu size={20} />
-        </button>
+        <details className="mobile-menu">
+          <summary aria-label="Open navigation">
+            <Menu size={20} />
+          </summary>
+          <div>
+            {navItems.map(([label, href]) => (
+              <a key={label} href={href}>
+                {label}
+              </a>
+            ))}
+          </div>
+        </details>
       </header>
 
       <section id="top" className="hero">
