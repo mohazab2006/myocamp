@@ -72,6 +72,9 @@ const spaces = [
 export default function Home() {
   return (
     <main className="overflow-x-hidden w-full max-w-full">
+      <a className="skip-link" href="#story">
+        Skip to main content
+      </a>
       <header className="site-nav" aria-label="Main navigation">
         <a className="brand" href="#top" aria-label="MYO Camp home">
           <img src="/Pictures/Logo.png" alt="" />
