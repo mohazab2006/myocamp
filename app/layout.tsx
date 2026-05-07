@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Geist } from "next/font/google";
+import { Caprasimo, Caveat, Fraunces, Geist } from "next/font/google";
 import "./globals.css";
 
 const geist = Geist({
@@ -8,29 +8,53 @@ const geist = Geist({
   display: "swap"
 });
 
-const display = Fraunces({
+const fraunces = Fraunces({
   subsets: ["latin"],
   variable: "--font-display",
   display: "swap"
 });
 
+const caprasimo = Caprasimo({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-camp",
+  display: "swap"
+});
+
+const caveat = Caveat({
+  subsets: ["latin"],
+  variable: "--font-script",
+  display: "swap"
+});
+
 export const metadata: Metadata = {
-  title: "MYO Camp",
+  title: {
+    default: "Muslim Youth of Ottawa",
+    template: "%s · MYO"
+  },
   description:
-    "A volunteer-run Muslim youth summer camp in Ontario with cabins, canoeing, campfires, faith, leadership, and friendship.",
-  icons: {
-    icon: "/Pictures/Logo.png"
-  }
+    "Muslim Youth of Ottawa runs hikes, halaqas, service days, and the MYO Summer Camp — a week of cabins, canoeing, campfires, faith, and friendship.",
+  metadataBase: new URL("https://myo.camp"),
+  openGraph: {
+    title: "Muslim Youth of Ottawa",
+    description:
+      "Hikes, halaqas, leadership, and the annual MYO Summer Camp at Camp Smitty.",
+    type: "website"
+  },
+  icons: { icon: "/Pictures/Logo.png" }
 };
 
 export default function RootLayout({
   children
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body className={`${geist.variable} ${display.variable}`}>{children}</body>
+    <html
+      lang="en"
+      className={`${geist.variable} ${fraunces.variable} ${caprasimo.variable} ${caveat.variable}`}
+    >
+      <body data-theme="org" className="min-h-[100dvh] antialiased">
+        {children}
+      </body>
     </html>
   );
 }

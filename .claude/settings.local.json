@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pnpm add *)",
+      "Bash(grep -iE \"^\\(Mountain|Tent|MapPin|List$|X\\\\.\\)\")",
+      "Bash(pnpm build *)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(awk 'NR>=93 && NR<=105' /c/Projects/myocamp/components/camp/CampHero.tsx)"
+    ]
+  }
+}

@@ -1,0 +1,106 @@
+import type { Metadata } from "next";
+import { getSiteSettings } from "@/lib/content/org";
+import { CampIcon, PaintedDivider } from "@/components/camp/Illustrations";
+
+export const metadata: Metadata = {
+  title: "Camp · Support",
+  description: "Subsidise a camper, donate gear, or volunteer for the week at MYO Camp."
+};
+
+export default async function CampSupportPage() {
+  const settings = await getSiteSettings();
+
+  return (
+    <>
+      <section className="topo-bg bg-camp-paper">
+        <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-20 md:gap-10 md:px-10 md:py-28">
+          <div className="col-span-12 md:col-span-7">
+            <div className="font-script text-2xl text-camp-flame">help one camper get to camp</div>
+            <h1 className="font-camp mt-2 text-6xl leading-[0.92] text-camp-bark md:text-8xl">
+              Subsidise a spot.<br />
+              <span className="text-camp-flame">Quietly.</span>
+            </h1>
+            <p className="mt-6 max-w-[60ch] text-lg leading-relaxed text-camp-ink/85">
+              Every year families ask if there&apos;s help available. There always is — because of donations.
+              Names are never shared. The kid never knows who paid. They just get to come.
+            </p>
+          </div>
+          <div className="col-span-12 md:col-span-5">
+            <div className="aspect-[4/5] overflow-hidden border-2 border-camp-bark/30">
+              <img src="/Pictures/campPoster.jpg" alt="MYO Summer Camp poster" className="h-full w-full object-cover" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <PaintedDivider />
+
+      <section className="bg-camp-paper-soft">
+        <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
+          <div className="grid grid-cols-12 gap-6 md:gap-10">
+            <div className="col-span-12 md:col-span-4">
+              <div className="font-script text-2xl text-camp-flame">where it goes</div>
+              <h2 className="font-camp mt-2 text-5xl leading-[0.95] text-camp-bark md:text-6xl">
+                Three lanes.
+              </h2>
+            </div>
+            <div className="col-span-12 grid gap-5 md:col-span-8 md:grid-cols-3">
+              {[
+                {
+                  icon: "tent",
+                  amt: "$400",
+                  title: "Send a camper",
+                  body: "Covers a full spot for one youth. Most-requested kind of donation."
+                },
+                {
+                  icon: "knife",
+                  amt: "$1,200",
+                  title: "Train counsellors",
+                  body: "First aid, lifeguard, food safety. We re-certify every year."
+                },
+                {
+                  icon: "flame",
+                  amt: "$5,000",
+                  title: "Cover the kitchen",
+                  body: "Halal meals for the whole week, plus pre-camp staff training food."
+                }
+              ].map((tier, i) => (
+                <article
+                  key={tier.title}
+                  className="border-2 border-camp-bark/30 bg-camp-paper p-6"
+                  style={{ rotate: `${i % 2 ? 0.5 : -0.5}deg` }}
+                >
+                  <div className="text-camp-flame">
+                    <CampIcon name={tier.icon as never} size={36} />
+                  </div>
+                  <div className="font-camp mt-3 text-3xl text-camp-bark">{tier.amt}</div>
+                  <div className="font-script text-xl text-camp-flame">{tier.title}</div>
+                  <p className="mt-3 text-camp-ink/80">{tier.body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
+            <a
+              href={settings.donateUrl}
+              target="_blank"
+              rel="noopener"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink bg-camp-flame px-6 py-3 text-sm font-medium text-camp-paper transition hover:translate-y-[-1px]"
+            >
+              Donate via PayPal
+            </a>
+            <a
+              href={settings.volunteerUrl}
+              target="_blank"
+              rel="noopener"
+              className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink/80 bg-camp-paper px-6 py-3 text-sm font-medium text-camp-ink transition hover:rotate-[1deg]"
+            >
+              Volunteer for camp
+            </a>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}
