@@ -52,7 +52,11 @@ export default async function CampRegisterPage() {
           <div className="col-span-12 md:col-span-5">
             <div className="space-y-3">
               {[
-                ["Camp dates", formatRange(camp.campStart, camp.campEnd)],
+                ["Main camp", formatRange(camp.campStart, camp.campEnd)],
+                ...(camp.litStart && camp.litEnd
+                  ? [["LIT session", formatRange(camp.litStart, camp.litEnd)] as const]
+                  : []),
+                ["Staff arrival", camp.staffArrival],
                 [
                   "Registration window",
                   camp.registrationOpens && camp.registrationDeadline

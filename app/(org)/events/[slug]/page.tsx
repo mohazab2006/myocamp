@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowUpRight, CalendarBlank, MapPin, Tag } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeft, CalendarBlank, MapPin, Tag } from "@phosphor-icons/react/dist/ssr";
 import { getEvent, getEvents } from "@/lib/content/events";
 import { formatRange, isUpcoming } from "@/lib/date";
-import { ButtonAnchor } from "@/components/main/Button";
+import { ButtonAnchor, ButtonLink } from "@/components/main/Button";
+
+const isInternalHref = (href: string) => href.startsWith("/");
 
 export async function generateStaticParams() {
   const events = await getEvents();
@@ -87,6 +89,22 @@ export default async function EventPage({
           <div className="prose prose-stone max-w-none">
             <p className="text-lg leading-relaxed text-ink">{event.blurb}</p>
             {event.body && <p className="text-ink-soft">{event.body}</p>}
+            {event.type === "camp" && isInternalHref(event.registerUrl ?? "") && (
+              <div className="mt-6 flex flex-wrap gap-3">
+                <ButtonLink href="/camp" variant="secondary">
+                  Camp home
+                </ButtonLink>
+                <ButtonLink href="/camp/register" variant="secondary">
+                  Registration
+                </ButtonLink>
+                <ButtonLink href="/camp/location" variant="secondary">
+                  Location
+                </ButtonLink>
+                <ButtonLink href="/camp/rules" variant="secondary">
+                  Rules
+                </ButtonLink>
+              </div>
+            )}
           </div>
         </div>
 
@@ -101,9 +119,13 @@ export default async function EventPage({
             )}
             {upcoming && event.registerUrl ? (
               <div className="mt-5">
-                <ButtonAnchor href={event.registerUrl} target="_blank" rel="noopener">
-                  Open registration
-                </ButtonAnchor>
+                {isInternalHref(event.registerUrl) ? (
+                  <ButtonLink href={event.registerUrl}>View MYO Summer Camp</ButtonLink>
+                ) : (
+                  <ButtonAnchor href={event.registerUrl} target="_blank" rel="noopener">
+                    Open registration
+                  </ButtonAnchor>
+                )}
               </div>
             ) : !upcoming ? (
               <p className="mt-4 text-sm text-ink-soft">

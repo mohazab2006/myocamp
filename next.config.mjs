@@ -7,6 +7,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const nextConfig = {
   turbopack: {
     root: __dirname
+  },
+  async redirects() {
+    return [
+      { source: "/programs", destination: "/events", permanent: true },
+      { source: "/programs/:slug", destination: "/events", permanent: true }
+    ];
   }
 };
 

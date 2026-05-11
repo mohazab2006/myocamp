@@ -41,7 +41,10 @@ export const metadata: Metadata = {
       "Hikes, halaqas, leadership, and the annual MYO Summer Camp at Camp Smitty.",
     type: "website"
   },
-  icons: { icon: "/Pictures/Logo.png" }
+  icons: {
+    icon: "/Pictures/LogoMAIN.png",
+    apple: "/Pictures/LogoMAIN.png"
+  }
 };
 
 export default function RootLayout({

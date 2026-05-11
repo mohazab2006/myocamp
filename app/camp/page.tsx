@@ -15,10 +15,13 @@ import { formatRange } from "@/lib/date";
 
 export default async function CampHome() {
   const camp = await getCampSettings();
+  const mainRange = formatRange(camp.campStart, camp.campEnd);
+  const litRange =
+    camp.litStart && camp.litEnd ? formatRange(camp.litStart, camp.litEnd) : undefined;
 
   return (
     <>
-      <CampHero />
+      <CampHero mainRange={mainRange} litRange={litRange} />
 
       {/* WHY CAMP */}
       <section className="border-y-2 border-camp-bark/15 bg-camp-paper-soft">
@@ -26,12 +29,12 @@ export default async function CampHome() {
           <div className="col-span-12 md:col-span-5">
             <div className="font-script text-3xl text-camp-flame">field journal entry</div>
             <h2 className="font-camp mt-3 text-5xl leading-[0.92] text-camp-bark md:text-6xl">
-              <span className="scribble-underline">A different week.</span>
+              <span className="scribble-underline">A different rhythm.</span>
             </h2>
           </div>
           <div className="col-span-12 space-y-5 text-lg leading-relaxed text-camp-ink/85 md:col-span-7">
             <p>
-              Most kids spend the summer indoors. Phones, screens, AC. Camp is the opposite — seven nights in
+              Most kids spend the summer indoors. Phones, screens, AC. Camp is the opposite — four nights in
               cabins, three meals around long wooden tables, a forest behind every door, and a lake that
               wakes up before everyone else.
             </p>
@@ -41,9 +44,60 @@ export default async function CampHome() {
             </p>
             <p>
               We&apos;re volunteer-led, which means it&apos;s also the kind of camp where the people running it
-              actually know your kid&apos;s name by Tuesday.
+              actually know your kid&apos;s name by Friday.
             </p>
           </div>
+        </div>
+      </section>
+
+      {/* 2026 SESSIONS */}
+      <section className="bg-camp-paper">
+        <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
+          <div className="grid grid-cols-12 gap-6 md:gap-10">
+            <div className="col-span-12 md:col-span-4">
+              <div className="font-script text-2xl text-camp-flame">summer 2026</div>
+              <h2 className="font-camp mt-2 text-5xl leading-[0.95] text-camp-bark md:text-6xl">
+                Two focused<br />four-day sessions.
+              </h2>
+              <p className="mt-6 max-w-[44ch] text-camp-ink/80">
+                Instead of one full week, we&apos;re running two shorter sessions at Camp Smitty — a dedicated
+                LIT track, then the main camp. Staff arrive {camp.staffArrival.toLowerCase()} before each
+                session.
+              </p>
+            </div>
+            <div className="col-span-12 grid gap-5 md:col-span-8 md:grid-cols-2">
+              {[
+                {
+                  title: "LIT leadership track",
+                  dates: litRange ?? "July 23–26, 2026",
+                  body: "Ages 17–19. Lighter logistics, more responsibility — meals, activity planning, and waking yourselves up. Some LITs may graduate into counsellor roles for main camp."
+                },
+                {
+                  title: "Main camp · core program",
+                  dates: mainRange,
+                  body: "Ages 9–16. The full MYO camp experience — cabins, skills stations, prayer, and fire circles — in a focused four-day session."
+                }
+              ].map((session, i) => (
+                <article
+                  key={session.title}
+                  className="border-2 border-camp-bark/30 bg-camp-paper-soft p-6"
+                  style={{ rotate: `${i % 2 ? 0.4 : -0.4}deg` }}
+                >
+                  <div className="font-script text-xl text-camp-flame">{session.dates}</div>
+                  <h3 className="font-camp mt-2 text-3xl text-camp-bark">{session.title}</h3>
+                  <p className="mt-3 leading-relaxed text-camp-ink/80">{session.body}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+          <p className="mt-10 max-w-[70ch] text-camp-ink/75">
+            We may also run meetups, hikes, or a dedicated archery weekend in October before and after camp —
+            see the{" "}
+            <Link href="/events" className="text-camp-flame underline decoration-2 underline-offset-4">
+              MYO events list
+            </Link>{" "}
+            for dates as they&apos;re confirmed.
+          </p>
         </div>
       </section>
 
@@ -57,7 +111,7 @@ export default async function CampHome() {
                 Skills you<br />actually use.
               </h2>
               <p className="mt-6 max-w-[44ch] text-camp-ink/80">
-                Not a passive week. Every camper rotates through real hands-on stations. By Saturday they tie
+                Not a passive four days. Every camper rotates through real hands-on stations. By Sunday they tie
                 their own knots, light their own fire, and read a paper map.
               </p>
             </div>
@@ -90,7 +144,7 @@ export default async function CampHome() {
             <div>
               <div className="font-script text-2xl text-camp-flame">the rhythm</div>
               <h2 className="font-camp mt-2 text-5xl leading-[0.95] text-camp-bark md:text-6xl">
-                One week, day by day.
+                Main camp, day by day.
               </h2>
             </div>
             <div className="font-script text-xl text-camp-bark/70">
@@ -128,7 +182,7 @@ export default async function CampHome() {
                 The places<br />we live.
               </h2>
               <p className="mt-6 max-w-[44ch] text-camp-ink/80">
-                Camp Smitty is a working camp the rest of the year. We rent the whole site for our week —
+                Camp Smitty is a working camp the rest of the year. We rent the whole site for our session —
                 cabins, kitchen, lake, woods, and all.
               </p>
               <div className="mt-8">

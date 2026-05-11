@@ -8,7 +8,12 @@ import { CompassIcon, FlameIcon, KnotIcon, BowIcon } from "./Illustrations";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-export function CampHero() {
+type CampHeroProps = {
+  mainRange: string;
+  litRange?: string;
+};
+
+export function CampHero({ mainRange, litRange }: CampHeroProps) {
   const root = useRef<HTMLElement>(null);
 
   useGSAP(
@@ -67,7 +72,7 @@ export function CampHero() {
       <div className="relative mx-auto max-w-[1440px] px-6 pb-24 pt-16 md:px-10 md:pb-36 md:pt-24">
         <div className="flex items-center justify-between text-camp-bark">
           <div className="font-script text-2xl md:text-3xl">est. Camp Smitty &middot; Eganville</div>
-          <div className="font-script text-xl md:text-2xl">a week every August</div>
+          <div className="font-script text-xl md:text-2xl">two focused sessions · August</div>
         </div>
 
         <div className="relative mt-12 flex flex-nowrap items-end justify-center gap-x-3 whitespace-nowrap leading-[0.85] md:gap-x-6">
@@ -113,12 +118,13 @@ export function CampHero() {
         </div>
 
         <p className="camp-hero-script font-script mx-auto mt-2 max-w-3xl text-center text-3xl leading-tight text-camp-flame md:text-5xl">
-          a week of cabins, canoes &amp; campfires
+          four days of cabins, canoes &amp; campfires
         </p>
 
-        <div className="camp-hero-meta mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-3 text-center sm:grid-cols-3">
+        <div className="camp-hero-meta mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-3 text-center sm:grid-cols-2 lg:grid-cols-4">
           {[
-            ["When", "Aug 16 – 22, 2026"],
+            ["Main camp", mainRange],
+            ...(litRange ? [["LIT session", litRange] as const] : []),
             ["Where", "Camp Smitty, Eganville"],
             ["Who", "Ages 9 – 19 · Boys & Girls"]
           ].map(([k, v]) => (
@@ -134,7 +140,6 @@ export function CampHero() {
             href="/camp/register"
             className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink bg-camp-flame px-6 py-3 text-sm font-medium text-camp-paper transition hover:translate-y-[-1px] hover:rotate-[-1deg]"
           >
-            <FlameIcon size={16} />
             Open registration
           </a>
           <a

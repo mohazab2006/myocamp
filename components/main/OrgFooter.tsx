@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getSiteSettings } from "@/lib/content/org";
+import { SocialLinks } from "@/components/main/SocialLinks";
 
 export async function OrgFooter() {
   const settings = await getSiteSettings();
@@ -10,16 +11,17 @@ export async function OrgFooter() {
         <div className="md:col-span-5">
           <div className="font-display text-3xl leading-none tracking-tight">Muslim Youth of Ottawa</div>
           <p className="mt-4 max-w-[42ch] text-sm text-paper/75">
-            A volunteer-led community for Muslim youth in Ottawa — programs all year, hikes, halaqas, service
-            days, and the camp at Camp Smitty every August.
+            A volunteer-led community for Muslim youth in Ottawa — hikes, halaqas, service days, and the camp at
+            Camp Smitty every August.
           </p>
+          <SocialLinks links={settings.socials} tone="light" className="mt-6" />
         </div>
 
         <div className="md:col-span-3">
           <div className="text-xs uppercase tracking-[0.18em] text-paper/55">Explore</div>
           <ul className="mt-4 space-y-2 text-sm">
             <li><Link href="/events" className="hover:text-paper">Events</Link></li>
-            <li><Link href="/programs" className="hover:text-paper">Programs</Link></li>
+            <li><Link href="/blog" className="hover:text-paper">Blog</Link></li>
             <li><Link href="/camp" className="hover:text-paper">MYO Camp</Link></li>
             <li><Link href="/about" className="hover:text-paper">About</Link></li>
           </ul>
@@ -40,6 +42,16 @@ export async function OrgFooter() {
             <li>
               <a href={`mailto:${settings.email}`} className="hover:text-paper">
                 {settings.email}
+              </a>
+            </li>
+            <li>
+              <a
+                href={settings.newsletterUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-paper"
+              >
+                Adventure List newsletter
               </a>
             </li>
             <li className="text-paper/65">Ottawa, Ontario</li>

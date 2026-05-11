@@ -1,69 +1,53 @@
 import type { OrgEvent } from "../types";
 
+// MSA Bonfire, LIT leadership track, and main camp are owner-confirmed.
+// Past entries stay on the list for the archive. Phase 2 admin will CRUD these through Sanity.
 const seedEvents: OrgEvent[] = [
   {
-    slug: "myo-summer-camp-2026",
-    title: "MYO Summer Camp 2026",
-    type: "camp",
-    startDate: "2026-08-16",
-    endDate: "2026-08-22",
-    location: "Camp Smitty, Eganville",
+    slug: "msa-bonfire-social-may-2026",
+    title: "MSA Bonfire Social",
+    type: "campfire",
+    startDate: "2026-05-16",
+    location: "Rideau River Provincial Park",
     audience: ["youth", "leaders"],
     blurb:
-      "A week at Camp Smitty — cabins, canoes, fire-circles, prayer, leadership. Ages 9 to 16, plus LIT for ages 17–19.",
-    heroImage: "/Pictures/canoes2.jpg",
-    registerUrl: "https://form.jotform.com/241729323092253",
-    registerOpens: "2026-06-29",
-    registerCloses: "2026-07-24",
-    cost: "$400"
-  },
-  {
-    slug: "fall-hike-gatineau-2026",
-    title: "Fall Hike — Gatineau Park",
-    type: "hike",
-    startDate: "2026-10-04",
-    location: "Gatineau Park, Lac Pink loop",
-    audience: ["families", "youth"],
-    blurb:
-      "Six kilometres through fall colours, with a stop at the lookout. Bring sturdy shoes and water — we provide the snacks.",
-    heroImage: "/Pictures/trails.jpg",
+      "Not your average Saturday. Trails, workshops, games, prizes, dinner, s'mores, and a bonfire under the night sky. Hosted by AYJ MSA with workshops by MYO. Ages 16+.",
+    body: "An evening to unwind, reconnect, and enjoy meaningful time with your friends and community. Trails and outdoor activities, workshops + Islamic reminders, games and prizes, dinner with s'mores and snacks, and a bonfire under the night sky. 2:00 PM – 10:30 PM. Free, registration required. Supported by Islamic Relief Canada.",
+    heroImage: "/Pictures/msabonefire.png",
+    registerUrl:
+      "https://docs.google.com/forms/d/e/1FAIpQLScKEypc02nwQOrxD4Aq_91WhoiOyIAg5Wc9eVY_J_NaAk2gNQ/viewform",
     cost: "Free"
   },
   {
-    slug: "knot-and-fire-workshop-nov-2026",
-    title: "Knot & Fire Skills Workshop",
+    slug: "myo-camp-lit-2026",
+    title: "LIT Leadership Track 2026",
     type: "workshop",
-    startDate: "2026-11-15",
-    location: "MYO Hall, Ottawa",
-    audience: ["youth", "leaders"],
+    startDate: "2026-07-23",
+    endDate: "2026-07-26",
+    location: "Camp Smitty, Eganville",
+    audience: ["leaders"],
     blurb:
-      "Hands-on session: bowline, taut-line, figure-eight. Then ferro-rod fire-starting outside. Counts toward LIT prep.",
-    heroImage: "/Pictures/bFirePit.jpg",
-    cost: "$15"
+      "Four-day leadership track for ages 17–19. Lighter logistics, more responsibility — meals, planning, and waking yourselves up.",
+    body: "Staff arrive Wednesday at 6pm. LITs arrive Thursday morning. The session prepares senior youth to graduate into counsellor roles for the August main camp.",
+    heroImage: "/Pictures/lit.JPG",
+    registerUrl: "https://form.jotform.com/241729323092253",
+    cost: "TBD"
   },
   {
-    slug: "community-iftar-2027",
-    title: "Community Iftar",
-    type: "social",
-    startDate: "2027-03-14",
-    location: "Ottawa Mosque",
-    audience: ["all"],
-    blurb:
-      "Open iftar for families, volunteers, and the wider community. Suhoor packs available for travelers.",
-    heroImage: "/Pictures/messHall.jpg",
-    cost: "Free"
-  },
-  {
-    slug: "winter-service-day-2027",
-    title: "Winter Service Day",
-    type: "service",
-    startDate: "2027-01-25",
-    location: "Centretown Emergency Food Centre",
+    slug: "myo-main-camp-2026",
+    title: "MYO Main Camp 2026",
+    type: "camp",
+    startDate: "2026-08-06",
+    endDate: "2026-08-09",
+    location: "Camp Smitty, Eganville",
     audience: ["youth", "families"],
     blurb:
-      "A morning packing meal kits and an afternoon delivering them. Service hours signed off for high-school students.",
-    heroImage: "/Pictures/assembly.jpg",
-    cost: "Free"
+      "Ages 9–16. The full MYO camp experience — cabins, skills stations, prayer, and fire circles — in a focused four-day session.",
+    body:
+      "Staff arrive Wednesday at 6pm. Campers arrive Thursday morning. Registration, fees, location, rules, and the full camp story live on the MYO Summer Camp site.",
+    heroImage: "/Pictures/verycoolcampfire.jpg",
+    registerUrl: "/camp",
+    cost: "$400"
   },
   // Past events
   {

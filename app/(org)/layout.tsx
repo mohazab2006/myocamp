@@ -1,5 +1,6 @@
 import { OrgNav } from "@/components/main/OrgNav";
 import { OrgFooter } from "@/components/main/OrgFooter";
+import { NewsletterCallout } from "@/components/main/NewsletterCallout";
 import { BodyTheme } from "@/components/shared/BodyTheme";
 
 export default function OrgLayout({
@@ -15,6 +16,7 @@ export default function OrgLayout({
       <main id="main" className="min-h-[100dvh]">
         {children}
       </main>
+      <NewsletterCallout />
       <OrgFooter />
     </>
   );

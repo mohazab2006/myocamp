@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { getCampSettings } from "@/lib/content/camp";
+import { getSiteSettings } from "@/lib/content/org";
+import { SocialLinks } from "@/components/main/SocialLinks";
 import { TopoDivider } from "./Illustrations";
 
 export async function CampFooter() {
-  const camp = await getCampSettings();
+  const [camp, settings] = await Promise.all([getCampSettings(), getSiteSettings()]);
 
   return (
     <footer className="mt-24 bg-camp-paper-soft">
@@ -12,12 +14,13 @@ export async function CampFooter() {
         <div className="md:col-span-5">
           <div className="font-camp text-5xl leading-none text-camp-bark">MYO Camp</div>
           <p className="font-script mt-3 text-2xl leading-none text-camp-flame">
-            one week, every August
+            two focused sessions · August
           </p>
           <p className="mt-6 max-w-[44ch] text-sm leading-relaxed text-camp-ink/80">
             A volunteer-run summer camp for Muslim youth at Camp Smitty in Eganville, Ontario. Cabins,
             canoes, fire-circles, prayer, leadership, friendship.
           </p>
+          <SocialLinks links={settings.socials} className="mt-6" />
         </div>
 
         <div className="md:col-span-3">
@@ -39,6 +42,16 @@ export async function CampFooter() {
               </a>
             </li>
             <li className="text-camp-ink/70">Camp Smitty · 98 Mink Lake Road · Eganville</li>
+            <li>
+              <a
+                href={settings.newsletterUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-camp-bark hover:text-camp-flame"
+              >
+                Adventure List newsletter
+              </a>
+            </li>
             <li>
               <Link href="/" className="text-camp-bark hover:text-camp-flame">← Back to MYO</Link>
             </li>

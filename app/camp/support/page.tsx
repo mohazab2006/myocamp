@@ -27,7 +27,11 @@ export default async function CampSupportPage() {
           </div>
           <div className="col-span-12 md:col-span-5">
             <div className="aspect-[4/5] overflow-hidden border-2 border-camp-bark/30">
-              <img src="/Pictures/campPoster.jpg" alt="MYO Summer Camp poster" className="h-full w-full object-cover" />
+              <img
+                src="/Pictures/basketball.jpg"
+                alt="Campers playing basketball at Camp Smitty"
+                className="h-full w-full object-cover object-center"
+              />
             </div>
           </div>
         </div>

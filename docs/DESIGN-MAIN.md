@@ -28,11 +28,18 @@ Saturation kept under 70%. No pure black. No pure white. Single accent (`ember`)
 No script font. No Inter. No oversize headlines beyond 7xl.
 
 ## Layout
-- Container: `max-w-[1320px] mx-auto px-6 md:px-10`.
-- Grid-based (`grid grid-cols-12 gap-6 md:gap-8`) with asymmetric column spans, never identical card rows.
-- Hero: split (left copy 6 cols, right cinematic photo 6 cols, photo bleeds slightly off canvas at top).
-- Sections: alternating left-aligned and asymmetric. No center-stacked feature blocks.
-- Bento program preview: 1 wide + 2 tall + 1 wide (4 tiles, mixed aspect).
+- Container: `max-w-[1440px] mx-auto px-6 md:px-10`.
+- Grid-based with asymmetric column spans, never identical card rows.
+- **Hero (updated 2026-05-07):** image-led wordmark hero, mirroring `/camp` energy but editorial.
+  - Top row: small editorial labels (org name · era) left + right.
+  - Center: massive "MYO" Fraunces wordmark, `clamp(140px, 28vw, 360px)`, letter-spacing `-0.04em`. Animated letter-drop on load via GSAP.
+  - Below wordmark: italic Fraunces "Muslim Youth of Ottawa" as the tagline.
+  - The actual MYO Summer Camp logo image (`/Pictures/Logo.png`) is rendered below the tagline with `mix-blend-multiply` so it sits on the paper texture as a brand artifact, not as a UI chrome element.
+  - Three numbered meta tiles (years / programs / volunteer-led), thin-rule dividers above each.
+  - Two CTAs: primary "What's coming up" → events, secondary "The Summer Camp" → /camp.
+  - Below CTAs: a 4-up photo strip of activity imagery (assembly, canoes, sports, fire pit) with alternating Y offsets, captioned in micro-caps.
+- Sections: image-led blocks. Three-pillar tile row (Events / Programs / Camp), full-bleed photo strip with no copy, image-led event cards, photo collage on support band.
+- Copy length: hero tagline = one line. Section intros ≤ 1 sentence. Card meta ≤ 1 line.
 
 ## Motion (intensity 4, intentional)
 - Section entrances: fade + 12px rise, staggered 80ms, on intersection.

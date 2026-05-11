@@ -9,7 +9,7 @@ const seedPrograms: OrgProgram[] = [
     audience: ["youth"],
     blurb:
       "A weekly circle for youth ages 12–18: Quran, reflection, open discussion, and tea after. Drop-in welcome.",
-    heroImage: "/Pictures/library.jpg",
+    heroImage: "/Pictures/camp3.jpg",
     active: true,
     startedAt: "2024-09-06"
   },
@@ -21,7 +21,7 @@ const seedPrograms: OrgProgram[] = [
     audience: ["leaders"],
     blurb:
       "An eight-week mentorship for ages 17–19 that prepares Leaders in Training to staff the camp. Leadership, first aid, group dynamics.",
-    heroImage: "/Pictures/assembly.jpg",
+    heroImage: "/Pictures/kidswiththobes.JPG",
     active: true,
     startedAt: "2025-01-11"
   },
@@ -33,7 +33,7 @@ const seedPrograms: OrgProgram[] = [
     audience: ["youth", "families"],
     blurb:
       "Rotating skills clinic: rope-work and lashings, fire-craft from char to coal, and beginner archery on the back range.",
-    heroImage: "/Pictures/bFirePit.jpg",
+    heroImage: "/Pictures/camp2.jpg",
     active: true,
     startedAt: "2025-03-15"
   },
@@ -45,7 +45,7 @@ const seedPrograms: OrgProgram[] = [
     audience: ["youth", "leaders"],
     blurb:
       "Members-only fitness sessions for sisters — strength, cardio, and a short halaqa to close.",
-    heroImage: "/Pictures/sports.jpg",
+    heroImage: "/Pictures/camp6.jpg",
     active: true,
     startedAt: "2024-10-01"
   },
@@ -57,7 +57,7 @@ const seedPrograms: OrgProgram[] = [
     audience: ["youth"],
     blurb:
       "Eight-week pickup league at the local rec centre. Concluded May 2024 — looking for a new gym before relaunch.",
-    heroImage: "/Pictures/sports.jpg",
+    heroImage: "/Pictures/basketball.jpg",
     active: false,
     startedAt: "2024-03-06"
   }

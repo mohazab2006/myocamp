@@ -24,6 +24,20 @@ Salvaged from existing `app/page.tsx`, legacy HTML, and brief.
 - **Things to leave home:** phones, tablets, valuables, candy, weapons, fireworks, laser pointers.
 - **Safety / staff:** CPR, first aid, waterfront, food safety, counselor training.
 
+## Imagery — added 2026-05-07/11 (owner-provided, modern hi-res, people-heavy)
+
+**Filename casing matters — Vercel runs Linux, case-sensitive.** Reference exact case in `src=`.
+
+- `basketball.jpg` — three boys playing basketball outside, action shot. Pure energy. Used: hero background wash, hero tile, camp band collage, photo strip, brothers' basketball program card, support band.
+- `kidswiththobes.JPG` — LIT cohort posed in thobes for Jumu'ah, Camp Smitty cabins behind. Iconic identity shot. Used: hero tile, programs pillar, support band feature, LIT mentorship program card.
+- `LITgroup.JPG` — LIT group at night, candid around a truck. Atmospheric. Used: hero tile, photo strip, LIT Leadership Track event hero.
+- `racersgroup.jpg` — younger campers holding a "RACERS" banner, outdoor games. Used: hero tile, events pillar, camp band collage, support band, photo strip.
+- `verycoolcampfire.jpg` — long-exposure campfire with sparks shooting straight up, silhouette of a person beside it. Atmospheric headliner. Used: camp band collage feature tile.
+- `LogoMAIN.png` — circular badge logo (trees + sun + person silhouette). The proper standalone MYO emblem, no "Summer Camp" wordmark. Used: org nav badge (replacing the M-circle), org hero brand mark. Both apply a CSS `filter` to recolour the pale blue lines into deep forest green so it reads on paper.
+
+## Old Logo file
+- `Logo.png` — full "MYO Summer Camp" wordmark with the same circle on the left. Camp-section branded. No longer used on org pages — `LogoMAIN.png` replaces it. Keep in repo for now as legacy/historical reference; can be deleted in phase 2 cleanup.
+
 ## Imagery available (`public/Pictures/`)
 - Logo: `Logo.png`.
 - Wide scenes: `assembly.jpg`, `messHall.jpg`, `outsideMessHall.jpg`, `campPoster.jpg`.

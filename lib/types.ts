@@ -27,6 +27,15 @@ export interface OrgEvent {
   archived?: boolean;
 }
 
+export interface BlogPost {
+  slug: string;
+  title: string;
+  publishedAt: string;
+  excerpt: string;
+  body?: string;
+  heroImage?: string;
+}
+
 export interface OrgProgram {
   slug: string;
   title: string;
@@ -41,19 +50,31 @@ export interface OrgProgram {
   startedAt?: string;
 }
 
+export type SocialPlatform = "facebook" | "instagram" | "email" | "photos" | "vimeo" | "camp";
+
+export interface SocialLink {
+  platform: SocialPlatform;
+  label: string;
+  url: string;
+}
+
 export interface SiteSettings {
   email: string;
   donateUrl: string;
   volunteerUrl: string;
-  socials: { label: string; url: string }[];
+  newsletterUrl: string;
+  socials: SocialLink[];
 }
 
 export interface CampSettings {
   registrationStatus: "open" | "full" | "closed" | "opening-soon";
   registrationOpens?: string;
   registrationDeadline?: string;
+  litStart?: string;
+  litEnd?: string;
   campStart: string;
   campEnd: string;
+  staffArrival: string;
   formUrl: string;
   feeCamper: number;
   feeLit: number;

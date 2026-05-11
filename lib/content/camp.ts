@@ -1,17 +1,23 @@
 import type { CampSettings } from "../types";
 
+export const campMapEmbedUrl =
+  "https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d8203.837028744429!2d-77.04916149272421!3d45.557084590512!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sen!2sca!4v1687106356229!5m2!1sen!2sca";
+
 export async function getCampSettings(): Promise<CampSettings> {
   return {
     registrationStatus: "opening-soon",
     registrationOpens: "2026-06-29",
     registrationDeadline: "2026-07-24",
-    campStart: "2026-08-16",
-    campEnd: "2026-08-22",
+    litStart: "2026-07-23",
+    litEnd: "2026-07-26",
+    campStart: "2026-08-06",
+    campEnd: "2026-08-09",
+    staffArrival: "Wednesday at 6pm",
     formUrl: "https://form.jotform.com/241729323092253",
     feeCamper: 400,
     feeLit: 400,
-    dropOff: "Sunday afternoon",
-    pickUp: "Saturday at noon",
+    dropOff: "Thursday morning",
+    pickUp: "Sunday at 3pm",
     paymentEmail: "myoadmin@gmail.com",
     paypalDonateId: "PVVD32WHTA9KE"
   };
@@ -99,40 +105,187 @@ export const campCodeOfConduct = [
   "Leave the woods and cabins better than you found them."
 ];
 
+export const campStorySnapshots = [
+  {
+    src: "/Pictures/welcomeCabin.jpg",
+    alt: "Welcome cabin at Camp Smitty",
+    caption: "Welcome cabin",
+    note: "first look on arrival day"
+  },
+  {
+    src: "/Pictures/verycoolcampfire.jpg",
+    alt: "Campers around the fire pit at dusk",
+    caption: "Fire circle",
+    note: "where the day actually ends"
+  },
+  {
+    src: "/Pictures/canoes2.jpg",
+    alt: "Canoes lined up at the waterfront",
+    caption: "Waterfront",
+    note: "life jackets before lunch"
+  },
+  {
+    src: "/Pictures/LITgroup.JPG",
+    alt: "Leadership-in-training group at camp",
+    caption: "LIT crew",
+    note: "older youth learning to lead"
+  }
+] as const;
+
+export const campStoryChapters = [
+  {
+    eyebrow: "who runs it",
+    title: "Volunteers who come back every August.",
+    paragraphs: [
+      "Camp is run by counsellors, lifeguards, cooks, drivers, medics, and the long list of parents who say yes when we ask. There is no professional camp company and no hired-out kitchen.",
+      "Every meal, every fire, every cabin check is done by people who love this — many of them former campers who aged out and came back as staff."
+    ],
+    images: [
+      {
+        src: "/Pictures/kitchenstaff.png",
+        alt: "Volunteer kitchen staff preparing a meal",
+        caption: "Kitchen crew",
+        note: "halal meals, three times a day"
+      },
+      {
+        src: "/Pictures/assembly.jpg",
+        alt: "Campers gathered for assembly on the field",
+        caption: "Camp-wide assembly",
+        note: "Friday khutbah on the grass"
+      }
+    ]
+  },
+  {
+    eyebrow: "where we gather",
+    title: "Camp Smitty knows our rhythm.",
+    paragraphs: [
+      "We rent Camp Smitty in Eganville for the week. They have hosted us for decades, know our prayer times, and keep our lifejacket inventory labeled in their own handwriting.",
+      "The site is a working camp the rest of the year — cabins, kitchen, lake, woods, and trails. For our session we take the whole place and make it ours."
+    ],
+    images: [
+      {
+        src: "/Pictures/outsideMess.jpg",
+        alt: "Mess hall exterior at Camp Smitty",
+        caption: "Mess hall",
+        note: "long tables, no phones"
+      },
+      {
+        src: "/Pictures/trails.jpg",
+        alt: "Pine forest trail through camp",
+        caption: "Morning trails",
+        note: "optional sunrise walk"
+      }
+    ]
+  },
+  {
+    eyebrow: "what we teach",
+    title: "Hard skills, taught for real life.",
+    paragraphs: [
+      "We pick activities that build something — knots, fire-craft, navigation, archery, lashings — because at fourteen, learning that you can do hard things on your own is the actual lesson.",
+      "Faith is the spine of the week, but it is not the schedule. It is how the schedule is run: salah on time, modest dress on the water, kindness in the cabin."
+    ],
+    images: [
+      {
+        src: "/Pictures/obstacleCourse.jpg",
+        alt: "Campers on the wooded obstacle course",
+        caption: "Obstacle course",
+        note: "cabins compete on Saturday"
+      },
+      {
+        src: "/Pictures/gFirePit.jpg",
+        alt: "Girls gathered at the fire pit",
+        caption: "Skills and stories",
+        note: "practice by day, fire at dusk"
+      }
+    ]
+  }
+] as const;
+
+export const campStoryMoments = [
+  {
+    src: "/Pictures/kidswiththobes.JPG",
+    alt: "Campers in modest dress together outdoors",
+    caption: "Modest dress, real friendship",
+    note: "the week is lived together, not performed for a feed"
+  },
+  {
+    src: "/Pictures/insideBCabin.jpg",
+    alt: "Inside a boys cabin bunk room",
+    caption: "Cabin life",
+    note: "mess duty, lights out, inside jokes"
+  },
+  {
+    src: "/Pictures/beach.jpg",
+    alt: "Sandy beach on the lake",
+    caption: "Swim test day",
+    note: "lifeguards on duty all afternoon"
+  },
+  {
+    src: "/Pictures/recHall.jpg",
+    alt: "Recreation hall activity space",
+    caption: "Rec hall",
+    note: "knot drills and rainy-day games"
+  },
+  {
+    src: "/Pictures/treeHouse.jpg",
+    alt: "Tree house structure in the woods",
+    caption: "Tree house",
+    note: "a landmark every new camper finds"
+  },
+  {
+    src: "/Pictures/basketball.jpg",
+    alt: "Campers playing basketball outdoors",
+    caption: "Court behind the cabins",
+    note: "pickup games between rotations"
+  }
+] as const;
+
+export const campDriveSteps = [
+  {
+    title: "Head west from Ottawa",
+    detail: "Take Highway 417 toward Arnprior and Pembroke. Plan about two hours from downtown, longer with a cabin-group stop."
+  },
+  {
+    title: "Stay on Hwy 17 past Eganville",
+    detail: "The last stretch is quieter road past Lac des Loups. Cell signal fades before you reach the turnoff — that is normal."
+  },
+  {
+    title: "Turn onto Mink Lake Road",
+    detail: "Camp Smitty is at 98 Mink Lake Road. Follow camp signage to the main parking area for drop-off."
+  },
+  {
+    title: "Check in at the welcome cabin",
+    detail: "Staff greet families at the welcome cabin, confirm cabin assignment, and point you to gear drop-off."
+  }
+] as const;
+
+export const campArrivalNotes = [
+  "Pack the duffel you can carry — there is a short walk from parking to cabins.",
+  "Label everything with your camper's name; lost-and-found fills fast.",
+  "Bring any medication in original packaging to the medic table at check-in.",
+  "Parents leave after cabin assignment unless staff ask you to stay for a quick hello."
+] as const;
+
 export const campWeekRhythm = [
   {
-    day: "Sunday",
-    title: "Arrive & settle",
-    body: "Drop-off in the afternoon. Cabin assignments, tour of the grounds, opening fire after dinner."
-  },
-  {
-    day: "Monday",
-    title: "Find your feet",
-    body: "Morning Quran, swim test, first canoe rotation, knot basics in the rec hall."
-  },
-  {
-    day: "Tuesday",
-    title: "Skills day",
-    body: "Workshops rotate — fire-starting, archery, navigation, lashings. Service shift in the kitchen."
-  },
-  {
-    day: "Wednesday",
-    title: "Long trip",
-    body: "Half-day trail hike to the lookout. Lunch on the rocks. Afternoon free for crafts or sports."
-  },
-  {
     day: "Thursday",
-    title: "Camp-wide games",
-    body: "Cabins compete on the obstacle course and the lake. Themed dinner. Quiet reflection circle."
+    title: "Arrive & settle",
+    body: "Staff arrive Wednesday evening. Campers Thursday morning. Cabin assignments, tour of the grounds, opening fire after dinner."
   },
   {
     day: "Friday",
-    title: "Jumu'ah & open lake",
-    body: "Khutbah on the dock. Open swim and canoe. Talent night around the fire."
+    title: "Find your feet",
+    body:
+      "Morning Quran, swim test, first canoe rotation, knot basics in the rec hall. Jumu'ah khutbah on Friday."
   },
   {
     day: "Saturday",
-    title: "Pack & part",
-    body: "Cabin clean-up, closing assembly, pickup at noon. We send a photo packet within a week."
+    title: "Skills & camp-wide games",
+    body: "Workshops rotate — fire-starting, archery, navigation, lashings. Cabins compete on the obstacle course and the lake."
+  },
+  {
+    day: "Sunday",
+    title: "Pack out & closing",
+    body: "Open swim and canoe. Cabin clean-up, closing assembly, pickup at 3pm."
   }
 ];
