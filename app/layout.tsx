@@ -39,7 +39,25 @@ export const metadata: Metadata = {
     title: "Muslim Youth of Ottawa",
     description:
       "Hikes, halaqas, leadership, and the annual MYO Summer Camp at Camp Smitty.",
-    type: "website"
+    url: "https://myo.camp",
+    siteName: "Muslim Youth of Ottawa",
+    type: "website",
+    locale: "en_CA",
+    images: [
+      {
+        url: "/Pictures/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Muslim Youth of Ottawa — volunteer-led programs, events, and summer camp at Camp Smitty."
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Muslim Youth of Ottawa",
+    description:
+      "Hikes, halaqas, leadership, and the annual MYO Summer Camp at Camp Smitty.",
+    images: ["/Pictures/og-image.png"]
   },
   icons: {
     icon: "/Pictures/LogoMAIN.png",
@@ -55,7 +73,7 @@ export default function RootLayout({
       lang="en"
       className={`${geist.variable} ${fraunces.variable} ${caprasimo.variable} ${caveat.variable}`}
     >
-      <body data-theme="org" className="min-h-[100dvh] antialiased">
+      <body data-theme="org" className="min-h-dvh antialiased">
         {children}
       </body>
     </html>
