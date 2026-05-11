@@ -13,6 +13,17 @@ import {
   BowIcon,
   LeafIcon,
   SparkIcon,
+  CanoeIcon,
+  PaddleIcon,
+  TentIcon,
+  MountainIcon,
+  MoonIcon,
+  StarIcon,
+  ArrowIcon,
+  AcornIcon,
+  LanternIcon,
+  FishIcon,
+  WaveIcon,
   TopoDivider
 } from "../camp/Illustrations";
 import { Marquee } from "./Marquee";
@@ -222,7 +233,22 @@ export function OrgHero() {
           { sel: ".float-leaf", y: -8, r: 5, dur: 5.1 },
           { sel: ".float-spark", y: -6, r: 10, dur: 3.0 },
           { sel: ".float-knot", y: -7, r: -3, dur: 4.6 },
-          { sel: ".float-bow", y: -9, r: 4, dur: 4.9 }
+          { sel: ".float-bow", y: -9, r: 4, dur: 4.9 },
+          { sel: ".float-bow-edge", y: -9, r: -4, dur: 5.2 },
+          { sel: ".float-canoe", y: -11, r: 2, dur: 6.2 },
+          { sel: ".float-paddle", y: -9, r: -3, dur: 5.0 },
+          { sel: ".float-tent", y: -7, r: -2, dur: 4.7 },
+          { sel: ".float-mountain", y: -5, r: 1, dur: 6.8 },
+          { sel: ".float-moon", y: -6, r: 2, dur: 5.5 },
+          { sel: ".float-star-a", y: -4, r: 12, dur: 3.4 },
+          { sel: ".float-star-b", y: -4, r: -8, dur: 3.8 },
+          { sel: ".float-star-c", y: -3, r: 14, dur: 3.2 },
+          { sel: ".float-arrow", y: -8, r: 2, dur: 5.3 },
+          { sel: ".float-arrow-edge", y: -7, r: -3, dur: 5.6 },
+          { sel: ".float-acorn", y: -5, r: -4, dur: 4.8 },
+          { sel: ".float-lantern", y: -10, r: 3, dur: 4.4 },
+          { sel: ".float-fish", y: -6, r: 6, dur: 4.5 },
+          { sel: ".float-wave", y: -4, r: 0, dur: 5.8 }
         ];
 
         floats.forEach((f) => {
@@ -303,8 +329,22 @@ export function OrgHero() {
       <BowIcon
         size={74}
         aria-hidden
-        className="org-hero-decoration float-bow pointer-events-none absolute bottom-[34%] right-[3%] hidden text-pine/50 md:block lg:bottom-[36%] lg:right-[5%]"
+        className="org-hero-decoration float-bow-edge pointer-events-none absolute bottom-[34%] right-[3%] hidden text-pine/50 md:block lg:bottom-[36%] lg:right-[5%]"
         style={{ rotate: "-22deg" }}
+      />
+
+      {/* Extra scatter — small accents in the lower half */}
+      <StarIcon
+        size={18}
+        aria-hidden
+        className="org-hero-decoration float-star-c pointer-events-none absolute left-[14%] bottom-[28%] hidden text-brass/70 md:block"
+        style={{ rotate: "12deg" }}
+      />
+      <ArrowIcon
+        size={42}
+        aria-hidden
+        className="org-hero-decoration float-arrow-edge pointer-events-none absolute right-[14%] bottom-[26%] hidden text-ember/45 md:block"
+        style={{ rotate: "32deg" }}
       />
 
       <div className="relative mx-auto max-w-[1320px] px-6 pb-12 pt-14 md:px-10 md:pb-16 md:pt-20">
@@ -317,30 +357,123 @@ export function OrgHero() {
 
         {/* Wordmark */}
         <h1 className="sr-only">Muslim Youth of Ottawa</h1>
-        <div className="relative mt-8 flex flex-nowrap items-baseline justify-center gap-x-1 overflow-hidden whitespace-nowrap leading-[0.82] pb-3 md:mt-10">
-          {[
-            { l: "M", accent: false },
-            { l: "Y", accent: false },
-            { l: "O", accent: true }
-          ].map((letter, i) => (
-            <span
-              key={i}
-              className={`org-hero-letter font-display inline-block ${
-                letter.accent ? "text-ember" : "text-ink"
-              }`}
-              style={{
-                fontSize: "clamp(140px, 26vw, 320px)",
-                fontWeight: 400,
-                letterSpacing: "-0.045em",
-                textShadow: letter.accent
-                  ? "0 6px 0 oklch(22% 0.018 132 / 0.07)"
-                  : "0 4px 0 oklch(22% 0.018 132 / 0.05)"
-              }}
-              aria-hidden
-            >
-              {letter.l}
-            </span>
-          ))}
+        <div className="relative mt-8 md:mt-10">
+          {/* Doodle cluster around the wordmark — paper-margin ornaments */}
+          <MoonIcon
+            size={40}
+            aria-hidden
+            className="org-hero-decoration float-moon pointer-events-none absolute left-[6%] top-[-32px] hidden text-pine/55 sm:block md:left-[10%] md:top-[-44px]"
+            style={{ rotate: "-14deg" }}
+          />
+          <StarIcon
+            size={22}
+            aria-hidden
+            className="org-hero-decoration float-star-a pointer-events-none absolute left-[24%] top-[-28px] hidden text-brass sm:block md:top-[-40px]"
+            style={{ rotate: "14deg" }}
+          />
+          <AcornIcon
+            size={34}
+            aria-hidden
+            className="org-hero-decoration float-acorn pointer-events-none absolute left-[36%] top-[-46px] hidden text-moss/70 sm:block md:top-[-58px]"
+            style={{ rotate: "8deg" }}
+          />
+          <StarIcon
+            size={16}
+            aria-hidden
+            className="org-hero-decoration float-star-b pointer-events-none absolute right-[34%] top-[-30px] hidden text-brass/80 md:block"
+            style={{ rotate: "-10deg" }}
+          />
+          <LanternIcon
+            size={44}
+            aria-hidden
+            className="org-hero-decoration float-lantern pointer-events-none absolute right-[20%] top-[-44px] hidden text-ember/65 sm:block md:right-[22%] md:top-[-56px]"
+            style={{ rotate: "-6deg" }}
+          />
+          <MountainIcon
+            size={50}
+            aria-hidden
+            className="org-hero-decoration float-mountain pointer-events-none absolute right-[5%] top-[-30px] hidden text-pine/55 sm:block md:right-[8%] md:top-[-42px]"
+            style={{ rotate: "4deg" }}
+          />
+
+          {/* Side flanks — drawn beside the letters */}
+          <KnotIcon
+            size={48}
+            aria-hidden
+            className="org-hero-decoration float-knot pointer-events-none absolute left-[-1%] top-[20%] hidden text-brass/65 md:left-[0%] md:block"
+            style={{ rotate: "-12deg" }}
+          />
+          <ArrowIcon
+            size={56}
+            aria-hidden
+            className="org-hero-decoration float-arrow pointer-events-none absolute left-[1%] top-[58%] hidden text-ember/65 md:left-[3%] md:block"
+            style={{ rotate: "-22deg" }}
+          />
+          <BowIcon
+            size={56}
+            aria-hidden
+            className="org-hero-decoration float-bow pointer-events-none absolute right-[0%] top-[22%] hidden text-pine/60 md:right-[2%] md:block"
+            style={{ rotate: "-18deg" }}
+          />
+          <PaddleIcon
+            size={54}
+            aria-hidden
+            className="org-hero-decoration float-paddle pointer-events-none absolute right-[2%] top-[60%] hidden text-forest/60 md:right-[4%] md:block"
+            style={{ rotate: "26deg" }}
+          />
+
+          {/* Below the letters — canoe, tent, fish, wave */}
+          <CanoeIcon
+            size={56}
+            aria-hidden
+            className="org-hero-decoration float-canoe pointer-events-none absolute left-[14%] bottom-[-32px] hidden text-pine/65 sm:block md:left-[18%] md:bottom-[-44px]"
+            style={{ rotate: "-6deg" }}
+          />
+          <TentIcon
+            size={50}
+            aria-hidden
+            className="org-hero-decoration float-tent pointer-events-none absolute right-[16%] bottom-[-28px] hidden text-moss/70 sm:block md:right-[20%] md:bottom-[-40px]"
+            style={{ rotate: "6deg" }}
+          />
+          <FishIcon
+            size={38}
+            aria-hidden
+            className="org-hero-decoration float-fish pointer-events-none absolute left-[32%] bottom-[-44px] hidden text-brass/65 md:block"
+            style={{ rotate: "-10deg" }}
+          />
+          <WaveIcon
+            size={36}
+            aria-hidden
+            className="org-hero-decoration float-wave pointer-events-none absolute right-[30%] bottom-[-44px] hidden text-pine/45 md:block"
+            style={{ rotate: "4deg" }}
+          />
+
+          {/* Letter row — overflow clipped just for the slide-up entry */}
+          <div className="relative flex flex-nowrap items-baseline justify-center gap-x-1 overflow-hidden whitespace-nowrap leading-[0.82] pb-3">
+            {[
+              { l: "M", accent: false },
+              { l: "Y", accent: false },
+              { l: "O", accent: true }
+            ].map((letter, i) => (
+              <span
+                key={i}
+                className={`org-hero-letter font-display inline-block ${
+                  letter.accent ? "text-ember" : "text-ink"
+                }`}
+                style={{
+                  fontSize: "clamp(140px, 26vw, 320px)",
+                  fontWeight: 400,
+                  letterSpacing: "-0.045em",
+                  textShadow: letter.accent
+                    ? "0 6px 0 oklch(22% 0.018 132 / 0.07)"
+                    : "0 4px 0 oklch(22% 0.018 132 / 0.05)"
+                }}
+                aria-hidden
+              >
+                {letter.l}
+              </span>
+            ))}
+          </div>
         </div>
 
         {/* Script subtitle + scribble underline */}
@@ -370,7 +503,7 @@ export function OrgHero() {
         <p className="org-hero-lede mx-auto mt-9 max-w-2xl text-center text-base leading-relaxed text-ink-soft md:mt-11 md:text-xl">
           Volunteer-led since the 1980s &mdash; programs, events,{" "}
           <span className="text-ink">
-            and a four-day summer camp at{" "}
+            and unforgettable summer camps at{" "}
             <span className="font-script italic text-pine">Camp Smitty</span>.
           </span>
         </p>

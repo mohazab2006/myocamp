@@ -140,6 +140,77 @@ export function SparkIcon({ size, ...props }: IconProps) {
   );
 }
 
+export function ArrowIcon({ size, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M8 32 L 52 32" />
+      <path d="M44 24 L 56 32 L 44 40" />
+      <path d="M8 32 L 14 26 M 8 32 L 14 38" />
+      <path d="M16 28 L 12 32 L 16 36" />
+    </svg>
+  );
+}
+
+export function PaddleIcon({ size, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M32 6 Q 22 12 22 22 Q 22 32 32 34 Q 42 32 42 22 Q 42 12 32 6 Z" />
+      <path d="M32 34 L 32 58" />
+      <path d="M28 56 L 32 60 L 36 56" />
+    </svg>
+  );
+}
+
+export function MountainIcon({ size, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M6 50 L 22 22 L 32 36 L 44 14 L 58 50 Z" />
+      <path d="M18 28 L 22 22 L 26 28" />
+      <path d="M40 20 L 44 14 L 48 20" />
+    </svg>
+  );
+}
+
+export function FishIcon({ size, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M10 32 Q 24 18 42 32 Q 24 46 10 32 Z" />
+      <path d="M42 32 L 56 22 L 54 32 L 56 42 Z" />
+      <circle cx="18" cy="30" r="1.4" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function AcornIcon({ size, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M16 24 Q 32 14 48 24 Q 48 30 32 30 Q 16 30 16 24 Z" />
+      <path d="M20 30 Q 22 50 32 54 Q 42 50 44 30" />
+      <path d="M32 14 L 32 8" />
+    </svg>
+  );
+}
+
+export function StarIcon({ size, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M32 10 L 37 26 L 54 26 L 40 36 L 45 52 L 32 42 L 19 52 L 24 36 L 10 26 L 27 26 Z" />
+    </svg>
+  );
+}
+
+export function LanternIcon({ size, ...props }: IconProps) {
+  return (
+    <svg {...base(size)} {...props}>
+      <path d="M26 14 L 38 14 L 38 18 L 42 18 L 42 22 L 22 22 L 22 18 L 26 18 Z" />
+      <path d="M24 22 Q 18 32 22 44 Q 28 52 32 52 Q 36 52 42 44 Q 46 32 40 22 Z" />
+      <path d="M28 30 L 28 44 M 36 30 L 36 44" />
+      <path d="M32 6 L 32 14" />
+      <path d="M32 52 L 32 58" />
+    </svg>
+  );
+}
+
 const iconMap = {
   compass: CompassIcon,
   flame: FlameIcon,
@@ -153,7 +224,14 @@ const iconMap = {
   book: BookIcon,
   wave: WaveIcon,
   hand: HandIcon,
-  spark: SparkIcon
+  spark: SparkIcon,
+  arrow: ArrowIcon,
+  paddle: PaddleIcon,
+  mountain: MountainIcon,
+  fish: FishIcon,
+  acorn: AcornIcon,
+  star: StarIcon,
+  lantern: LanternIcon
 } as const;
 
 export type CampIconName = keyof typeof iconMap;
@@ -161,6 +239,105 @@ export type CampIconName = keyof typeof iconMap;
 export function CampIcon({ name, ...props }: { name: CampIconName } & IconProps) {
   const C = iconMap[name];
   return <C {...props} />;
+}
+
+type ScatterItem = {
+  name: CampIconName;
+  size: number;
+  top?: string;
+  bottom?: string;
+  left?: string;
+  right?: string;
+  rotate?: number;
+  tone: string;
+};
+
+const scatterVariants = {
+  forest: [
+    { name: "leaf",     size: 44, top: "8%",   left: "3%",   rotate: -18, tone: "text-camp-moss/25" },
+    { name: "mountain", size: 64, top: "14%",  right: "5%",  rotate: 4,   tone: "text-camp-moss/20" },
+    { name: "acorn",    size: 32, top: "38%",  left: "7%",   rotate: 12,  tone: "text-camp-bark/20" },
+    { name: "leaf",     size: 36, top: "60%",  right: "4%",  rotate: 28,  tone: "text-camp-moss/25" },
+    { name: "compass",  size: 52, bottom: "8%",  left: "10%",  rotate: -8,  tone: "text-camp-bark/15" },
+    { name: "arrow",    size: 42, bottom: "20%", right: "12%", rotate: -16, tone: "text-camp-bark/20" },
+    { name: "star",     size: 16, top: "26%",  left: "22%",  tone: "text-camp-amber/40" },
+    { name: "spark",    size: 18, bottom: "32%", right: "8%",  tone: "text-camp-flame/25" },
+    { name: "leaf",     size: 26, bottom: "6%",  left: "30%",  rotate: -34, tone: "text-camp-moss/20" }
+  ],
+  firey: [
+    { name: "flame",   size: 52, top: "10%",  left: "5%",  rotate: -10, tone: "text-camp-flame/25" },
+    { name: "lantern", size: 46, top: "22%",  right: "7%", rotate: -4,  tone: "text-camp-flame/25" },
+    { name: "spark",   size: 22, top: "48%",  left: "14%", tone: "text-camp-flame/30" },
+    { name: "star",    size: 18, top: "8%",   right: "22%", tone: "text-camp-amber/40" },
+    { name: "knot",    size: 50, bottom: "12%", left: "6%",  rotate: 10,  tone: "text-camp-bark/18" },
+    { name: "moon",    size: 36, bottom: "28%", right: "5%", rotate: 14,  tone: "text-camp-bark/18" },
+    { name: "flame",   size: 36, bottom: "6%",  right: "16%", rotate: 6,   tone: "text-camp-flame/22" },
+    { name: "spark",   size: 14, top: "36%",  right: "3%", tone: "text-camp-flame/25" },
+    { name: "star",    size: 14, bottom: "40%", left: "28%", tone: "text-camp-amber/35" }
+  ],
+  water: [
+    { name: "canoe",   size: 64, top: "12%",  left: "4%",   rotate: -6, tone: "text-camp-moss/22" },
+    { name: "paddle",  size: 46, top: "28%",  right: "6%",  rotate: 26, tone: "text-camp-moss/22" },
+    { name: "fish",    size: 36, top: "52%",  left: "10%",  rotate: -14, tone: "text-camp-bark/18" },
+    { name: "wave",    size: 60, bottom: "18%", right: "8%",  tone: "text-camp-moss/25" },
+    { name: "compass", size: 38, top: "8%",   right: "18%", rotate: 8,  tone: "text-camp-bark/18" },
+    { name: "wave",    size: 80, top: "42%",  left: "22%",  tone: "text-camp-moss/15" },
+    { name: "arrow",   size: 36, bottom: "10%", left: "14%",  rotate: 32, tone: "text-camp-flame/22" },
+    { name: "star",    size: 14, bottom: "30%", right: "24%", tone: "text-camp-amber/35" },
+    { name: "fish",    size: 22, bottom: "6%",  right: "32%", rotate: 22, tone: "text-camp-bark/15" }
+  ],
+  route: [
+    { name: "compass", size: 56, top: "10%",  left: "6%",   rotate: -6, tone: "text-camp-bark/22" },
+    { name: "arrow",   size: 52, top: "30%",  right: "7%",  rotate: -20, tone: "text-camp-bark/18" },
+    { name: "knot",    size: 44, top: "55%",  left: "4%",   rotate: 14, tone: "text-camp-moss/22" },
+    { name: "bow",     size: 56, bottom: "12%", right: "9%",  rotate: -24, tone: "text-camp-amber/30" },
+    { name: "moon",    size: 32, top: "14%",  right: "20%", rotate: 18, tone: "text-camp-bark/18" },
+    { name: "acorn",   size: 28, bottom: "24%", left: "16%",  rotate: 10, tone: "text-camp-bark/20" },
+    { name: "spark",   size: 18, bottom: "5%",  right: "26%", tone: "text-camp-flame/25" },
+    { name: "star",    size: 14, top: "4%",   left: "26%",  tone: "text-camp-amber/40" },
+    { name: "tent",    size: 40, bottom: "6%",  left: "28%",  rotate: -4, tone: "text-camp-moss/22" }
+  ],
+  dark: [
+    { name: "flame",   size: 48, top: "8%",   left: "5%",   rotate: -8, tone: "text-camp-amber/25" },
+    { name: "compass", size: 56, top: "22%",  right: "7%",  rotate: 10, tone: "text-camp-amber/15" },
+    { name: "star",    size: 18, top: "5%",   right: "22%", tone: "text-camp-amber/40" },
+    { name: "moon",    size: 36, bottom: "18%", left: "12%",  rotate: 14, tone: "text-camp-paper/15" },
+    { name: "lantern", size: 42, bottom: "10%", right: "10%", rotate: -6, tone: "text-camp-amber/25" },
+    { name: "spark",   size: 20, top: "52%",  right: "14%", tone: "text-camp-amber/30" },
+    { name: "knot",    size: 44, bottom: "32%", left: "5%",   rotate: 18, tone: "text-camp-paper/12" },
+    { name: "leaf",    size: 30, top: "62%",  left: "16%",  rotate: -24, tone: "text-camp-amber/20" },
+    { name: "star",    size: 12, bottom: "6%",  right: "34%", tone: "text-camp-amber/35" }
+  ]
+} as const satisfies Record<string, ScatterItem[]>;
+
+export type ScatterVariant = keyof typeof scatterVariants;
+
+export function SectionScatter({ variant = "forest" }: { variant?: ScatterVariant }) {
+  const items = scatterVariants[variant];
+  return (
+    <div
+      aria-hidden
+      className="pointer-events-none absolute inset-0 -z-10 select-none overflow-hidden"
+    >
+      {items.map((item, i) => {
+        const Icon = iconMap[item.name];
+        return (
+          <Icon
+            key={`${variant}-${i}`}
+            size={item.size}
+            className={`absolute ${item.tone}`}
+            style={{
+              top: item.top,
+              bottom: item.bottom,
+              left: item.left,
+              right: item.right,
+              transform: item.rotate ? `rotate(${item.rotate}deg)` : undefined
+            }}
+          />
+        );
+      })}
+    </div>
+  );
 }
 
 export function TopoDivider({ className }: { className?: string }) {

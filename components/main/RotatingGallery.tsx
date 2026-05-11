@@ -13,6 +13,7 @@ import {
 const galleryTiles: { images: string[]; intervalMs: number; offsetMs: number; lift: string }[] = [
   {
     images: [
+      "/Pictures/story1.png",
       "/Pictures/camp1.jpg",
       "/Pictures/camp3.jpg",
       "/Pictures/camp5.jpg",
@@ -24,6 +25,7 @@ const galleryTiles: { images: string[]; intervalMs: number; offsetMs: number; li
   },
   {
     images: [
+      "/Pictures/story2.png",
       "/Pictures/camp2.jpg",
       "/Pictures/boatHouse.jpg",
       "/Pictures/insideGirlsCabin.jpg",
@@ -35,6 +37,7 @@ const galleryTiles: { images: string[]; intervalMs: number; offsetMs: number; li
   },
   {
     images: [
+      "/Pictures/story3.png",
       "/Pictures/camp4.jpg",
       "/Pictures/camp6.jpg",
       "/Pictures/lego.jpg",
@@ -46,6 +49,7 @@ const galleryTiles: { images: string[]; intervalMs: number; offsetMs: number; li
   },
   {
     images: [
+      "/Pictures/mainstory.png",
       "/Pictures/camp7.jpg",
       "/Pictures/messHall.jpg",
       "/Pictures/recHall.jpg",

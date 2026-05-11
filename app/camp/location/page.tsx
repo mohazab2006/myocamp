@@ -8,7 +8,12 @@ import {
   campSpaces,
   getCampSettings
 } from "@/lib/content/camp";
-import { CampIcon, PaintedDivider, TopoDivider } from "@/components/camp/Illustrations";
+import {
+  CampIcon,
+  PaintedDivider,
+  SectionScatter,
+  TopoDivider
+} from "@/components/camp/Illustrations";
 
 export const metadata: Metadata = {
   title: "Camp · Location",
@@ -20,7 +25,8 @@ export default async function CampLocationPage() {
 
   return (
     <>
-      <section className="topo-bg bg-camp-paper">
+      <section className="topo-bg relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="route" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-7">
@@ -91,7 +97,8 @@ export default async function CampLocationPage() {
 
       <PaintedDivider />
 
-      <section className="bg-camp-paper-soft">
+      <section className="relative isolate overflow-hidden bg-camp-paper-soft">
+        <SectionScatter variant="forest" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-4">
@@ -130,7 +137,8 @@ export default async function CampLocationPage() {
         </div>
       </section>
 
-      <section className="bg-camp-paper">
+      <section className="relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="water" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-4">
@@ -218,7 +226,8 @@ export default async function CampLocationPage() {
 
       <TopoDivider />
 
-      <section className="bg-camp-paper-soft">
+      <section className="relative isolate overflow-hidden bg-camp-paper-soft">
+        <SectionScatter variant="firey" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-4">
@@ -253,7 +262,8 @@ export default async function CampLocationPage() {
         </div>
       </section>
 
-      <section className="bg-camp-paper">
+      <section className="relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="route" />
         <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-16 md:gap-10 md:px-10 md:py-20">
           <div className="col-span-12 md:col-span-5">
             <div className="font-script text-2xl text-camp-flame">first hour on site</div>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/content/org";
-import { CampIcon, PaintedDivider } from "@/components/camp/Illustrations";
+import { CampIcon, PaintedDivider, SectionScatter } from "@/components/camp/Illustrations";
 
 export const metadata: Metadata = {
   title: "Camp · Support",
@@ -12,7 +12,8 @@ export default async function CampSupportPage() {
 
   return (
     <>
-      <section className="topo-bg bg-camp-paper">
+      <section className="topo-bg relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="firey" />
         <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-20 md:gap-10 md:px-10 md:py-28">
           <div className="col-span-12 md:col-span-7">
             <div className="font-script text-2xl text-camp-flame">help one camper get to camp</div>
@@ -39,7 +40,8 @@ export default async function CampSupportPage() {
 
       <PaintedDivider />
 
-      <section className="bg-camp-paper-soft">
+      <section className="relative isolate overflow-hidden bg-camp-paper-soft">
+        <SectionScatter variant="route" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-4">

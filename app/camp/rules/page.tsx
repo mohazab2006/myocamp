@@ -5,7 +5,7 @@ import {
   leaveAtHome,
   packingList
 } from "@/lib/content/camp";
-import { PaintedDivider } from "@/components/camp/Illustrations";
+import { PaintedDivider, SectionScatter } from "@/components/camp/Illustrations";
 
 export const metadata: Metadata = {
   title: "Camp · Rules & packing",
@@ -15,7 +15,8 @@ export const metadata: Metadata = {
 export default function CampRulesPage() {
   return (
     <>
-      <section className="topo-bg bg-camp-paper">
+      <section className="topo-bg relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="route" />
         <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-20 md:gap-10 md:px-10 md:py-28">
           <div className="col-span-12 md:col-span-7">
             <div className="font-script text-2xl text-camp-flame">cabin rules · packing list</div>
@@ -43,7 +44,8 @@ export default function CampRulesPage() {
 
       <PaintedDivider />
 
-      <section className="bg-camp-paper-soft">
+      <section className="relative isolate overflow-hidden bg-camp-paper-soft">
+        <SectionScatter variant="firey" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-5">
@@ -69,7 +71,8 @@ export default function CampRulesPage() {
         </div>
       </section>
 
-      <section className="bg-camp-paper">
+      <section className="relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="forest" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 border-r-0 md:col-span-6 md:border-r-2 md:border-camp-bark/20 md:pr-10">

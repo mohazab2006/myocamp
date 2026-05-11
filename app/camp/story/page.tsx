@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   CampIcon,
   PaintedDivider,
+  SectionScatter,
   TopoDivider
 } from "@/components/camp/Illustrations";
 import {
@@ -19,7 +20,8 @@ export const metadata: Metadata = {
 export default function CampStoryPage() {
   return (
     <>
-      <section className="topo-bg bg-camp-paper">
+      <section className="topo-bg relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="forest" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-7">
@@ -41,7 +43,24 @@ export default function CampStoryPage() {
             </div>
           </div>
 
-          <div className="mt-12 grid grid-cols-2 gap-3 md:mt-16 md:grid-cols-4 md:gap-4">
+          <figure
+            className="relative mt-12 overflow-hidden border-2 border-camp-bark/30 bg-camp-paper-soft md:mt-16"
+            style={{ rotate: "-0.4deg" }}
+          >
+            <div className="aspect-[16/9] overflow-hidden md:aspect-[21/9]">
+              <img
+                src="/Pictures/mainstory.png"
+                alt="MYO campers and staff together at Camp Smitty"
+                className="painted-edge h-full w-full object-cover"
+              />
+            </div>
+            <figcaption className="flex flex-wrap items-baseline justify-between gap-3 border-t border-camp-bark/15 px-4 py-3 md:px-6 md:py-4">
+              <div className="font-camp text-2xl text-camp-bark md:text-3xl">The whole camp, one frame.</div>
+              <div className="font-script text-base text-camp-ink/70 md:text-lg">closing day at the lake</div>
+            </figcaption>
+          </figure>
+
+          <div className="mt-10 grid grid-cols-2 gap-3 md:mt-14 md:grid-cols-4 md:gap-4">
             {campStorySnapshots.map((shot, i) => (
               <figure
                 key={shot.src}
@@ -70,8 +89,11 @@ export default function CampStoryPage() {
       {campStoryChapters.map((chapter, chapterIndex) => (
         <section
           key={chapter.title}
-          className={chapterIndex % 2 ? "bg-camp-paper" : "bg-camp-paper-soft"}
+          className={`relative isolate overflow-hidden ${
+            chapterIndex % 2 ? "bg-camp-paper" : "bg-camp-paper-soft"
+          }`}
         >
+          <SectionScatter variant={chapterIndex % 2 ? "route" : "water"} />
           <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
             <div className="grid grid-cols-12 items-start gap-6 md:gap-10">
               <div
@@ -122,7 +144,8 @@ export default function CampStoryPage() {
         </section>
       ))}
 
-      <section className="bg-camp-bark text-camp-paper">
+      <section className="relative isolate overflow-hidden bg-camp-bark text-camp-paper">
+        <SectionScatter variant="dark" />
         <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-16 md:gap-10 md:px-10 md:py-20">
           <div className="col-span-12 md:col-span-5">
             <div className="aspect-[4/5] overflow-hidden border-2 border-camp-paper/20">
@@ -164,7 +187,8 @@ export default function CampStoryPage() {
 
       <TopoDivider />
 
-      <section className="bg-camp-paper">
+      <section className="relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="firey" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-4">
@@ -201,7 +225,8 @@ export default function CampStoryPage() {
         </div>
       </section>
 
-      <section className="bg-camp-paper-soft">
+      <section className="relative isolate overflow-hidden bg-camp-paper-soft">
+        <SectionScatter variant="route" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-5">
@@ -260,7 +285,8 @@ export default function CampStoryPage() {
         </div>
       </section>
 
-      <section className="bg-camp-paper">
+      <section className="relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="water" />
         <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-16 md:gap-10 md:px-10 md:py-20">
           <div className="col-span-12 md:col-span-7">
             <div className="font-script text-2xl text-camp-flame">ready for August</div>

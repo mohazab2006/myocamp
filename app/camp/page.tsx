@@ -3,6 +3,7 @@ import { CampHero } from "@/components/camp/CampHero";
 import {
   CampIcon,
   PaintedDivider,
+  SectionScatter,
   TopoDivider
 } from "@/components/camp/Illustrations";
 import {
@@ -24,7 +25,8 @@ export default async function CampHome() {
       <CampHero mainRange={mainRange} litRange={litRange} />
 
       {/* WHY CAMP */}
-      <section className="border-y-2 border-camp-bark/15 bg-camp-paper-soft">
+      <section className="relative isolate overflow-hidden border-y-2 border-camp-bark/15 bg-camp-paper-soft">
+        <SectionScatter variant="forest" />
         <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-20 md:gap-10 md:px-10 md:py-28">
           <div className="col-span-12 md:col-span-5">
             <div className="font-script text-3xl text-camp-flame">field journal entry</div>
@@ -51,7 +53,8 @@ export default async function CampHome() {
       </section>
 
       {/* 2026 SESSIONS */}
-      <section className="bg-camp-paper">
+      <section className="relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="route" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-4">
@@ -102,7 +105,8 @@ export default async function CampHome() {
       </section>
 
       {/* ACTIVITIES — illustrated grid */}
-      <section className="topo-bg bg-camp-paper">
+      <section className="topo-bg relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="firey" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-4">
@@ -138,7 +142,8 @@ export default async function CampHome() {
       <PaintedDivider />
 
       {/* WEEK RHYTHM */}
-      <section className="bg-camp-paper-soft">
+      <section className="relative isolate overflow-hidden bg-camp-paper-soft">
+        <SectionScatter variant="water" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="flex flex-wrap items-end justify-between gap-6">
             <div>
@@ -173,7 +178,8 @@ export default async function CampHome() {
       <TopoDivider />
 
       {/* SPACES — illustrated photo cards */}
-      <section className="bg-camp-paper">
+      <section className="relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="forest" />
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-5">
@@ -218,7 +224,8 @@ export default async function CampHome() {
       </section>
 
       {/* CTA BAND */}
-      <section className="bg-camp-bark text-camp-paper">
+      <section className="relative isolate overflow-hidden bg-camp-bark text-camp-paper">
+        <SectionScatter variant="dark" />
         <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-20 md:gap-10 md:px-10 md:py-28">
           <div className="col-span-12 md:col-span-7">
             <div className="font-script text-2xl text-camp-amber">before camp begins</div>

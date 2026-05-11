@@ -267,10 +267,10 @@ export default async function HomePage() {
             stagger={0.1}
           >
             {[
-              "/Pictures/treeHouse.jpg",
+              "/Pictures/story1.png",
               "/Pictures/canoes.jpg",
-              "/Pictures/outsideMess.jpg",
-              "/Pictures/obstacleCourse.jpg"
+              "/Pictures/story2.png",
+              "/Pictures/story3.png"
             ].map((src, i) => (
               <div
                 key={src}

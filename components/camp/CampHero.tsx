@@ -4,7 +4,25 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useRef } from "react";
-import { CompassIcon, FlameIcon, KnotIcon, BowIcon } from "./Illustrations";
+import {
+  CompassIcon,
+  FlameIcon,
+  KnotIcon,
+  BowIcon,
+  LeafIcon,
+  CanoeIcon,
+  TentIcon,
+  MoonIcon,
+  ArrowIcon,
+  PaddleIcon,
+  MountainIcon,
+  FishIcon,
+  AcornIcon,
+  StarIcon,
+  LanternIcon,
+  SparkIcon,
+  WaveIcon
+} from "./Illustrations";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -69,13 +87,42 @@ export function CampHero({ mainRange, litRange }: CampHeroProps) {
     >
       <div className="absolute inset-0 bg-gradient-to-b from-camp-sky/40 via-transparent to-camp-paper" />
 
-      <div className="relative mx-auto max-w-[1440px] px-6 pb-24 pt-16 md:px-10 md:pb-36 md:pt-24">
+      <LeafIcon
+        size={42}
+        className="camp-hero-decoration absolute left-[8%] top-[8%] hidden text-camp-moss/80 sm:block"
+        style={{ rotate: "-22deg" }}
+      />
+      <CompassIcon
+        size={56}
+        className="camp-hero-decoration absolute bottom-[14%] left-[10%] hidden text-camp-moss/85 sm:block"
+        style={{ rotate: "-6deg" }}
+      />
+      <MoonIcon
+        size={36}
+        className="camp-hero-decoration absolute right-[12%] top-[6%] hidden text-camp-bark/70 sm:block"
+        style={{ rotate: "18deg" }}
+      />
+      <StarIcon
+        size={20}
+        className="camp-hero-decoration absolute left-[22%] top-[3%] hidden text-camp-amber md:block"
+      />
+      <StarIcon
+        size={14}
+        className="camp-hero-decoration absolute right-[32%] top-[7%] hidden text-camp-amber/80 md:block"
+        style={{ rotate: "12deg" }}
+      />
+      <SparkIcon
+        size={18}
+        className="camp-hero-decoration absolute right-[6%] bottom-[6%] hidden text-camp-flame/80 md:block"
+      />
+
+      <div className="relative mx-auto max-w-[1440px] px-6 pb-24 pt-4 md:px-10 md:pb-36 md:pt-6">
         <div className="flex items-center justify-between text-camp-bark">
           <div className="font-script text-2xl md:text-3xl">est. Camp Smitty &middot; Eganville</div>
-          <div className="font-script text-xl md:text-2xl">two focused sessions · August</div>
+          <div className="font-script text-xl md:text-2xl">two focused sessions · July &amp; August</div>
         </div>
 
-        <div className="relative mt-12 flex flex-nowrap items-end justify-center gap-x-3 whitespace-nowrap leading-[0.85] md:gap-x-6">
+        <div className="relative mt-2 flex flex-nowrap items-end justify-center gap-x-3 whitespace-nowrap leading-[0.85] md:mt-3 md:gap-x-6">
           <FlameIcon
             size={64}
             className="camp-hero-decoration absolute left-[6%] top-[-12px] hidden text-camp-flame md:block"
@@ -86,6 +133,27 @@ export function CampHero({ mainRange, litRange }: CampHeroProps) {
             className="camp-hero-decoration absolute right-[6%] top-[-24px] hidden text-camp-bark md:block"
             style={{ rotate: "16deg" }}
           />
+          <MountainIcon
+            size={58}
+            className="camp-hero-decoration absolute left-[18%] top-[-30px] hidden text-camp-moss md:block"
+            style={{ rotate: "-4deg" }}
+          />
+          <LanternIcon
+            size={52}
+            className="camp-hero-decoration absolute right-[18%] top-[-20px] hidden text-camp-flame/80 md:block"
+            style={{ rotate: "-6deg" }}
+          />
+          <AcornIcon
+            size={36}
+            className="camp-hero-decoration absolute right-[28%] top-[-36px] hidden text-camp-bark/80 lg:block"
+            style={{ rotate: "10deg" }}
+          />
+          <LeafIcon
+            size={40}
+            className="camp-hero-decoration absolute left-[28%] top-[-26px] hidden text-camp-moss lg:block"
+            style={{ rotate: "24deg" }}
+          />
+
           <KnotIcon
             size={56}
             className="camp-hero-decoration absolute bottom-[20%] left-[-2%] hidden text-camp-moss lg:block"
@@ -95,6 +163,31 @@ export function CampHero({ mainRange, litRange }: CampHeroProps) {
             size={64}
             className="camp-hero-decoration absolute bottom-[24%] right-[-1%] hidden text-camp-amber lg:block"
             style={{ rotate: "-22deg" }}
+          />
+          <KnotIcon
+            size={38}
+            className="camp-hero-decoration absolute top-[10%] left-[1%] hidden text-camp-bark/75 lg:block"
+            style={{ rotate: "-18deg" }}
+          />
+          <ArrowIcon
+            size={72}
+            className="camp-hero-decoration absolute bottom-[8%] right-[8%] hidden text-camp-bark/80 md:block"
+            style={{ rotate: "-14deg" }}
+          />
+          <ArrowIcon
+            size={48}
+            className="camp-hero-decoration absolute top-[35%] left-[4%] hidden text-camp-flame/70 lg:block"
+            style={{ rotate: "26deg" }}
+          />
+          <PaddleIcon
+            size={62}
+            className="camp-hero-decoration absolute bottom-[2%] left-[6%] hidden text-camp-moss/85 md:block"
+            style={{ rotate: "32deg" }}
+          />
+          <PaddleIcon
+            size={48}
+            className="camp-hero-decoration absolute top-[40%] right-[3%] hidden text-camp-bark/70 lg:block"
+            style={{ rotate: "-28deg" }}
           />
 
           {groups.map((group, gi) => (

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Envelope, Wallet } from "@phosphor-icons/react/dist/ssr";
 import { getCampSettings } from "@/lib/content/camp";
 import { formatRange } from "@/lib/date";
-import { PaintedDivider } from "@/components/camp/Illustrations";
+import { PaintedDivider, SectionScatter } from "@/components/camp/Illustrations";
 
 export const metadata: Metadata = {
   title: "Camp · Register",
@@ -22,7 +22,8 @@ export default async function CampRegisterPage() {
 
   return (
     <>
-      <section className="topo-bg bg-camp-paper">
+      <section className="topo-bg relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="route" />
         <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-20 md:gap-10 md:px-10 md:py-28">
           <div className="col-span-12 md:col-span-7">
             <div className="font-script text-2xl text-camp-flame">paperwork, the easy version</div>
@@ -83,7 +84,8 @@ export default async function CampRegisterPage() {
 
       <PaintedDivider />
 
-      <section className="bg-camp-paper-soft">
+      <section className="relative isolate overflow-hidden bg-camp-paper-soft">
+        <SectionScatter variant="firey" />
         <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-16 md:gap-10 md:px-10 md:py-20">
           <div className="col-span-12 md:col-span-4">
             <div className="font-script text-2xl text-camp-flame">how to pay</div>
@@ -114,7 +116,8 @@ export default async function CampRegisterPage() {
         </div>
       </section>
 
-      <section className="bg-camp-paper">
+      <section className="relative isolate overflow-hidden bg-camp-paper">
+        <SectionScatter variant="forest" />
         <div className="mx-auto max-w-[1440px] px-6 py-12 md:px-10 md:py-16">
           <div className="font-script text-center text-2xl text-camp-flame">the form</div>
           <h2 className="font-camp mt-1 text-center text-4xl text-camp-bark md:text-5xl">

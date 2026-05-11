@@ -125,8 +125,8 @@ export const campStorySnapshots = [
     note: "life jackets before lunch"
   },
   {
-    src: "/Pictures/LITgroup.JPG",
-    alt: "Leadership-in-training group at camp",
+    src: "/Pictures/lit.JPG",
+    alt: "LIT crew in thobes on the trail at camp",
     caption: "LIT crew",
     note: "older youth learning to lead"
   }
@@ -142,16 +142,16 @@ export const campStoryChapters = [
     ],
     images: [
       {
-        src: "/Pictures/kitchenstaff.png",
-        alt: "Volunteer kitchen staff preparing a meal",
-        caption: "Kitchen crew",
-        note: "halal meals, three times a day"
+        src: "/Pictures/staff.png",
+        alt: "MYO Camp volunteer staff gathered around the table",
+        caption: "The staff table",
+        note: "the people who show up every August"
       },
       {
-        src: "/Pictures/assembly.jpg",
-        alt: "Campers gathered for assembly on the field",
-        caption: "Camp-wide assembly",
-        note: "Friday khutbah on the grass"
+        src: "/Pictures/kitchenstaff.png",
+        alt: "MYO Camp kitchen volunteers in the camp kitchen",
+        caption: "Kitchen crew",
+        note: "halal meals, three times a day"
       }
     ]
   },
@@ -164,10 +164,10 @@ export const campStoryChapters = [
     ],
     images: [
       {
-        src: "/Pictures/outsideMess.jpg",
-        alt: "Mess hall exterior at Camp Smitty",
-        caption: "Mess hall",
-        note: "long tables, no phones"
+        src: "/Pictures/story1.png",
+        alt: "Canoes spread across Mink Lake at Camp Smitty",
+        caption: "Out on Mink Lake",
+        note: "afternoon canoe rotation"
       },
       {
         src: "/Pictures/trails.jpg",
@@ -186,16 +186,16 @@ export const campStoryChapters = [
     ],
     images: [
       {
-        src: "/Pictures/obstacleCourse.jpg",
-        alt: "Campers on the wooded obstacle course",
-        caption: "Obstacle course",
-        note: "cabins compete on Saturday"
+        src: "/Pictures/story2.png",
+        alt: "Campers learning a skill together at MYO Camp",
+        caption: "Workshops in rotation",
+        note: "knots, fire, archery, navigation"
       },
       {
-        src: "/Pictures/gFirePit.jpg",
-        alt: "Girls gathered at the fire pit",
-        caption: "Skills and stories",
-        note: "practice by day, fire at dusk"
+        src: "/Pictures/story3.png",
+        alt: "Camp moment captured during the week at MYO Camp",
+        caption: "Practice by day",
+        note: "fire-circle by dusk"
       }
     ]
   }
