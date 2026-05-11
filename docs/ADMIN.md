@@ -1,88 +1,102 @@
-# Admin — Phase 2 plan
+# Admin
 
-Phase 1 ships a placeholder `/admin` route. This doc captures the design so phase 2 implementation is fast and the data shape in phase 1 already aligns.
+The `/admin` route is a password-protected owner dashboard for editing public site content.
 
-## Owner needs (gathered from initial brief)
-- Add / edit events and programs.
-- Update payment URLs (PayPal donate ID changes occasionally).
-- Update form embeds (JotForm URLs change per registration cycle).
-- Swap hero/feature images.
-- Toggle "Registration is open / full / closed" on camp.
-- Edit copy for support, contact, rules pages.
+## Login
 
-## Recommended stack
-- **Sanity Studio** embedded at `/admin` (or hosted at `myo.sanity.studio`).
-  - Free tier: 3 users, 10k docs — ample.
-  - Schema lives in `sanity/schemas/`.
-  - Auth handled by Sanity (Google login for owner).
-  - Live preview optional later.
-- **Why Sanity over alternatives:**
-  - Payload (great but self-hosted DB needed).
-  - Notion-as-DB (cute but slow API, unstructured).
-  - Sheets-as-DB (no relational fields, awkward for image refs).
-  - Custom (months of work for a 2-person team).
+This uses Supabase Auth email/password, not magic links.
 
-## Schemas to ship in phase 2
-- `event` — matches `OrgEvent` interface in `lib/types.ts`.
-- `program` — matches `OrgProgram`.
-- `siteSettings` — singleton: contact email, support links, payment IDs, social URLs.
-- `campSettings` — singleton: registration status, current camp dates, JotForm URL, drop-off/pickup times, fees.
-- `page` — long-form pages (about, story, rules) with portable text body.
-- `mediaAsset` — image with alt, caption, credit.
+Create the admin user in Supabase:
 
-## Data integration seam
-Phase 1 keeps content in `lib/content/*.ts` exporting async functions:
-```ts
-export async function getEvents(): Promise<OrgEvent[]>;
-export async function getEvent(slug: string): Promise<OrgEvent | null>;
+1. Open Supabase Dashboard.
+2. Go to Authentication > Users.
+3. Add the owner email and password.
+
+Set these server environment variables:
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
+ADMIN_EMAIL=owner@example.com
 ```
-Phase 2 swaps the body of those functions to call `sanityClient.fetch(...)`. **Page components do not change.** This is the deliberate seam.
 
-## Auth
-- Sanity Studio handles login.
-- Public site has no auth in phase 1 or 2.
-- If owner ever wants form-builder UI on the public site (low priority), use NextAuth + role check — not in scope yet.
+`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` can be used instead of `NEXT_PUBLIC_SUPABASE_ANON_KEY` if the project uses Supabase's newer publishable keys.
 
-## Revalidation
-- Use Next ISR with `revalidate: 60` on listing pages once Sanity is wired.
-- Add `/api/revalidate` webhook from Sanity for instant updates.
+`ADMIN_EMAIL` is optional but recommended. Use `ADMIN_EMAILS` with comma-separated emails if more than one owner should access `/admin`.
 
-## Out of scope for admin
-- Member accounts / camper logins. (JotForm + email handles registration.)
-- Payment processing. (PayPal + EMT remain external.)
-- Email broadcasts. (Owner uses Mailchimp separately.)
+Supabase stores the auth session in cookies through `@supabase/ssr`. The project has a root `proxy.ts` file scoped to `/admin/:path*` so Supabase can refresh auth cookies during admin requests.
 
-## UX inspiration
-- **@salamsociety repo** — owner referenced this as visual/UX reference for the admin dashboard. Review before scaffolding Sanity Studio config; possibly worth copying the layout / IA pattern.
+## Supabase
 
-## Real content owner needs to be able to edit (recorded so phase 2 covers all of it)
+For content reads and writes, also set the service role key on the server:
 
-### Camp — new dual-session format (confirmed by owner 2026-05-07)
-The camp moved from one full week to **two 4-day sessions** at Camp Smitty:
+```bash
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+```
 
-- **LIT Program** (Leadership track)
-  - Thursday July 23 (9am) – Sunday July 26 (3pm)
-  - Staff arrive Wednesday at 6pm
-  - Lighter logistics: LITs help with meals, planning, self-management
-  - LITs may graduate to counsellor roles for the core camp
-- **Main Camp** (Core program)
-  - Thursday August 6 – Sunday August 9
-  - Staff arrive Wednesday at 6pm
-  - Primary staff focus
+The public site reads Supabase content when configured. If Supabase is missing or empty, the site falls back to the seeded files in `lib/content`.
 
-Phase 2 implication: `campSettings` singleton needs two session fields (LIT + main) rather than a single date range. The `WeekRhythm` field should support 4-day arrays. Re-evaluate fee structure with owner.
+## Tables
 
-### Additional camp activities the owner is considering
-- Dedicated **archery weekend** in October.
-- A **day camp** or **meetups** before the main camp (continuing recent years' pattern).
+Run this SQL in Supabase:
 
-### Confirmed real events
-- **MSA Bonfire Social** — May 16, 2026 · Rideau River Provincial Park · ages 16+ · free w/ registration. Hosted by AYJ MSA, workshops by MYO. Registration: `https://docs.google.com/forms/d/e/1FAIpQLScKEypc02nwQOrxD4Aq_91WhoiOyIAg5Wc9eVY_J_NaAk2gNQ/viewform`. Already seeded in `lib/content/events.ts`.
+```sql
+create table if not exists public.content_events (
+  slug text primary key,
+  title text not null,
+  start_date date not null,
+  data jsonb not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
 
-### What owner explicitly wants admin control over
-- Forms (registration URLs change per cycle).
-- Links (donate, volunteer, social).
-- Payment details (PayPal hosted button ID).
-- Images (swap hero / feature images).
-- Event copy + dates + statuses (open/full/closed).
-- Camp settings (dates, fees, registration status, dual-session structure).
+create table if not exists public.content_blog_posts (
+  slug text primary key,
+  title text not null,
+  published_at date not null,
+  data jsonb not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
+create or replace function public.set_updated_at()
+returns trigger
+language plpgsql
+as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$;
+
+drop trigger if exists content_events_updated_at on public.content_events;
+create trigger content_events_updated_at
+before update on public.content_events
+for each row execute function public.set_updated_at();
+
+drop trigger if exists content_blog_posts_updated_at on public.content_blog_posts;
+create trigger content_blog_posts_updated_at
+before update on public.content_blog_posts
+for each row execute function public.set_updated_at();
+
+alter table public.content_events enable row level security;
+alter table public.content_blog_posts enable row level security;
+```
+
+No public RLS policy is required when the app reads through the server-side service role key.
+
+## Editable Content
+
+Current dashboard support:
+
+- Events: title, slug, type, dates, location, audience, summary, body, image path, registration URL, registration window, cost, archived flag.
+- Blog posts: title, slug, publish date, excerpt, body, image path.
+
+Use image paths from `public/Pictures`, for example `/Pictures/trails.jpg`.
+
+Planned later:
+
+- Site settings: donate URL, volunteer URL, contact email, social links.
+- Camp settings: registration status, dates, fees, payment details, form URL.
+- Image uploads through Supabase Storage.

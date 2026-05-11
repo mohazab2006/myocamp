@@ -6,7 +6,7 @@ import {
   InstagramLogo,
   Tent,
   Video
-} from "@phosphor-icons/react/dist/ssr";
+} from "@phosphor-icons/react/ssr";
 
 const iconFor = (platform: SocialLink["platform"]) => {
   switch (platform) {

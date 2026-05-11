@@ -313,7 +313,7 @@ const scatterVariants = {
 export type ScatterVariant = keyof typeof scatterVariants;
 
 export function SectionScatter({ variant = "forest" }: { variant?: ScatterVariant }) {
-  const items = scatterVariants[variant];
+  const items: ScatterItem[] = scatterVariants[variant];
   return (
     <div
       aria-hidden

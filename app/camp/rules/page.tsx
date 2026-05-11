@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Check, X } from "@phosphor-icons/react/dist/ssr";
+import { Check, X } from "@phosphor-icons/react/ssr";
 import {
   campCodeOfConduct,
   leaveAtHome,

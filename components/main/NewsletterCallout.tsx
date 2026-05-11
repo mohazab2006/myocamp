@@ -1,4 +1,4 @@
-import { ArrowUpRight, EnvelopeSimple } from "@phosphor-icons/react/dist/ssr";
+import { ArrowUpRight, EnvelopeSimple } from "@phosphor-icons/react/ssr";
 import { getSiteSettings } from "@/lib/content/org";
 
 export async function NewsletterCallout() {

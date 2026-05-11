@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { BlogPost } from "@/lib/types";
 import { formatPostDate } from "@/lib/date";
-import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
+import { ArrowUpRight } from "@phosphor-icons/react/ssr";
 
 export function BlogCard({ post }: { post: BlogPost }) {
   return (

@@ -1,7 +1,8 @@
 import type { OrgEvent } from "../types";
+import { fetchSupabaseEvent, fetchSupabaseEvents } from "@/lib/supabase/content";
 
 // MSA Bonfire, LIT leadership track, and main camp are owner-confirmed.
-// Past entries stay on the list for the archive. Phase 2 admin will CRUD these through Sanity.
+// Past entries stay on the list for the archive. Supabase becomes the source once configured.
 const seedEvents: OrgEvent[] = [
   {
     slug: "msa-bonfire-social-may-2026",
@@ -86,9 +87,13 @@ const seedEvents: OrgEvent[] = [
 ];
 
 export async function getEvents(): Promise<OrgEvent[]> {
+  const supabaseEvents = await fetchSupabaseEvents();
+  if (supabaseEvents?.length) return supabaseEvents;
   return seedEvents;
 }
 
 export async function getEvent(slug: string): Promise<OrgEvent | null> {
+  const supabaseEvent = await fetchSupabaseEvent(slug);
+  if (supabaseEvent) return supabaseEvent;
   return seedEvents.find((e) => e.slug === slug) ?? null;
 }

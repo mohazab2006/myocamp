@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { OrgProgram } from "@/lib/types";
-import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
+import { ArrowUpRight } from "@phosphor-icons/react/ssr";
 
 export function ProgramCard({ program }: { program: OrgProgram }) {
   return (

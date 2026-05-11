@@ -1,4 +1,5 @@
 import type { BlogPost } from "../types";
+import { fetchSupabaseBlogPost, fetchSupabaseBlogPosts } from "@/lib/supabase/content";
 
 const seedPosts: BlogPost[] = [
   {
@@ -62,11 +63,17 @@ const seedPosts: BlogPost[] = [
 ];
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
+  const supabasePosts = await fetchSupabaseBlogPosts();
+  if (supabasePosts?.length) return supabasePosts;
+
   return [...seedPosts].sort(
     (a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt)
   );
 }
 
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
+  const supabasePost = await fetchSupabaseBlogPost(slug);
+  if (supabasePost) return supabasePost;
+
   return seedPosts.find((post) => post.slug === slug) ?? null;
 }

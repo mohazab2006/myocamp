@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarBlank, MapPin, Tag } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeft, CalendarBlank, MapPin, Tag } from "@phosphor-icons/react/ssr";
 import { getEvent, getEvents } from "@/lib/content/events";
 import { formatRange, isUpcoming } from "@/lib/date";
 import { ButtonAnchor, ButtonLink } from "@/components/main/Button";

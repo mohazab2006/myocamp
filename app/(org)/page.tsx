@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowUpRight, Flame } from "@phosphor-icons/react/dist/ssr";
+import { ArrowUpRight, Flame } from "@phosphor-icons/react/ssr";
 import { getCampSettings } from "@/lib/content/camp";
 import { getSiteSettings } from "@/lib/content/org";
 import { getEvents } from "@/lib/content/events";

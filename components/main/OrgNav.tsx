@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type MouseEvent } from "react";
-import { Flame, List, X } from "@phosphor-icons/react/dist/ssr";
+import { Flame, List, X } from "@phosphor-icons/react/ssr";
 
 const items = [
   { label: "About", href: "/about" },

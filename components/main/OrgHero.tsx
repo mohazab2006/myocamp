@@ -4,7 +4,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef } from "react";
 import Link from "next/link";
-import { ArrowRight, Flame } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, Flame } from "@phosphor-icons/react/ssr";
 import { RotatingPhoto, useRotator, type RotatingSlide } from "./RotatingPhoto";
 import {
   CompassIcon,

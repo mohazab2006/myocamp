@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { HandHeart, HandCoins, Heart, ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
+import { HandHeart, HandCoins, Heart, ArrowUpRight } from "@phosphor-icons/react/ssr";
 import { getSiteSettings } from "@/lib/content/org";
 import { ButtonAnchor, ButtonLink } from "@/components/main/Button";
 import { PageHero } from "@/components/main/PageHero";

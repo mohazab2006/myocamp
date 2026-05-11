@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarBlank } from "@phosphor-icons/react/dist/ssr";
+import { ArrowLeft, CalendarBlank } from "@phosphor-icons/react/ssr";
 import { BlogPostBody } from "@/components/main/BlogPostBody";
 import { BlogPostShareLink } from "@/components/main/BlogPostShareLink";
 import { getBlogPost, getBlogPosts } from "@/lib/content/blog";

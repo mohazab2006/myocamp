@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, Megaphone } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRight, Megaphone } from "@phosphor-icons/react/ssr";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { useRef } from "react";

@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { OrgEvent } from "@/lib/types";
 import { formatRange } from "@/lib/date";
-import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr";
+import { ArrowUpRight } from "@phosphor-icons/react/ssr";
 
 const typeLabels: Record<OrgEvent["type"], string> = {
   hike: "Hike",

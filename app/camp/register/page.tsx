@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Envelope, Wallet } from "@phosphor-icons/react/dist/ssr";
+import { Envelope, Wallet } from "@phosphor-icons/react/ssr";
 import { getCampSettings } from "@/lib/content/camp";
 import { formatRange } from "@/lib/date";
 import { PaintedDivider, SectionScatter } from "@/components/camp/Illustrations";

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Envelope, MapPin, Tent } from "@phosphor-icons/react/dist/ssr";
+import { Envelope, MapPin, Tent } from "@phosphor-icons/react/ssr";
 import { getSiteSettings } from "@/lib/content/org";
 import { ButtonAnchor } from "@/components/main/Button";
 import { PageHero } from "@/components/main/PageHero";

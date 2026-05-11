@@ -1,4 +1,4 @@
-import { XLogo } from "@phosphor-icons/react/dist/ssr";
+import { XLogo } from "@phosphor-icons/react/ssr";
 import type { BlogPost } from "@/lib/types";
 import { getXPostShareUrl } from "@/lib/blog-share";
 

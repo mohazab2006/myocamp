@@ -2,7 +2,7 @@ import { BodyTheme } from "@/components/shared/BodyTheme";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Admin · MYO",
+  title: "Admin | MYO",
   robots: { index: false, follow: false }
 };
 
