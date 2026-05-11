@@ -62,7 +62,7 @@ export function AnnouncementBar({
         }}
       />
       <div className="relative mx-auto flex max-w-[1320px] flex-wrap items-center justify-center gap-3 px-4 py-3 text-sm md:gap-5 md:px-8 md:py-3.5">
-        <span className="announcement-badge inline-flex items-center gap-1.5 rounded-full bg-ember px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-paper shadow-[0_1px_0_oklch(22%_0.018_132_/_0.6)] md:text-xs">
+        <span className="announcement-badge inline-flex items-center gap-1.5 rounded-full bg-ember px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-paper shadow-[0_1px_0_oklch(22%_0.018_132/0.6)] md:text-xs">
           <Megaphone
             size={12}
             weight="fill"
