@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Envelope, Wallet } from "@phosphor-icons/react/ssr";
+import { Envelope, HandCoins, NotePencil, Wallet } from "@phosphor-icons/react/ssr";
 import { getCampSettings } from "@/lib/content/camp";
 import { formatRange } from "@/lib/date";
 import { PaintedDivider, SectionScatter } from "@/components/camp/Illustrations";
@@ -89,25 +89,71 @@ export default async function CampRegisterPage() {
         <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-16 md:gap-10 md:px-10 md:py-20">
           <div className="col-span-12 md:col-span-4">
             <div className="font-script text-2xl text-camp-flame">how to pay</div>
-            <h2 className="font-camp mt-2 text-4xl text-camp-bark md:text-5xl">Two options.</h2>
+            <h2 className="font-camp mt-2 text-4xl text-camp-bark md:text-5xl">Four ways, in order.</h2>
             <p className="mt-4 text-camp-ink/80">
               Wait for confirmation before sending payment. We confirm spots first, then collect.
             </p>
+            <div className="mt-5 border-l-2 border-camp-flame/70 bg-camp-paper/60 px-4 py-3 text-sm text-camp-ink/80">
+              <span className="font-script text-base text-camp-flame">a small ask —</span>{" "}
+              please use the lowest-numbered option that works for you. Every dollar that doesn&apos;t go to
+              processing fees stays at camp.
+            </div>
           </div>
           <div className="col-span-12 grid gap-5 md:col-span-8 md:grid-cols-2">
-            <div className="flex flex-col gap-3 border-2 border-camp-bark/30 bg-camp-paper p-6">
-              <div className="text-camp-flame"><Envelope size={32} weight="duotone" /></div>
+            <div className="relative flex flex-col gap-3 border-2 border-camp-flame/60 bg-camp-paper p-6 shadow-[0_2px_0_0_rgba(0,0,0,0.04)]">
+              <div className="absolute -right-2 -top-3 rotate-3 bg-camp-flame px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-camp-paper">
+                preferred
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="font-script text-3xl leading-none text-camp-bark/60">01</span>
+                <div className="text-camp-flame"><Envelope size={32} weight="duotone" /></div>
+              </div>
               <div className="font-camp text-2xl text-camp-bark">Email money transfer</div>
               <p className="text-camp-ink/80">
-                Send to <a className="text-camp-flame underline" href={`mailto:${camp.paymentEmail}`}>{camp.paymentEmail}</a>. Camper&apos;s name in the memo.
+                Send to{" "}
+                <a className="text-camp-flame underline" href={`mailto:${camp.paymentEmail}`}>
+                  {camp.paymentEmail}
+                </a>
+                . Camper&apos;s name in the memo.
               </p>
               <div className="font-script mt-auto text-camp-bark/65">no fees</div>
             </div>
+
             <div className="flex flex-col gap-3 border-2 border-camp-bark/30 bg-camp-paper p-6">
-              <div className="text-camp-flame"><Wallet size={32} weight="duotone" /></div>
+              <div className="flex items-center justify-between">
+                <span className="font-script text-3xl leading-none text-camp-bark/60">02</span>
+                <div className="text-camp-flame"><HandCoins size={32} weight="duotone" /></div>
+              </div>
+              <div className="font-camp text-2xl text-camp-bark">Cash in person</div>
+              <p className="text-camp-ink/80">
+                Drop it off at a halaqah or arrange a hand-off with an organizer. We&apos;ll send a receipt
+                back.
+              </p>
+              <div className="font-script mt-auto text-camp-bark/65">no fees</div>
+            </div>
+
+            <div className="flex flex-col gap-3 border-2 border-camp-bark/30 bg-camp-paper p-6">
+              <div className="flex items-center justify-between">
+                <span className="font-script text-3xl leading-none text-camp-bark/60">03</span>
+                <div className="text-camp-flame"><NotePencil size={32} weight="duotone" /></div>
+              </div>
+              <div className="font-camp text-2xl text-camp-bark">Cheque</div>
+              <p className="text-camp-ink/80">
+                Made payable to{" "}
+                <span className="font-medium text-camp-bark">Muslim Youth of Ottawa</span>. Camper&apos;s
+                name in the memo line.
+              </p>
+              <div className="font-script mt-auto text-camp-bark/65">no fees</div>
+            </div>
+
+            <div className="flex flex-col gap-3 border-2 border-camp-bark/30 bg-camp-paper p-6">
+              <div className="flex items-center justify-between">
+                <span className="font-script text-3xl leading-none text-camp-bark/60">04</span>
+                <div className="text-camp-flame"><Wallet size={32} weight="duotone" /></div>
+              </div>
               <div className="font-camp text-2xl text-camp-bark">PayPal</div>
               <p className="text-camp-ink/80">
-                If EMT isn&apos;t an option. PayPal adds a small per-camper fee — we&apos;ll send the link in
+                Last resort — PayPal takes a per-camper fee out of camp funds. We&apos;ll send the link in
                 your confirmation email.
               </p>
               <div className="font-script mt-auto text-camp-bark/65">~3% fee</div>

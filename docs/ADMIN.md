@@ -60,6 +60,13 @@ create table if not exists public.content_blog_posts (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists public.content_camp_settings (
+  id text primary key,
+  data jsonb not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql
@@ -80,9 +87,17 @@ create trigger content_blog_posts_updated_at
 before update on public.content_blog_posts
 for each row execute function public.set_updated_at();
 
+drop trigger if exists content_camp_settings_updated_at on public.content_camp_settings;
+create trigger content_camp_settings_updated_at
+before update on public.content_camp_settings
+for each row execute function public.set_updated_at();
+
 alter table public.content_events enable row level security;
 alter table public.content_blog_posts enable row level security;
+alter table public.content_camp_settings enable row level security;
 ```
+
+The `content_camp_settings` table holds a single row with `id = 'current'`. The `data` column is a partial `CampSettings` object — fields that are missing fall back to the seed values in `lib/content/camp.ts`. Today the admin UI only writes `registrationStatus` to it; the rest of the fields (dates, fees, form URL) remain code-controlled for now.
 
 No public RLS policy is required when the app reads through the server-side service role key.
 
@@ -92,11 +107,12 @@ Current dashboard support:
 
 - Events: title, slug, type, dates, location, audience, summary, body, image path, registration URL, registration window, cost, archived flag.
 - Blog posts: title, slug, publish date, excerpt, body, image path.
+- Camp: registration status (Opening soon / Open now / Full / Closed). Drives the badge and copy on `/camp/register`. The JotForm itself is still controlled inside JotForm — toggling status here only changes how the site frames the form.
 
 Use image paths from `public/Pictures`, for example `/Pictures/trails.jpg`.
 
 Planned later:
 
 - Site settings: donate URL, volunteer URL, contact email, social links.
-- Camp settings: registration status, dates, fees, payment details, form URL.
+- Camp settings (the rest): dates, fees, payment details, form URL, waitlist URL.
 - Image uploads through Supabase Storage.

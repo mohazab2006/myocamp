@@ -7,12 +7,19 @@ import {
   deleteSupabaseBlogPost,
   deleteSupabaseEvent,
   upsertSupabaseBlogPost,
+  upsertSupabaseCampSettings,
   upsertSupabaseEvent
 } from "@/lib/supabase/content";
-import type { AudienceTag, BlogPost, EventType, OrgEvent } from "@/lib/types";
+import type { AudienceTag, BlogPost, CampSettings, EventType, OrgEvent } from "@/lib/types";
 
 const eventTypes: EventType[] = ["hike", "campfire", "fundraiser", "social", "service", "camp", "workshop"];
 const audienceTags: AudienceTag[] = ["youth", "parents", "families", "leaders", "all"];
+const registrationStatuses: CampSettings["registrationStatus"][] = [
+  "open",
+  "full",
+  "closed",
+  "opening-soon"
+];
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -192,4 +199,27 @@ export async function deleteBlogPostAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/blog");
   adminRedirect({ saved: "Blog post deleted." });
+}
+
+export async function saveCampStatusAction(formData: FormData) {
+  await requireAdmin();
+
+  const candidate = value(formData, "registrationStatus") as CampSettings["registrationStatus"];
+  if (!registrationStatuses.includes(candidate)) {
+    adminRedirect({ section: "camp", error: "Pick a valid registration status." });
+  }
+
+  try {
+    await upsertSupabaseCampSettings({ registrationStatus: candidate });
+  } catch (error) {
+    adminRedirect({
+      section: "camp",
+      error: error instanceof Error ? error.message : "Could not save camp status."
+    });
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/camp");
+  revalidatePath("/camp/register");
+  adminRedirect({ section: "camp", saved: "Registration status updated." });
 }

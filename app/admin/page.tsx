@@ -9,19 +9,22 @@ import {
   Plus,
   SignOut,
   SlidersHorizontal,
+  Tent,
   WarningCircle
 } from "@phosphor-icons/react/ssr";
 import { getBlogPosts } from "@/lib/content/blog";
+import { getCampSettings } from "@/lib/content/camp";
 import { getEvents } from "@/lib/content/events";
 import { getAdminUser, isSupabaseAuthConfigured } from "@/lib/supabase/auth";
 import { isSupabaseConfigured } from "@/lib/supabase/content";
-import type { AudienceTag, BlogPost, EventType, OrgEvent } from "@/lib/types";
+import type { AudienceTag, BlogPost, CampSettings, EventType, OrgEvent } from "@/lib/types";
 import {
   deleteBlogPostAction,
   deleteEventAction,
   loginAction,
   logoutAction,
   saveBlogPostAction,
+  saveCampStatusAction,
   saveEventAction
 } from "./actions";
 
@@ -30,8 +33,23 @@ export const dynamic = "force-dynamic";
 const eventTypes: EventType[] = ["hike", "campfire", "fundraiser", "social", "service", "camp", "workshop"];
 const audienceTags: AudienceTag[] = ["youth", "parents", "families", "leaders", "all"];
 
+const registrationStatusOptions: {
+  value: CampSettings["registrationStatus"];
+  label: string;
+  hint: string;
+}[] = [
+  {
+    value: "opening-soon",
+    label: "Opening soon",
+    hint: "Not open yet — page shows the opening date and newsletter prompt."
+  },
+  { value: "open", label: "Open now", hint: "Registration is live — JotForm is accepting submissions." },
+  { value: "full", label: "Full", hint: "All spots taken — point families to the waitlist." },
+  { value: "closed", label: "Closed", hint: "Registration is finished for this cycle." }
+];
+
 type SearchParams = Promise<Record<string, string | string[] | undefined>>;
-type AdminSection = "events" | "blog" | "setup";
+type AdminSection = "events" | "blog" | "camp" | "setup";
 
 function firstParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value;
@@ -39,7 +57,7 @@ function firstParam(value: string | string[] | undefined) {
 
 function adminSection(value: string | string[] | undefined): AdminSection {
   const section = firstParam(value);
-  if (section === "blog" || section === "setup") return section;
+  if (section === "blog" || section === "setup" || section === "camp") return section;
   return "events";
 }
 
@@ -94,7 +112,7 @@ function LoginPanel({
   configured: boolean;
 }) {
   return (
-    <section className="mx-auto flex min-h-[100dvh] max-w-[760px] flex-col justify-center px-6 py-20 md:px-10">
+    <section className="mx-auto flex min-h-dvh max-w-[760px] flex-col justify-center px-6 py-20 md:px-10">
       <Link href="/" className="inline-flex w-fit items-center gap-2 text-sm text-ink-soft hover:text-ink">
         <ArrowLeft size={14} weight="bold" /> Back to MYO
       </Link>
@@ -289,11 +307,13 @@ function DeleteButton({
 function SectionNav({
   active,
   eventCount,
-  postCount
+  postCount,
+  campStatusLabel
 }: {
   active: AdminSection;
   eventCount: number;
   postCount: number;
+  campStatusLabel: string;
 }) {
   const items = [
     {
@@ -311,6 +331,13 @@ function SectionNav({
       icon: FileText
     },
     {
+      key: "camp",
+      href: "/admin?section=camp",
+      label: "Camp",
+      detail: `Status: ${campStatusLabel}`,
+      icon: Tent
+    },
+    {
       key: "setup",
       href: "/admin?section=setup",
       label: "Setup",
@@ -320,7 +347,7 @@ function SectionNav({
   ] as const;
 
   return (
-    <nav aria-label="Admin sections" className="grid gap-2 sm:grid-cols-3">
+    <nav aria-label="Admin sections" className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
       {items.map((item) => {
         const Icon = item.icon;
         const selected = active === item.key;
@@ -355,6 +382,83 @@ function SectionNav({
   );
 }
 
+function CampStatusPanel({
+  current,
+  supabaseConfigured
+}: {
+  current: CampSettings["registrationStatus"];
+  supabaseConfigured: boolean;
+}) {
+  const currentOption = registrationStatusOptions.find((option) => option.value === current);
+
+  return (
+    <section className="grid gap-5">
+      <div className="flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <p className="eyebrow text-brass">Camp</p>
+          <h2 className="mt-2 text-2xl font-semibold tracking-tight text-ink">Registration status</h2>
+          <p className="mt-2 max-w-[62ch] text-sm leading-relaxed text-ink-soft">
+            Flip the badge on{" "}
+            <Link href="/camp/register" className="text-pine underline underline-offset-4 hover:text-forest">
+              /camp/register
+            </Link>{" "}
+            and homepage CTAs. The JotForm itself is still controlled inside JotForm — this only changes
+            the messaging on the site.
+          </p>
+        </div>
+        <div
+          className={`border px-3 py-2 text-sm ${
+            supabaseConfigured
+              ? "border-pine/25 bg-sky/55 text-forest"
+              : "border-ember/30 bg-ember/10 text-ink"
+          }`}
+        >
+          {supabaseConfigured ? `Currently: ${currentOption?.label ?? current}` : "Supabase not connected"}
+        </div>
+      </div>
+
+      <form
+        action={saveCampStatusAction}
+        className="grid gap-5 border border-line bg-paper-deep/35 p-5"
+      >
+        <Field
+          label="Registration status"
+          hint={currentOption?.hint ?? "Pick what visitors see on the camp pages."}
+        >
+          <select
+            className={inputClass}
+            name="registrationStatus"
+            defaultValue={current}
+            required
+            disabled={!supabaseConfigured}
+          >
+            {registrationStatusOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </Field>
+
+        <button
+          className="inline-flex h-11 w-fit items-center justify-center gap-2 bg-forest px-5 text-sm font-semibold text-paper transition hover:bg-pine disabled:cursor-not-allowed disabled:opacity-50"
+          disabled={!supabaseConfigured}
+        >
+          <CheckCircle size={16} weight="bold" /> Save status
+        </button>
+
+        {!supabaseConfigured && (
+          <p className="text-xs leading-relaxed text-ink-soft">
+            Connect Supabase (see the Setup tab) before saving — the status falls back to the value in
+            <code className="mx-1 rounded bg-paper-deep/60 px-1 py-0.5">lib/content/camp.ts</code> until
+            it&apos;s configured.
+          </p>
+        )}
+      </form>
+    </section>
+  );
+}
+
 function SetupPanel({ supabaseConfigured }: { supabaseConfigured: boolean }) {
   return (
     <section className="grid gap-5">
@@ -380,7 +484,7 @@ function SetupPanel({ supabaseConfigured }: { supabaseConfigured: boolean }) {
           <li>Set `ADMIN_EMAIL` or comma-separated `ADMIN_EMAILS` to restrict access.</li>
           <li>Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.</li>
           <li>Set `NEXT_PUBLIC_SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` on the server.</li>
-          <li>Create `content_events` and `content_blog_posts` tables using `docs/ADMIN.md`.</li>
+          <li>Create `content_events`, `content_blog_posts`, and `content_camp_settings` tables using `docs/ADMIN.md`.</li>
           <li>Use image paths from `public/Pictures`, for example `/Pictures/trails.jpg`.</li>
         </ul>
       </div>
@@ -400,8 +504,11 @@ export default async function AdminPage({ searchParams }: { searchParams?: Searc
     return <LoginPanel error={error} saved={saved} configured={configured} />;
   }
 
-  const [events, posts] = await Promise.all([getEvents(), getBlogPosts()]);
+  const [events, posts, camp] = await Promise.all([getEvents(), getBlogPosts(), getCampSettings()]);
   const supabaseConfigured = isSupabaseConfigured();
+  const campStatusLabel =
+    registrationStatusOptions.find((option) => option.value === camp.registrationStatus)?.label ??
+    camp.registrationStatus;
 
   return (
     <section className="mx-auto max-w-[1180px] px-5 py-6 md:px-8 md:py-8">
@@ -438,7 +545,12 @@ export default async function AdminPage({ searchParams }: { searchParams?: Searc
       </div>
 
       <div className="sticky top-0 z-20 -mx-5 border-b border-line bg-paper/95 px-5 py-3 backdrop-blur md:-mx-8 md:px-8">
-        <SectionNav active={section} eventCount={events.length} postCount={posts.length} />
+        <SectionNav
+          active={section}
+          eventCount={events.length}
+          postCount={posts.length}
+          campStatusLabel={campStatusLabel}
+        />
       </div>
 
       <div className="mt-6">
@@ -487,6 +599,13 @@ export default async function AdminPage({ searchParams }: { searchParams?: Searc
               </div>
             ))}
           </section>
+        )}
+
+        {section === "camp" && (
+          <CampStatusPanel
+            current={camp.registrationStatus}
+            supabaseConfigured={supabaseConfigured}
+          />
         )}
 
         {section === "setup" && <SetupPanel supabaseConfigured={supabaseConfigured} />}

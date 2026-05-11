@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@supabase/supabase-js";
-import type { BlogPost, OrgEvent } from "@/lib/types";
+import type { BlogPost, CampSettings, OrgEvent } from "@/lib/types";
 
 type EventRow = {
   slug: string;
@@ -14,6 +14,13 @@ type BlogPostRow = {
   published_at: string | null;
   data: BlogPost;
 };
+
+type CampSettingsRow = {
+  id: string;
+  data: Partial<CampSettings>;
+};
+
+export const CAMP_SETTINGS_ROW_ID = "current";
 
 function getSupabaseUrl() {
   return process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
@@ -145,5 +152,39 @@ export async function deleteSupabaseBlogPost(slug: string) {
   if (!supabase) throw new Error("Supabase is not configured.");
 
   const { error } = await supabase.from("content_blog_posts").delete().eq("slug", slug);
+  if (error) throw new Error(error.message);
+}
+
+export async function fetchSupabaseCampSettings() {
+  const supabase = getSupabaseContentClient();
+  if (!supabase) return null;
+
+  const { data, error } = await supabase
+    .from("content_camp_settings")
+    .select("id,data")
+    .eq("id", CAMP_SETTINGS_ROW_ID)
+    .maybeSingle();
+
+  if (error) {
+    console.warn("Supabase camp settings unavailable, falling back to seed content:", error.message);
+    return null;
+  }
+
+  if (!data) return null;
+  return (data as CampSettingsRow).data;
+}
+
+export async function upsertSupabaseCampSettings(patch: Partial<CampSettings>) {
+  const supabase = getSupabaseContentClient();
+  if (!supabase) throw new Error("Supabase is not configured.");
+
+  const existing = (await fetchSupabaseCampSettings()) ?? {};
+  const merged: Partial<CampSettings> = { ...existing, ...patch };
+
+  const { error } = await supabase.from("content_camp_settings").upsert({
+    id: CAMP_SETTINGS_ROW_ID,
+    data: merged
+  });
+
   if (error) throw new Error(error.message);
 }

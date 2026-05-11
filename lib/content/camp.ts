@@ -1,26 +1,31 @@
 import type { CampSettings } from "../types";
+import { fetchSupabaseCampSettings } from "../supabase/content";
 
 export const campMapEmbedUrl =
   "https://www.google.com/maps/embed?pb=!1m10!1m8!1m3!1d8203.837028744429!2d-77.04916149272421!3d45.557084590512!3m2!1i1024!2i768!4f13.1!5e1!3m2!1sen!2sca!4v1687106356229!5m2!1sen!2sca";
 
+const campSeed: CampSettings = {
+  registrationStatus: "opening-soon",
+  registrationOpens: "2026-06-29",
+  registrationDeadline: "2026-07-24",
+  litStart: "2026-07-23",
+  litEnd: "2026-07-26",
+  campStart: "2026-08-06",
+  campEnd: "2026-08-09",
+  staffArrival: "Wednesday at 6pm",
+  formUrl: "https://form.jotform.com/241729323092253",
+  feeCamper: 400,
+  feeLit: 400,
+  dropOff: "Thursday morning",
+  pickUp: "Sunday at 3pm",
+  paymentEmail: "myoadmin@gmail.com",
+  paypalDonateId: "PVVD32WHTA9KE"
+};
+
 export async function getCampSettings(): Promise<CampSettings> {
-  return {
-    registrationStatus: "opening-soon",
-    registrationOpens: "2026-06-29",
-    registrationDeadline: "2026-07-24",
-    litStart: "2026-07-23",
-    litEnd: "2026-07-26",
-    campStart: "2026-08-06",
-    campEnd: "2026-08-09",
-    staffArrival: "Wednesday at 6pm",
-    formUrl: "https://form.jotform.com/241729323092253",
-    feeCamper: 400,
-    feeLit: 400,
-    dropOff: "Thursday morning",
-    pickUp: "Sunday at 3pm",
-    paymentEmail: "myoadmin@gmail.com",
-    paypalDonateId: "PVVD32WHTA9KE"
-  };
+  const override = await fetchSupabaseCampSettings();
+  if (!override) return campSeed;
+  return { ...campSeed, ...override };
 }
 
 export const campActivities = [
