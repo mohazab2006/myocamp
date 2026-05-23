@@ -6,6 +6,7 @@ import { AdminSubmitButton } from "@/components/admin/submit-button";
 import { EventForm } from "@/components/admin/event-form";
 import { requireAuthorizedAdmin } from "@/lib/admin/guards";
 import { resolveAdminFlashState, type AdminSearchParams } from "@/lib/admin/page-state";
+import { fetchCampsForEventLink } from "@/lib/admin/camps";
 import { getEvents } from "@/lib/content/events";
 
 import { deleteEventAction } from "../actions";
@@ -20,6 +21,7 @@ export default async function AdminEventsPage({
   await requireAuthorizedAdmin();
   const { message, type } = await resolveAdminFlashState(searchParams);
   const events = await getEvents();
+  const camps = await fetchCampsForEventLink();
   const liveCount = events.filter((event) => !event.archived).length;
 
   return (
@@ -53,7 +55,7 @@ export default async function AdminEventsPage({
         <Plus size={14} weight="bold" /> Add a new event
       </div>
       <div className="mt-3">
-        <EventForm />
+        <EventForm camps={camps} />
       </div>
 
       <div className="mt-12 flex items-center gap-3 border-b border-line pb-3 text-xs uppercase tracking-[0.18em] text-ink-soft">
@@ -69,7 +71,7 @@ export default async function AdminEventsPage({
 
         {events.map((event) => (
           <div key={event.slug} className="grid gap-3">
-            <EventForm event={event} />
+            <EventForm event={event} camps={camps} />
             <form action={deleteEventAction} className="flex justify-end">
               <input type="hidden" name="slug" value={event.slug} />
               <AdminSubmitButton

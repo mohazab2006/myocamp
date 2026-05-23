@@ -4,7 +4,7 @@ import { AdminField, adminInputClass, adminTextareaClass } from "@/components/ad
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { AdminSubmitButton } from "@/components/admin/submit-button";
 import { saveEventAction } from "@/app/admin/actions";
-import type { AudienceTag, EventType, OrgEvent } from "@/lib/types";
+import type { AudienceTag, Camp, EventType, OrgEvent } from "@/lib/types";
 
 const eventTypes: EventType[] = [
   "hike",
@@ -19,9 +19,10 @@ const audienceTags: AudienceTag[] = ["youth", "parents", "families", "leaders", 
 
 type EventFormProps = {
   event?: OrgEvent;
+  camps?: Camp[];
 };
 
-export function EventForm({ event }: EventFormProps) {
+export function EventForm({ event, camps = [] }: EventFormProps) {
   return (
     <form action={saveEventAction} className="grid gap-5 border border-line bg-paper-deep/35 p-5 md:p-6">
       <div className="flex items-center justify-between gap-4">
@@ -129,11 +130,36 @@ export function EventForm({ event }: EventFormProps) {
       </AdminField>
 
       <AdminField label="Hero image" hint="Shown at the top of the event page. Drag in or click to upload.">
-        <ImageUploader name="heroImage" defaultValue={event?.heroImage} folder="events" />
+        <div className="max-w-xs">
+          <ImageUploader name="heroImage" defaultValue={event?.heroImage} folder="events" />
+        </div>
       </AdminField>
 
+      <div className="rounded border border-line bg-paper p-4 text-sm leading-relaxed text-ink-soft">
+        <strong className="text-ink">Two kinds of events:</strong> leave{" "}
+        <em>Link to camp</em> as <strong className="text-ink">None</strong> for normal events (bonfire,
+        hike, fundraiser) with their own registration URL. Link to a camp only for Main Camp / LIT
+        session pages that should route parents to camp registration.
+      </div>
+
       <div className="grid gap-4 md:grid-cols-2">
-        <AdminField label="Registration URL" hint="External JotForm / Eventbrite link.">
+        <AdminField
+          label="Link to camp"
+          hint="Camp session only. Leave as None for regular community events."
+        >
+          <select className={adminInputClass} name="campSlug" defaultValue={event?.campSlug ?? ""}>
+            <option value="">None — standalone event</option>
+            {camps.map((camp) => (
+              <option key={camp.id} value={camp.slug}>
+                {camp.title} ({camp.slug})
+              </option>
+            ))}
+          </select>
+        </AdminField>
+        <AdminField
+          label="Registration URL"
+          hint="For community events — Google Form, Eventbrite, etc. Not needed if linked to a camp."
+        >
           <input
             className={adminInputClass}
             name="registerUrl"

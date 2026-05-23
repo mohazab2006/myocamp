@@ -12,11 +12,14 @@ import {
   campWeekRhythm,
   getCampSettings
 } from "@/lib/content/camp";
+import { getPublicCampContext } from "@/lib/content/camps-public";
 import { formatRange } from "@/lib/date";
 
 export default async function CampHome() {
-  const camp = await getCampSettings();
-  const mainRange = formatRange(camp.campStart, camp.campEnd);
+  const { legacy: camp, primary } = await getPublicCampContext();
+  const mainRange = primary
+    ? formatRange(primary.startDate, primary.endDate)
+    : formatRange(camp.campStart, camp.campEnd);
   const litRange =
     camp.litStart && camp.litEnd ? formatRange(camp.litStart, camp.litEnd) : undefined;
 
@@ -124,7 +127,7 @@ export default async function CampHome() {
                 {campActivities.map((a, i) => (
                   <li
                     key={a.label}
-                    className="group relative overflow-hidden border-2 border-camp-bark/30 bg-camp-paper p-5 transition hover:rotate-[-1deg] hover:border-camp-flame"
+                    className="group relative overflow-hidden border-2 border-camp-bark/30 bg-camp-paper p-5 transition hover:-rotate-1 hover:border-camp-flame"
                     style={{ rotate: `${i % 2 ? 0.6 : -0.6}deg` }}
                   >
                     <div className="text-camp-flame">
@@ -208,7 +211,7 @@ export default async function CampHome() {
                     className="border-2 border-camp-bark/25 bg-camp-paper-soft"
                     style={{ rotate: `${(i % 3) - 1}deg` }}
                   >
-                    <div className="aspect-[4/5] overflow-hidden">
+                    <div className="aspect-4/5 overflow-hidden">
                       <img src={s.image} alt={s.title} className="h-full w-full object-cover" />
                     </div>
                     <div className="p-3">

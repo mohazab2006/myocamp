@@ -64,7 +64,9 @@ export function BlogPostForm({ post }: BlogPostFormProps) {
       </AdminField>
 
       <AdminField label="Hero image" hint="Shown at the top of the post and as the blog index thumbnail.">
-        <ImageUploader name="heroImage" defaultValue={post?.heroImage} folder="blog" />
+        <div className="max-w-xs">
+          <ImageUploader name="heroImage" defaultValue={post?.heroImage} folder="blog" />
+        </div>
       </AdminField>
 
       <div className="flex flex-wrap items-center gap-3 border-t border-line pt-5">

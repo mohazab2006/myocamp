@@ -163,6 +163,7 @@ export async function saveEventAction(formData: FormData) {
     body: value(formData, "body"),
     heroImage: value(formData, "heroImage"),
     registerUrl: value(formData, "registerUrl"),
+    campSlug: value(formData, "campSlug"),
     registerOpens: value(formData, "registerOpens"),
     registerCloses: value(formData, "registerCloses"),
     cost: value(formData, "cost"),

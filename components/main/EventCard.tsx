@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { OrgEvent } from "@/lib/types";
 import { formatRange } from "@/lib/date";
 import { ArrowUpRight } from "@phosphor-icons/react/ssr";
+import type { EventLinkedCampSummary } from "@/components/main/EventCampPanel";
 
 const typeLabels: Record<OrgEvent["type"], string> = {
   hike: "Hike",
@@ -13,16 +14,26 @@ const typeLabels: Record<OrgEvent["type"], string> = {
   workshop: "Workshop"
 };
 
-export function EventCard({ event, tone = "paper" }: { event: OrgEvent; tone?: "paper" | "deep" }) {
+export function EventCard({
+  event,
+  linkedCamp,
+  tone = "paper"
+}: {
+  event: OrgEvent;
+  linkedCamp?: EventLinkedCampSummary | null;
+  tone?: "paper" | "deep";
+}) {
+  const cardImage = event.heroImage ?? linkedCamp?.heroImage ?? null;
+
   return (
     <Link
       href={`/events/${event.slug}`}
       className="group flex flex-col gap-4 transition"
     >
-      <div className="relative aspect-[4/3] overflow-hidden bg-paper-deep">
-        {event.heroImage && (
+      <div className="relative aspect-4/3 overflow-hidden bg-paper-deep">
+        {cardImage && (
           <img
-            src={event.heroImage}
+            src={cardImage}
             alt=""
             className="h-full w-full object-cover transition duration-700 group-hover:scale-[1.03]"
           />
@@ -30,6 +41,11 @@ export function EventCard({ event, tone = "paper" }: { event: OrgEvent; tone?: "
         <span className="absolute left-3 top-3 rounded-full bg-paper/90 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-ink">
           {typeLabels[event.type]}
         </span>
+        {linkedCamp ? (
+          <span className="absolute right-3 top-3 rounded-full bg-pine px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-paper">
+            Camp
+          </span>
+        ) : null}
       </div>
       <div className={tone === "deep" ? "text-paper" : ""}>
         <div className={`text-xs uppercase tracking-[0.16em] ${tone === "deep" ? "text-paper/70" : "text-ink-soft"}`}>

@@ -3,6 +3,7 @@ import {
   ArrowSquareOut,
   CalendarBlank,
   CheckCircle,
+  EnvelopeSimple,
   FileText,
   Lock,
   SlidersHorizontal,
@@ -14,13 +15,14 @@ import { AdminField, adminInputClass } from "@/components/admin/field";
 import { AdminFlashBanner } from "@/components/admin/flash-banner";
 import { AdminSubmitButton } from "@/components/admin/submit-button";
 import { getBlogPosts } from "@/lib/content/blog";
-import { getCampSettings } from "@/lib/content/camp";
 import { getEvents } from "@/lib/content/events";
 import { getAdminSession, hasSupabaseAuthEnv } from "@/lib/admin/auth";
+import { fetchCamps } from "@/lib/admin/camps";
 import {
   resolveAdminFlashState,
   type AdminSearchParams
 } from "@/lib/admin/page-state";
+import { fetchGmailCredentials } from "@/lib/admin/gmail";
 import { isSupabaseConfigured } from "@/lib/supabase/content";
 import type { User } from "@supabase/supabase-js";
 
@@ -30,9 +32,28 @@ export const dynamic = "force-dynamic";
 
 const quickActions = [
   {
+    href: "/admin/camps",
+    label: "Camps",
+    description:
+      "Manage registrations, waitlists, payments, and JotForm IDs for every camp.",
+    icon: Tent
+  },
+  {
+    href: "/admin/inbox",
+    label: "Inbox",
+    description: "Triage e-Transfer emails that didn't auto-match a reference code.",
+    icon: EnvelopeSimple
+  },
+  {
+    href: "/admin/emails",
+    label: "Emails",
+    description: "Edit subject + body of every automated email parents receive.",
+    icon: EnvelopeSimple
+  },
+  {
     href: "/admin/events",
     label: "Events",
-    description: "Add, edit, archive, or delete public event pages.",
+    description: "Add, edit, archive, or delete smaller event pages.",
     icon: CalendarBlank
   },
   {
@@ -40,12 +61,6 @@ const quickActions = [
     label: "Blog posts",
     description: "Write recaps, news, and stories for the /blog feed.",
     icon: FileText
-  },
-  {
-    href: "/admin/camp",
-    label: "Camp",
-    description: "Flip the registration status badge that runs across /camp.",
-    icon: Tent
   },
   {
     href: "/admin/setup",
@@ -92,23 +107,72 @@ async function DashboardView({
   message: string | null;
   type: "success" | "error" | "info" | null;
 }) {
-  const [events, posts, camp] = await Promise.all([
+  const [events, posts, camps, gmailCreds] = await Promise.all([
     getEvents(),
     getBlogPosts(),
-    getCampSettings()
+    fetchCamps(),
+    fetchGmailCredentials().catch(() => null)
   ]);
   const supabaseContentConnected = isSupabaseConfigured();
   const liveEvents = events.filter((event) => !event.archived).length;
+  const primaryCamp = camps.find((c) => c.status === "open" || c.status === "full") ?? camps[0];
+  const campStatusLabel = primaryCamp?.status ?? "no camp";
+
+  // Dead-man's switch: if Gmail is connected but hasn't polled in 30+ minutes,
+  // surface a red banner so the owner knows e-transfers might be backing up.
+  const heartbeatStale =
+    gmailCreds &&
+    (!gmailCreds.lastPolledAt ||
+      Date.now() - new Date(gmailCreds.lastPolledAt).getTime() > 30 * 60 * 1000);
+  const gmailErrored = gmailCreds?.lastPolledStatus === "error";
 
   const stats = [
     { label: "Live events", value: String(liveEvents), icon: CalendarBlank },
     { label: "Blog posts", value: String(posts.length), icon: FileText },
-    { label: "Camp status", value: camp.registrationStatus.replace("-", " "), icon: Tent }
+    { label: "Camp status", value: campStatusLabel, icon: Tent }
   ];
 
   return (
     <main className="mx-auto max-w-[1180px] px-5 py-10 md:px-8 md:py-14">
       <AdminFlashBanner message={message} type={type} className="mb-8" />
+
+      {gmailCreds && (heartbeatStale || gmailErrored) ? (
+        <div className="mb-6 border-2 border-ember/50 bg-ember/15 p-4">
+          <div className="flex items-start gap-3">
+            <WarningCircle size={22} weight="duotone" className="mt-0.5 text-ember" />
+            <div className="flex-1">
+              <p className="font-display text-base tracking-tight text-ink">
+                {gmailErrored
+                  ? "Gmail polling errored on last run"
+                  : "Gmail hasn't polled in over 30 minutes"}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-ink-soft">
+                E-transfer auto-matching may be paused. Last poll:{" "}
+                <strong className="text-ink">
+                  {gmailCreds.lastPolledAt
+                    ? new Date(gmailCreds.lastPolledAt).toLocaleString("en-CA")
+                    : "never"}
+                </strong>
+                {gmailCreds.lastPolledError ? ` · ${gmailCreds.lastPolledError}` : ""}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Link
+                  href="/admin/setup/gmail"
+                  className="inline-flex h-8 items-center gap-1.5 border border-ember bg-paper px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-ember transition hover:bg-ember/10"
+                >
+                  Open Gmail setup
+                </Link>
+                <Link
+                  href="/admin/inbox"
+                  className="inline-flex h-8 items-center gap-1.5 border border-line bg-paper px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-soft transition hover:border-pine hover:text-ink"
+                >
+                  Check inbox
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div className="grid gap-3">
         <span className="eyebrow text-brass">Dashboard</span>

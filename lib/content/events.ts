@@ -32,6 +32,7 @@ const seedEvents: OrgEvent[] = [
     body: "Staff arrive Wednesday at 6pm. LITs arrive Thursday morning. The session prepares senior youth to graduate into counsellor roles for the August main camp.",
     heroImage: "/Pictures/lit.JPG",
     registerUrl: "https://form.jotform.com/241729323092253",
+    campSlug: "lit-camp-2026",
     cost: "TBD"
   },
   {
@@ -47,7 +48,8 @@ const seedEvents: OrgEvent[] = [
     body:
       "Staff arrive Wednesday at 6pm. Campers arrive Thursday morning. Registration, fees, location, rules, and the full camp story live on the MYO Summer Camp site.",
     heroImage: "/Pictures/verycoolcampfire.jpg",
-    registerUrl: "/camp",
+    registerUrl: "/camp/register",
+    campSlug: "main-camp-2026",
     cost: "$400"
   },
   // Past events
