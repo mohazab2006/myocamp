@@ -2,7 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createSupabaseAuthClient, getAdminUser } from "@/lib/supabase/auth";
+
+import { createSupabaseAuthClient, getAdminUser } from "@/lib/admin/auth";
+import { getAdminAllowlist } from "@/lib/admin/allowlist";
+import { uploadContentImage } from "@/lib/admin/media";
+import { buildAdminRedirect } from "@/lib/admin/page-state";
 import {
   deleteSupabaseBlogPost,
   deleteSupabaseEvent,
@@ -12,7 +16,15 @@ import {
 } from "@/lib/supabase/content";
 import type { AudienceTag, BlogPost, CampSettings, EventType, OrgEvent } from "@/lib/types";
 
-const eventTypes: EventType[] = ["hike", "campfire", "fundraiser", "social", "service", "camp", "workshop"];
+const eventTypes: EventType[] = [
+  "hike",
+  "campfire",
+  "fundraiser",
+  "social",
+  "service",
+  "camp",
+  "workshop"
+];
 const audienceTags: AudienceTag[] = ["youth", "parents", "families", "leaders", "all"];
 const registrationStatuses: CampSettings["registrationStatus"][] = [
   "open",
@@ -42,44 +54,39 @@ function compact<T extends object>(record: T) {
   ) as T;
 }
 
-function adminRedirect(params: Record<string, string>): never {
-  const search = new URLSearchParams(params);
-  redirect(`/admin?${search.toString()}`);
+function flash(base: string, type: "success" | "error" | "info", message: string): never {
+  redirect(buildAdminRedirect(base, type, message));
 }
 
-async function requireAdmin() {
+async function requireAdmin(redirectBase = "/admin") {
   if (!(await getAdminUser())) {
-    redirect("/admin?error=Please%20sign%20in%20again.");
+    flash(redirectBase, "error", "Please sign in again.");
   }
 }
+
+// ---------------------------------------------------------------------------
+// Auth
+// ---------------------------------------------------------------------------
 
 export async function loginAction(formData: FormData) {
   const email = value(formData, "email");
   const password = value(formData, "password");
   const supabase = await createSupabaseAuthClient();
 
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  });
-
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password });
   const user = data.user;
 
   if (error || !user) {
-    adminRedirect({ error: error?.message ?? "Email or password is incorrect." });
+    flash("/admin", "error", error?.message ?? "Email or password is incorrect.");
   }
 
-  const allowedEmails = (process.env.ADMIN_EMAILS ?? process.env.ADMIN_EMAIL ?? "")
-    .split(",")
-    .map((entry) => entry.trim().toLowerCase())
-    .filter(Boolean);
-
-  if (allowedEmails.length > 0 && !allowedEmails.includes((user.email ?? "").toLowerCase())) {
+  const allowlist = getAdminAllowlist();
+  if (allowlist.length > 0 && !allowlist.includes((user!.email ?? "").toLowerCase())) {
     await supabase.auth.signOut();
-    adminRedirect({ error: "This Supabase user is not allowed to access admin." });
+    flash("/admin", "error", "This Supabase user is not on the admin allowlist.");
   }
 
-  adminRedirect({ saved: "Signed in." });
+  flash("/admin", "success", "Signed in.");
 }
 
 export async function logoutAction() {
@@ -88,8 +95,42 @@ export async function logoutAction() {
   redirect("/admin");
 }
 
+// ---------------------------------------------------------------------------
+// Image upload (called from the client-side ImageUploader)
+// ---------------------------------------------------------------------------
+
+export type UploadImageResult = {
+  url: string | null;
+  error: string | null;
+};
+
+export async function uploadImageAction(formData: FormData): Promise<UploadImageResult> {
+  if (!(await getAdminUser())) {
+    return { url: null, error: "Not authorized." };
+  }
+
+  const file = formData.get("file");
+  if (!(file instanceof File)) {
+    return { url: null, error: "No file received." };
+  }
+
+  const folderRaw = String(formData.get("folder") ?? "misc");
+  const folder = folderRaw.replace(/[^a-z0-9_-]/gi, "").toLowerCase() || "misc";
+
+  try {
+    const { publicUrl } = await uploadContentImage(file, folder);
+    return { url: publicUrl, error: null };
+  } catch (err) {
+    return { url: null, error: err instanceof Error ? err.message : "Upload failed." };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Events
+// ---------------------------------------------------------------------------
+
 export async function saveEventAction(formData: FormData) {
-  await requireAdmin();
+  await requireAdmin("/admin/events");
 
   const title = value(formData, "title");
   const startDate = value(formData, "startDate");
@@ -103,7 +144,11 @@ export async function saveEventAction(formData: FormData) {
     .filter((entry): entry is AudienceTag => audienceTags.includes(entry as AudienceTag));
 
   if (!title || !startDate || !location || !blurb || !eventTypes.includes(type) || audience.length === 0) {
-    adminRedirect({ error: "Event needs title, type, date, location, audience, and summary." });
+    flash(
+      "/admin/events",
+      "error",
+      "Event needs title, type, date, location, audience, and summary."
+    );
   }
 
   const event = compact<OrgEvent>({
@@ -127,33 +172,47 @@ export async function saveEventAction(formData: FormData) {
   try {
     await upsertSupabaseEvent(event);
   } catch (error) {
-    adminRedirect({ error: error instanceof Error ? error.message : "Could not save event." });
+    flash(
+      "/admin/events",
+      "error",
+      error instanceof Error ? error.message : "Could not save event."
+    );
   }
 
   revalidatePath("/admin");
+  revalidatePath("/admin/events");
   revalidatePath("/events");
   revalidatePath(`/events/${event.slug}`);
-  adminRedirect({ saved: "Event saved." });
+  flash("/admin/events", "success", `Saved "${event.title}".`);
 }
 
 export async function deleteEventAction(formData: FormData) {
-  await requireAdmin();
+  await requireAdmin("/admin/events");
   const slug = value(formData, "slug");
-  if (!slug) adminRedirect({ error: "Missing event slug." });
+  if (!slug) flash("/admin/events", "error", "Missing event slug.");
 
   try {
     await deleteSupabaseEvent(slug);
   } catch (error) {
-    adminRedirect({ error: error instanceof Error ? error.message : "Could not delete event." });
+    flash(
+      "/admin/events",
+      "error",
+      error instanceof Error ? error.message : "Could not delete event."
+    );
   }
 
   revalidatePath("/admin");
+  revalidatePath("/admin/events");
   revalidatePath("/events");
-  adminRedirect({ saved: "Event deleted." });
+  flash("/admin/events", "success", "Event deleted.");
 }
 
+// ---------------------------------------------------------------------------
+// Blog
+// ---------------------------------------------------------------------------
+
 export async function saveBlogPostAction(formData: FormData) {
-  await requireAdmin();
+  await requireAdmin("/admin/blog");
 
   const title = value(formData, "title");
   const publishedAt = value(formData, "publishedAt");
@@ -161,7 +220,7 @@ export async function saveBlogPostAction(formData: FormData) {
   const slug = value(formData, "slug") || slugify(`${title}-${publishedAt}`);
 
   if (!title || !publishedAt || !excerpt) {
-    adminRedirect({ error: "Blog post needs title, publish date, and excerpt." });
+    flash("/admin/blog", "error", "Blog post needs title, publish date, and excerpt.");
   }
 
   const post = compact<BlogPost>({
@@ -176,50 +235,66 @@ export async function saveBlogPostAction(formData: FormData) {
   try {
     await upsertSupabaseBlogPost(post);
   } catch (error) {
-    adminRedirect({ error: error instanceof Error ? error.message : "Could not save blog post." });
+    flash(
+      "/admin/blog",
+      "error",
+      error instanceof Error ? error.message : "Could not save blog post."
+    );
   }
 
   revalidatePath("/admin");
+  revalidatePath("/admin/blog");
   revalidatePath("/blog");
   revalidatePath(`/blog/${post.slug}`);
-  adminRedirect({ saved: "Blog post saved." });
+  flash("/admin/blog", "success", `Saved "${post.title}".`);
 }
 
 export async function deleteBlogPostAction(formData: FormData) {
-  await requireAdmin();
+  await requireAdmin("/admin/blog");
   const slug = value(formData, "slug");
-  if (!slug) adminRedirect({ error: "Missing blog post slug." });
+  if (!slug) flash("/admin/blog", "error", "Missing blog post slug.");
 
   try {
     await deleteSupabaseBlogPost(slug);
   } catch (error) {
-    adminRedirect({ error: error instanceof Error ? error.message : "Could not delete blog post." });
+    flash(
+      "/admin/blog",
+      "error",
+      error instanceof Error ? error.message : "Could not delete blog post."
+    );
   }
 
   revalidatePath("/admin");
+  revalidatePath("/admin/blog");
   revalidatePath("/blog");
-  adminRedirect({ saved: "Blog post deleted." });
+  flash("/admin/blog", "success", "Blog post deleted.");
 }
 
+// ---------------------------------------------------------------------------
+// Camp settings
+// ---------------------------------------------------------------------------
+
 export async function saveCampStatusAction(formData: FormData) {
-  await requireAdmin();
+  await requireAdmin("/admin/camp");
 
   const candidate = value(formData, "registrationStatus") as CampSettings["registrationStatus"];
   if (!registrationStatuses.includes(candidate)) {
-    adminRedirect({ section: "camp", error: "Pick a valid registration status." });
+    flash("/admin/camp", "error", "Pick a valid registration status.");
   }
 
   try {
     await upsertSupabaseCampSettings({ registrationStatus: candidate });
   } catch (error) {
-    adminRedirect({
-      section: "camp",
-      error: error instanceof Error ? error.message : "Could not save camp status."
-    });
+    flash(
+      "/admin/camp",
+      "error",
+      error instanceof Error ? error.message : "Could not save camp status."
+    );
   }
 
   revalidatePath("/admin");
+  revalidatePath("/admin/camp");
   revalidatePath("/camp");
   revalidatePath("/camp/register");
-  adminRedirect({ section: "camp", saved: "Registration status updated." });
+  flash("/admin/camp", "success", "Registration status updated.");
 }

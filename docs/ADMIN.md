@@ -1,118 +1,92 @@
 # Admin
 
-The `/admin` route is a password-protected owner dashboard for editing public site content.
+The `/admin` route is a multi-section dashboard for managing public site content. It uses Supabase Auth (email + password) and an env-var allowlist on top, so only specific addresses can sign in.
+
+## Structure
+
+```
+/admin              → Overview (welcome, quick actions, stats)
+/admin/events       → Add/edit/delete events with drag-and-drop hero images
+/admin/blog         → Add/edit/delete blog posts with drag-and-drop hero images
+/admin/camp         → Toggle the camp registration status badge
+/admin/setup        → Live connection checklist (auth, content, allowlist)
+```
+
+The header at `/admin/*` shows the dashboard title, the section nav, a **View site** link, and **Sign out**.
+
+## States
+
+The overview page (`/admin`) renders one of four states based on the request:
+
+| State | When | UI |
+|---|---|---|
+| `unconfigured` | Supabase env vars missing entirely | Setup checklist with numbered steps |
+| `anonymous` | No active Supabase session | Sign-in form (email + password) |
+| `forbidden` | Signed in but email not in `ADMIN_EMAILS` | Access-denied panel |
+| `authorized` | Signed in AND on the allowlist | Full dashboard with stats + quick actions |
 
 ## Login
 
-This uses Supabase Auth email/password, not magic links.
+This uses Supabase Auth email/password (not magic links).
 
-Create the admin user in Supabase:
+Create the admin user(s) in Supabase:
 
-1. Open Supabase Dashboard.
-2. Go to Authentication > Users.
-3. Add the owner email and password.
+1. Open Supabase Dashboard → **Authentication → Users → Add user → Create new user**.
+2. Fill in email + a strong password, toggle **Auto Confirm User** on.
+3. Add the same email to `ADMIN_EMAILS` in `.env.local` (and in Vercel for production).
 
-Set these server environment variables:
+## Environment variables
 
-```bash
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-ADMIN_EMAIL=owner@example.com
-```
-
-`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` can be used instead of `NEXT_PUBLIC_SUPABASE_ANON_KEY` if the project uses Supabase's newer publishable keys.
-
-`ADMIN_EMAIL` is optional but recommended. Use `ADMIN_EMAILS` with comma-separated emails if more than one owner should access `/admin`.
-
-Supabase stores the auth session in cookies through `@supabase/ssr`. The project has a root `proxy.ts` file scoped to `/admin/:path*` so Supabase can refresh auth cookies during admin requests.
-
-## Supabase
-
-For content reads and writes, also set the service role key on the server:
+See `.env.example` for the full list. Required:
 
 ```bash
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+NEXT_PUBLIC_SUPABASE_URL=https://your-project-ref.supabase.co
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=...   # or NEXT_PUBLIC_SUPABASE_ANON_KEY
+SUPABASE_SERVICE_ROLE_KEY=...              # server-only — never expose
+ADMIN_EMAILS=you@example.com,teammate@example.com
 ```
 
-The public site reads Supabase content when configured. If Supabase is missing or empty, the site falls back to the seeded files in `lib/content`.
+`/admin/setup` shows live presence/absence of each one so you can verify the runtime is configured.
 
-## Tables
+Auth cookies are refreshed by `proxy.ts` (Next middleware scoped to `/admin/:path*`).
 
-Run this SQL in Supabase:
+## Schema
 
-```sql
-create table if not exists public.content_events (
-  slug text primary key,
-  title text not null,
-  start_date date not null,
-  data jsonb not null,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
+The canonical schema lives in [`supabase/schema.sql`](../supabase/schema.sql). It is idempotent and wrapped in a transaction, so it is safe to re-run on any Supabase project.
 
-create table if not exists public.content_blog_posts (
-  slug text primary key,
-  title text not null,
-  published_at date not null,
-  data jsonb not null,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
+To apply it:
 
-create table if not exists public.content_camp_settings (
-  id text primary key,
-  data jsonb not null,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now()
-);
+1. Open Supabase Dashboard → **SQL Editor** → **New query**.
+2. Paste the entire contents of `supabase/schema.sql`.
+3. Run.
 
-create or replace function public.set_updated_at()
-returns trigger
-language plpgsql
-as $$
-begin
-  new.updated_at = now();
-  return new;
-end;
-$$;
+It creates:
 
-drop trigger if exists content_events_updated_at on public.content_events;
-create trigger content_events_updated_at
-before update on public.content_events
-for each row execute function public.set_updated_at();
+- Three tables — `content_events`, `content_blog_posts`, `content_camp_settings` — with `updated_at` triggers, indexes, and a singleton `CHECK` constraint on `content_camp_settings.id`.
+- The `content-images` **Storage bucket** (public read, 8 MB cap, image MIME types only) used by the drag-and-drop image uploader.
 
-drop trigger if exists content_blog_posts_updated_at on public.content_blog_posts;
-create trigger content_blog_posts_updated_at
-before update on public.content_blog_posts
-for each row execute function public.set_updated_at();
+RLS is enabled on every table with **no policies defined**, so all anon/authenticated requests are denied by default. The Next.js app reads and writes via the **service role key** (server-only), which bypasses RLS. The Storage bucket is public so admin-uploaded images load via plain `<img src>`.
 
-drop trigger if exists content_camp_settings_updated_at on public.content_camp_settings;
-create trigger content_camp_settings_updated_at
-before update on public.content_camp_settings
-for each row execute function public.set_updated_at();
+## Image uploads
 
-alter table public.content_events enable row level security;
-alter table public.content_blog_posts enable row level security;
-alter table public.content_camp_settings enable row level security;
-```
+The admin event and blog post editors have a **drag-and-drop image uploader** that:
 
-The `content_camp_settings` table holds a single row with `id = 'current'`. The `data` column is a partial `CampSettings` object — fields that are missing fall back to the seed values in `lib/content/camp.ts`. Today the admin UI only writes `registrationStatus` to it; the rest of the fields (dates, fees, form URL) remain code-controlled for now.
+- Accepts `image/png`, `image/jpeg`, `image/webp`, `image/gif`, `image/avif`.
+- Caps at 8 MB.
+- Uploads to the `content-images` Supabase Storage bucket via a server action (`uploadImageAction` in `app/admin/actions.ts`).
+- Returns the public URL and stores it on the event/post `heroImage` field.
 
-No public RLS policy is required when the app reads through the server-side service role key.
+If you'd rather use a static image already in `public/Pictures/`, paste its path manually — anything stored as `heroImage` works.
 
-## Editable Content
+## Editable content
 
 Current dashboard support:
 
-- Events: title, slug, type, dates, location, audience, summary, body, image path, registration URL, registration window, cost, archived flag.
-- Blog posts: title, slug, publish date, excerpt, body, image path.
-- Camp: registration status (Opening soon / Open now / Full / Closed). Drives the badge and copy on `/camp/register`. The JotForm itself is still controlled inside JotForm — toggling status here only changes how the site frames the form.
-
-Use image paths from `public/Pictures`, for example `/Pictures/trails.jpg`.
+- **Events**: title, slug, type, dates, location, audience, summary, body, hero image, registration URL, registration window, cost, archived flag.
+- **Blog posts**: title, slug, publish date, excerpt, body, hero image.
+- **Camp**: registration status (Opening soon / Open now / Full / Closed). Drives the badge and copy on `/camp/register`. The JotForm itself is still controlled inside JotForm — toggling status here only changes how the site frames the form.
 
 Planned later:
 
 - Site settings: donate URL, volunteer URL, contact email, social links.
 - Camp settings (the rest): dates, fees, payment details, form URL, waitlist URL.
-- Image uploads through Supabase Storage.
