@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 import { closeOverdueRegistrations } from "@/lib/admin/camp-capacity";
+import { verifyCronAuth } from "@/lib/admin/cron-auth";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -9,7 +10,7 @@ export const dynamic = "force-dynamic";
  * POST/GET /api/camps/sweep
  *
  * Closes camps whose registration_closes_at deadline has passed.
- * Runs daily via Vercel Cron.
+ * On Vercel Hobby, runs via /api/cron/daily; this route remains for manual runs.
  */
 export async function POST(req: NextRequest) {
   return handle(req);
@@ -19,7 +20,7 @@ export async function GET(req: NextRequest) {
 }
 
 async function handle(req: NextRequest) {
-  if (!isAuthorized(req)) {
+  if (!verifyCronAuth(req)) {
     return NextResponse.json({ ok: false, error: "Unauthorized" }, { status: 401 });
   }
 
@@ -32,13 +33,4 @@ async function handle(req: NextRequest) {
       { status: 500 }
     );
   }
-}
-
-function isAuthorized(req: NextRequest): boolean {
-  const expected = process.env.CRON_SECRET;
-  if (!expected) return true;
-  const auth = req.headers.get("authorization");
-  if (auth && auth === `Bearer ${expected}`) return true;
-  const fromQuery = req.nextUrl.searchParams.get("secret");
-  return fromQuery === expected;
 }

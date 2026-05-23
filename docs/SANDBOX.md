@@ -217,10 +217,22 @@ Work through in order. Check each box in admin as you go.
 
 ## Step 9 — Cron jobs (Vercel Preview / Production only)
 
-Crons in `vercel.json` **do not run on localhost**. Test on Vercel:
+Crons in `vercel.json` **do not run on localhost**. On **Hobby**, only once-per-day schedules deploy.
+
+**Vercel (automatic, daily 2pm UTC — includes Gmail poll):**
 
 ```bash
-# Replace URL and secret
+curl "https://YOUR-PREVIEW.vercel.app/api/cron/daily" \
+  -H "Authorization: Bearer YOUR_CRON_SECRET"
+```
+
+**Manual Gmail poll** (anytime, e.g. after a parent sends e-transfer):
+
+```bash
+curl "https://YOUR-PREVIEW.vercel.app/api/gmail/poll?token=YOUR_CRON_SECRET"
+```
+
+```bash
 curl "https://YOUR-PREVIEW.vercel.app/api/reminders/sweep" \
   -H "Authorization: Bearer YOUR_CRON_SECRET"
 
@@ -229,12 +241,7 @@ curl "https://YOUR-PREVIEW.vercel.app/api/waitlist/sweep" \
 
 curl "https://YOUR-PREVIEW.vercel.app/api/camps/sweep" \
   -H "Authorization: Bearer YOUR_CRON_SECRET"
-
-curl "https://YOUR-PREVIEW.vercel.app/api/gmail/poll" \
-  -H "Authorization: Bearer YOUR_CRON_SECRET"
 ```
-
-Requires **Vercel Pro** for scheduled crons. Hobby plan: manual curl only.
 
 ---
 

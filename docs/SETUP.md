@@ -125,16 +125,13 @@ Copy from `.env.example` → `.env.local` for local dev.
 
 ### Cron jobs
 
-Configured in `vercel.json` (**Vercel Pro** required for scheduled crons):
+Configured in `vercel.json` for **Vercel Hobby** (max 2 jobs, once per day each):
 
 | Route | Schedule | Purpose |
 |-------|----------|---------|
-| `/api/gmail/poll` | Every 5 min | Poll Gmail for e-transfers |
-| `/api/waitlist/sweep` | Hourly | Expire overdue waitlist claims |
-| `/api/reminders/sweep` | Daily 2pm UTC | Send T-7/T-3/T-1 payment reminders |
-| `/api/camps/sweep` | Daily 6am UTC | Close camps past registration deadline |
+| `/api/cron/daily` | Daily 2pm UTC | Gmail poll + waitlist expiry + camp close + T-7/T-3/T-1 reminders |
 
-Hobby plan: trigger manually with curl + `CRON_SECRET` (see SANDBOX.md).
+**Gmail** runs once daily with everything else. For faster e-transfer matching, trigger `/api/gmail/poll?token=CRON_SECRET` manually from admin or curl anytime.
 
 ---
 
