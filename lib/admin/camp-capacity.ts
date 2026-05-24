@@ -109,3 +109,35 @@ export async function closeOverdueRegistrations(): Promise<{ closed: number }> {
   if (error) throw new Error(error.message);
   return { closed: (data ?? []).length };
 }
+
+/**
+ * Reopen a closed camp for registration. Clears registration_closes_at so the
+ * daily close sweep won't flip it back to closed tomorrow.
+ */
+export async function reopenCampRegistration(campId: string): Promise<{
+  status: CampStatus;
+  changed: boolean;
+}> {
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("camps")
+    .update({
+      status: "open",
+      registration_closes_at: null
+    })
+    .eq("id", campId)
+    .eq("status", "closed")
+    .select("id")
+    .maybeSingle();
+
+  if (error) throw new Error(error.message);
+  if (!data) {
+    return { status: "closed", changed: false };
+  }
+
+  const sync = await syncCampCapacityStatus(campId);
+  return {
+    status: sync?.newStatus ?? "open",
+    changed: true
+  };
+}

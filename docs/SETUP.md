@@ -131,7 +131,7 @@ Configured in `vercel.json` for **Vercel Hobby** (max 2 jobs, once per day each)
 |-------|----------|---------|
 | `/api/cron/daily` | Daily 2pm UTC | Gmail poll + waitlist expiry + camp close + T-7/T-3/T-1 reminders |
 
-**Gmail** runs once daily with everything else. For faster e-transfer matching, trigger `/api/gmail/poll?token=CRON_SECRET` manually from admin or curl anytime.
+**Gmail** runs once daily with everything else. For faster e-transfer matching, use **Admin → Setup → Poll Gmail** or curl anytime.
 
 ---
 

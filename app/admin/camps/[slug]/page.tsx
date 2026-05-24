@@ -27,10 +27,8 @@ import { fetchPaymentsForInvoice } from "@/lib/admin/payments";
 import { buildClaimUrl, fetchWaitlistForCamp } from "@/lib/admin/waitlist";
 import type { Camp, WaitlistEntry } from "@/lib/types";
 import { createManualRegistrationAction } from "./registrations/actions";
-import {
-  createManualWaitlistAction,
-  expireOverdueClaimsAction
-} from "./waitlist/actions";
+import { createManualWaitlistAction, expireOverdueClaimsAction } from "./waitlist/actions";
+import { reopenCampAction } from "@/app/admin/camps/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -173,6 +171,22 @@ export default async function AdminCampDetailPage({
           </Link>
         </div>
         <AdminFlashBanner message={message} type={type} className="mt-6" />
+
+        {camp.status === "closed" ? (
+          <div className="mt-6 border border-brass/40 bg-brass/10 p-4">
+            <p className="font-display text-base tracking-tight text-ink">Registration is closed</p>
+            <p className="mt-2 text-xs leading-relaxed text-ink-soft">
+              Reopen to accept registrations again. This clears the auto-close deadline so
+              tomorrow&apos;s cron won&apos;t close it again. Set a new deadline in Edit if you
+              want one later.
+            </p>
+            <form action={reopenCampAction} className="mt-3">
+              <input type="hidden" name="id" value={camp.id} />
+              <input type="hidden" name="slug" value={camp.slug} />
+              <AdminSubmitButton idleLabel="Reopen registration" variant="secondary" />
+            </form>
+          </div>
+        ) : null}
       </section>
 
       <nav

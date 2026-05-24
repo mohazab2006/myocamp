@@ -219,28 +219,22 @@ Work through in order. Check each box in admin as you go.
 
 Crons in `vercel.json` **do not run on localhost**. On **Hobby**, only once-per-day schedules deploy.
 
-**Vercel (automatic, daily 2pm UTC — includes Gmail poll):**
+**Manual runs (admin or curl):**
+
+On **Admin → Setup → Scheduled jobs**, each cron step has its own button plus **Run all daily jobs**.
 
 ```bash
 curl "https://YOUR-PREVIEW.vercel.app/api/cron/daily" \
   -H "Authorization: Bearer YOUR_CRON_SECRET"
 ```
 
-**Manual Gmail poll** (anytime, e.g. after a parent sends e-transfer):
+Individual routes (same logic as the buttons):
 
 ```bash
 curl "https://YOUR-PREVIEW.vercel.app/api/gmail/poll?token=YOUR_CRON_SECRET"
-```
-
-```bash
-curl "https://YOUR-PREVIEW.vercel.app/api/reminders/sweep" \
-  -H "Authorization: Bearer YOUR_CRON_SECRET"
-
-curl "https://YOUR-PREVIEW.vercel.app/api/waitlist/sweep" \
-  -H "Authorization: Bearer YOUR_CRON_SECRET"
-
-curl "https://YOUR-PREVIEW.vercel.app/api/camps/sweep" \
-  -H "Authorization: Bearer YOUR_CRON_SECRET"
+curl "https://YOUR-PREVIEW.vercel.app/api/waitlist/sweep" -H "Authorization: Bearer YOUR_CRON_SECRET"
+curl "https://YOUR-PREVIEW.vercel.app/api/camps/sweep" -H "Authorization: Bearer YOUR_CRON_SECRET"
+curl "https://YOUR-PREVIEW.vercel.app/api/reminders/sweep" -H "Authorization: Bearer YOUR_CRON_SECRET"
 ```
 
 ---

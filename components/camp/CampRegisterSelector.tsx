@@ -16,13 +16,13 @@ type CampRegisterSelectorProps = {
 const CARD_ICONS: CampIconName[] = ["tent", "flame", "lantern", "compass", "canoe", "star"];
 
 function statusLabel(camp: PublicCamp): { text: string; tone: string } {
-  if (camp.status === "open") {
+  if (camp.registrationStatus === "open") {
     return { text: "Open — spots available", tone: "bg-camp-moss text-camp-paper" };
   }
-  if (camp.status === "full") {
+  if (camp.registrationStatus === "full") {
     return { text: "Full — join waitlist", tone: "bg-camp-bark text-camp-paper" };
   }
-  return { text: camp.status, tone: "bg-camp-bark/70 text-camp-paper" };
+  return { text: camp.registrationStatus, tone: "bg-camp-bark/70 text-camp-paper" };
 }
 
 function sessionNumber(index: number): string {
@@ -98,7 +98,8 @@ export function CampRegisterSelector({ camps }: CampRegisterSelectorProps) {
             {camps.map((camp, i) => {
               const badge = statusLabel(camp);
               const icon = CARD_ICONS[i % CARD_ICONS.length];
-              const isOpen = camp.status === "open";
+              const isOpen = camp.registrationStatus === "open";
+              const isWaitlist = camp.registrationStatus === "full";
 
               return (
                 <li key={camp.id}>
@@ -163,7 +164,7 @@ export function CampRegisterSelector({ camps }: CampRegisterSelectorProps) {
 
                       <p className="mt-3 flex-1 text-sm leading-relaxed text-camp-ink/80">
                         ${camp.feePerCamper.toFixed(0)} per camper
-                        {camp.status === "full" ? " · waitlist only" : " · spots available"}
+                        {isWaitlist ? " · waitlist only" : isOpen ? " · spots available" : ""}
                         {camp.registrationClosesAt
                           ? ` · closes ${new Date(camp.registrationClosesAt).toLocaleDateString("en-CA", {
                               month: "short",
@@ -174,7 +175,7 @@ export function CampRegisterSelector({ camps }: CampRegisterSelectorProps) {
 
                       <div className="mt-6 flex items-center justify-between border-t border-dashed border-camp-bark/30 pt-4">
                         <span className="font-camp text-xl text-camp-flame">
-                          {camp.status === "full" ? "Join waitlist" : "Register now"}
+                          {isWaitlist ? "Join waitlist" : isOpen ? "Register now" : "View session"}
                         </span>
                         <span className="flex items-center gap-2 font-camp text-2xl text-camp-flame transition group-hover:translate-x-1">
                           <UsersThree size={22} weight="duotone" />

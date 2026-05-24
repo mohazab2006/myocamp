@@ -78,7 +78,7 @@ export default async function AdminGmailSetupPage({
           Connect the inbox that gets Interac notifications.
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft">
-          We poll this Gmail account every 5 minutes for Interac e-Transfer notification
+          We poll this Gmail account daily (and on demand) for Interac e-Transfer notification
           emails. When a parent's memo includes their <strong className="text-ink">
             MYO-YYYY-XXXX</strong>{" "}
           reference code, we auto-mark the invoice as paid. Anything ambiguous lands in{" "}

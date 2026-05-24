@@ -190,9 +190,11 @@ export function CampRegisterView({
             <div className="mx-auto mt-8 max-w-xl border-2 border-camp-bark/30 bg-camp-paper-soft p-8 text-center">
               <p className="font-camp text-2xl text-camp-bark">Registration isn&apos;t open right now.</p>
               <p className="mt-3 text-camp-ink/80">
-                {camp.status === "closed"
-                  ? "This session is closed. Contact us if you have questions."
-                  : "Check back soon or email us for help."}
+                {camp.registrationStatus === "full"
+                  ? "Registration is full, but you can still join the waitlist below."
+                  : camp.status === "closed"
+                    ? "This session is closed. Contact us if you have questions."
+                    : "Check back soon or email us for help."}
               </p>
               <Link
                 href="/contact"

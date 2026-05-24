@@ -11,6 +11,7 @@ import {
   updateCamp,
   type UpsertCampInput
 } from "@/lib/admin/camps";
+import { reopenCampRegistration } from "@/lib/admin/camp-capacity";
 import { requireAuthorizedAdmin } from "@/lib/admin/guards";
 import { buildAdminRedirect } from "@/lib/admin/page-state";
 import type { Camp } from "@/lib/types";
@@ -195,4 +196,38 @@ export async function deleteCampAction(formData: FormData) {
   revalidatePath("/admin/camps");
   revalidatePath("/admin");
   flash("/admin/camps", "success", "Camp deleted.");
+}
+
+export async function reopenCampAction(formData: FormData) {
+  await requireAuthorizedAdmin();
+  const id = value(formData, "id");
+  const slug = value(formData, "slug");
+  if (!id || !slug) flash("/admin/camps", "error", "Missing camp.");
+
+  try {
+    const { changed, status } = await reopenCampRegistration(id);
+    if (!changed) {
+      flash(`/admin/camps/${slug}`, "info", "Camp is not closed — nothing to reopen.");
+    }
+
+    revalidatePath("/admin/camps");
+    revalidatePath(`/admin/camps/${slug}`);
+    revalidatePath("/admin");
+    revalidatePath("/camp/register");
+    revalidatePath(`/camp/${slug}/register`);
+    revalidatePath("/events");
+    flash(
+      `/admin/camps/${slug}`,
+      "success",
+      status === "full"
+        ? "Registration reopened — camp is at capacity so status is Full (waitlist only)."
+        : "Registration reopened. Auto-close deadline cleared so cron won't close it again."
+    );
+  } catch (err) {
+    flash(
+      `/admin/camps/${slug}`,
+      "error",
+      err instanceof Error ? err.message : "Could not reopen camp."
+    );
+  }
 }

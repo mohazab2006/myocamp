@@ -3,6 +3,7 @@ import Link from "next/link";
 import {
   ArrowSquareOut,
   CheckCircle,
+  Clock,
   Database,
   EnvelopeSimple,
   Key,
@@ -14,6 +15,7 @@ import {
 
 import { AdminFlashBanner } from "@/components/admin/flash-banner";
 import { CopyButton } from "@/components/admin/copy-button";
+import { AdminSubmitButton } from "@/components/admin/submit-button";
 import { requireAuthorizedAdmin } from "@/lib/admin/guards";
 import { resolveAdminFlashState, type AdminSearchParams } from "@/lib/admin/page-state";
 import { getAdminAllowlist } from "@/lib/admin/allowlist";
@@ -22,6 +24,14 @@ import { fetchGmailCredentials, isGoogleOAuthConfigured } from "@/lib/admin/gmai
 import { getPayPalEnvironment, isPayPalConfigured } from "@/lib/admin/paypal";
 import { isResendConfigured } from "@/lib/email/resend";
 import { isSupabaseConfigured } from "@/lib/supabase/content";
+
+import {
+  closeOverdueCampsAction,
+  expireWaitlistClaimsAction,
+  pollGmailNowAction,
+  runDailyCronAction,
+  sendPaymentRemindersAction
+} from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -140,7 +150,7 @@ export default async function AdminSetupPage({
     {
       name: "CRON_SECRET",
       value: process.env.CRON_SECRET,
-      hint: "Optional bearer secret for non-Vercel pollers hitting /api/gmail/poll.",
+      hint: "Bearer secret for manual cron runs from admin or curl.",
       mask: true
     },
     {
@@ -244,7 +254,7 @@ export default async function AdminSetupPage({
             </div>
             <p className="mt-2 text-xs leading-relaxed text-ink-soft">
               {checks.gmail
-                ? `Connected to ${gmailCreds!.email}. Polls every 5 min via Vercel Cron.`
+                ? `Connected to ${gmailCreds!.email}. Polls daily via Vercel Cron — or use Poll now anytime.`
                 : isGoogleOAuthConfigured()
                   ? "OAuth configured but no inbox connected. Visit Gmail setup to connect."
                   : "Add GOOGLE_CLIENT_ID + GOOGLE_CLIENT_SECRET, then connect an inbox."}
@@ -361,6 +371,55 @@ export default async function AdminSetupPage({
             ? "✓ Secret is set — only requests with this URL (or the x-jotform-secret header) are accepted."
             : "No JOTFORM_WEBHOOK_SECRET set. For production, set one in your env vars so only JotForm can hit this URL."}
         </p>
+      </section>
+
+      <section className="mt-8 border border-line bg-paper-deep/35 p-6 md:p-8">
+        <p className="eyebrow text-brass flex items-center gap-2">
+          <Clock size={14} weight="duotone" /> Scheduled jobs
+        </p>
+        <h2 className="mt-2 font-display text-xl tracking-tight text-ink">
+          Run cron jobs manually
+        </h2>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft">
+          On Vercel Hobby, everything in <code className="border border-line bg-paper px-1 py-0.5 text-xs">/api/cron/daily</code> runs
+          automatically once per day at 2pm UTC. Use these buttons anytime you need results sooner —
+          same code paths as the cron.
+        </p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          <form action={runDailyCronAction}>
+            <AdminSubmitButton idleLabel="Run all daily jobs" />
+          </form>
+          <form action={pollGmailNowAction}>
+            <AdminSubmitButton idleLabel="Poll Gmail" variant="secondary" />
+          </form>
+          <form action={expireWaitlistClaimsAction}>
+            <AdminSubmitButton idleLabel="Expire waitlist claims" variant="secondary" />
+          </form>
+          <form action={closeOverdueCampsAction}>
+            <AdminSubmitButton idleLabel="Close overdue camps" variant="secondary" />
+          </form>
+          <form action={sendPaymentRemindersAction}>
+            <AdminSubmitButton idleLabel="Send payment reminders" variant="secondary" />
+          </form>
+        </div>
+        <ul className="mt-5 space-y-2 text-xs leading-relaxed text-ink-soft">
+          <li>
+            <strong className="text-ink">Poll Gmail</strong> — check for new Interac e-transfers and auto-match invoices.
+            Undo: match payments manually in Inbox / registration detail.
+          </li>
+          <li>
+            <strong className="text-ink">Expire waitlist claims</strong> — parents promoted off the waitlist get 48h to register; this marks missed deadlines as expired.
+            Undo: <strong className="text-ink">Re-add</strong> on the camp waitlist tab.
+          </li>
+          <li>
+            <strong className="text-ink">Close overdue camps</strong> — flips camps to closed when their registration deadline has passed.
+            Undo: <strong className="text-ink">Reopen registration</strong> on the camp page (clears the deadline so cron won&apos;t re-close).
+          </li>
+          <li>
+            <strong className="text-ink">Send payment reminders</strong> — T-7 / T-3 / T-1 emails for unpaid invoices before camp starts.
+            Cannot undo sent emails; pause reminders per registration if needed.
+          </li>
+        </ul>
       </section>
 
       <section className="mt-8 border border-line bg-paper-deep/35 p-6 md:p-8">

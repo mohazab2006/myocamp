@@ -18,7 +18,9 @@ type EventCampPanelProps = {
 };
 
 export function EventCampPanel({ camp, upcoming }: EventCampPanelProps) {
-  const canRegister = upcoming && (camp.status === "open" || camp.status === "full");
+  const canRegister =
+    upcoming && (camp.registrationStatus === "open" || camp.registrationStatus === "full");
+  const isWaitlist = camp.registrationStatus === "full";
 
   return (
     <div className="overflow-hidden border border-line bg-paper-deep/40">
@@ -40,13 +42,14 @@ export function EventCampPanel({ camp, upcoming }: EventCampPanelProps) {
           <p className="mt-1 text-sm text-ink-soft">{camp.location}</p>
         ) : null}
         <p className="mt-3 text-sm text-ink">
-          ${camp.feePerCamper.toFixed(0)} per camper · {statusLabels[camp.status]}
+          ${camp.feePerCamper.toFixed(0)} per camper ·{" "}
+          {isWaitlist ? "Waitlist open" : statusLabels[camp.status]}
         </p>
 
         {canRegister ? (
           <div className="mt-5 grid gap-2">
             <ButtonLink href={camp.registerPath}>
-              {camp.status === "full" ? "Join waitlist" : "Register for this camp"}
+              {isWaitlist ? "Join waitlist" : "Register for this camp"}
             </ButtonLink>
             <Link
               href="/camp"
@@ -122,9 +125,9 @@ export function FeaturedCampCards({ camps }: { camps: PublicCamp[] }) {
                   </p>
                   <p className="mt-2 text-sm text-ink">
                     ${camp.feePerCamper.toFixed(0)} ·{" "}
-                    {camp.status === "open"
+                    {camp.registrationStatus === "open"
                       ? "Open"
-                      : camp.status === "full"
+                      : camp.registrationStatus === "full"
                         ? "Waitlist"
                         : "See details"}
                   </p>

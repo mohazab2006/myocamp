@@ -11,7 +11,7 @@ const statusOptions: { value: Camp["status"]; label: string; hint: string }[] = 
   { value: "draft", label: "Draft", hint: "Not visible on the public site yet." },
   { value: "open", label: "Open", hint: "Registration form is live on /camp." },
   { value: "full", label: "Full", hint: "Registration closed; waitlist form is live." },
-  { value: "closed", label: "Closed", hint: "Both registration and waitlist closed." },
+  { value: "closed", label: "Closed", hint: "Registration closed. Waitlist stays open if the camp is at capacity." },
   {
     value: "archived",
     label: "Archived",
@@ -191,7 +191,7 @@ export function CampForm({ camp }: CampFormProps) {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <AdminField label="Registration closes at" hint="Auto-close at this date/time. Optional.">
+        <AdminField label="Registration closes at" hint="Auto-close at this date/time. Leave blank for no deadline. If you reopen a camp after auto-close, clear or extend this — otherwise cron closes it again.">
           <input
             className={adminInputClass}
             name="registrationClosesAt"

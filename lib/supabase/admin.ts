@@ -7,6 +7,11 @@ import { createClient } from "@supabase/supabase-js";
  * Use exclusively from server actions, route handlers, and server components.
  * Never import into a `"use client"` module.
  */
+export function isSupabaseAdminConfigured() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
+  return Boolean(url && process.env.SUPABASE_SERVICE_ROLE_KEY);
+}
+
 export function createSupabaseAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL ?? process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;

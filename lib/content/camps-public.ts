@@ -1,6 +1,7 @@
 import "server-only";
 
-import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { createSupabaseAdminClient, isSupabaseAdminConfigured } from "@/lib/supabase/admin";
+import { countActiveCampers } from "@/lib/admin/camp-capacity";
 import { parseCampData } from "@/lib/admin/camp-data";
 import { getCampSettings } from "@/lib/content/camp";
 import type { Camp, CampStatus } from "@/lib/types";
@@ -25,6 +26,8 @@ export interface PublicCamp {
   registerPath: string;
   heroImage: string | null;
   featuredOnEvents: boolean;
+  /** Active camper slots (filled at read time for public pages). */
+  activeCamperCount: number;
 }
 
 type CampRow = {
@@ -43,19 +46,29 @@ type CampRow = {
   data: Record<string, unknown> | null;
 };
 
-function mapStatus(status: CampStatus): PublicRegistrationStatus {
+function mapStatus(status: CampStatus, activeCamperCount: number, capacity: number | null): PublicRegistrationStatus {
   switch (status) {
     case "open":
       return "open";
     case "full":
       return "full";
     case "closed":
+      if (capacity != null && capacity > 0 && activeCamperCount >= capacity) {
+        return "full";
+      }
+      return "closed";
     case "archived":
       return "closed";
     case "draft":
     default:
       return "opening-soon";
   }
+}
+
+/** True when every spot is taken (or admin marked the camp Full). */
+export function isCampAtCapacity(camp: Pick<PublicCamp, "status" | "capacity" | "activeCamperCount">): boolean {
+  if (camp.status === "full") return true;
+  return camp.capacity != null && camp.capacity > 0 && camp.activeCamperCount >= camp.capacity;
 }
 
 function resolvePaymentEmail(data: Record<string, unknown> | null): string {
@@ -67,14 +80,14 @@ function resolvePaymentEmail(data: Record<string, unknown> | null): string {
   return process.env.PAYMENT_EMAIL ?? process.env.NEXT_PUBLIC_PAYMENT_EMAIL ?? "myoadmin@gmail.com";
 }
 
-function rowToPublicCamp(row: CampRow): PublicCamp {
+function rowToPublicCamp(row: CampRow, activeCamperCount = 0): PublicCamp {
   const data = parseCampData(row.data);
   return {
     id: row.id,
     slug: row.slug,
     title: row.title,
     status: row.status,
-    registrationStatus: mapStatus(row.status),
+    registrationStatus: mapStatus(row.status, activeCamperCount, row.capacity),
     capacity: row.capacity,
     startDate: row.start_date,
     endDate: row.end_date,
@@ -86,11 +99,26 @@ function rowToPublicCamp(row: CampRow): PublicCamp {
     registrationClosesAt: row.registration_closes_at,
     registerPath: `/camp/${row.slug}/register`,
     heroImage: data.heroImage,
-    featuredOnEvents: data.featuredOnEvents
+    featuredOnEvents: data.featuredOnEvents,
+    activeCamperCount
   };
 }
 
+async function enrichPublicCamps(rows: CampRow[]): Promise<PublicCamp[]> {
+  const counts = await Promise.all(rows.map((row) => countActiveCampers(row.id)));
+  return rows.map((row, index) => rowToPublicCamp(row, counts[index] ?? 0));
+}
+
+function isPubliclyJoinable(camp: PublicCamp): boolean {
+  if (camp.status === "open" || camp.status === "full") return true;
+  if (camp.status === "closed" && isCampAtCapacity(camp) && camp.waitlistFormJotformId) {
+    return true;
+  }
+  return false;
+}
+
 export async function fetchPublicCampBySlug(slug: string): Promise<PublicCamp | null> {
+  if (!isSupabaseAdminConfigured()) return null;
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from("camps")
@@ -101,22 +129,25 @@ export async function fetchPublicCampBySlug(slug: string): Promise<PublicCamp | 
   if (error || !data) return null;
   const row = data as CampRow;
   if (row.status === "archived") return null;
-  return rowToPublicCamp(row);
+  const count = await countActiveCampers(row.id);
+  return rowToPublicCamp(row, count);
 }
 
 /**
- * All camps parents can register or waitlist for right now (open or full).
+ * Camps parents can register or waitlist for (open, full, or closed-but-at-capacity).
  */
 export async function fetchRegisterablePublicCamps(): Promise<PublicCamp[]> {
+  if (!isSupabaseAdminConfigured()) return [];
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from("camps")
     .select("*")
-    .in("status", ["open", "full"])
+    .in("status", ["open", "full", "closed"])
     .order("start_date", { ascending: true });
 
   if (error || !data) return [];
-  return (data as CampRow[]).map(rowToPublicCamp);
+  const camps = await enrichPublicCamps(data as CampRow[]);
+  return camps.filter(isPubliclyJoinable);
 }
 
 /**
@@ -135,6 +166,7 @@ export async function fetchFeaturedPublicCamps(): Promise<PublicCamp[]> {
 
 /** All non-archived camps for event linking and lookups. */
 export async function fetchPublicCampsIndex(): Promise<PublicCamp[]> {
+  if (!isSupabaseAdminConfigured()) return [];
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from("camps")
@@ -143,7 +175,7 @@ export async function fetchPublicCampsIndex(): Promise<PublicCamp[]> {
     .order("start_date", { ascending: true });
 
   if (error || !data) return [];
-  return (data as CampRow[]).map(rowToPublicCamp);
+  return enrichPublicCamps(data as CampRow[]);
 }
 
 /** Merge legacy seed settings with the primary Supabase camp for marketing pages. */
@@ -169,7 +201,7 @@ export function activeFormForCamp(camp: PublicCamp): {
   if (camp.status === "open" && camp.registrationFormJotformId) {
     return { formId: camp.registrationFormJotformId, mode: "registration" };
   }
-  if (camp.status === "full" && camp.waitlistFormJotformId) {
+  if (isCampAtCapacity(camp) && camp.waitlistFormJotformId) {
     return { formId: camp.waitlistFormJotformId, mode: "waitlist" };
   }
   return { formId: null, mode: "none" };
@@ -182,7 +214,7 @@ export function campToPublicShape(camp: Camp, paymentEmail?: string | null): Pub
     slug: camp.slug,
     title: camp.title,
     status: camp.status,
-    registrationStatus: mapStatus(camp.status),
+    registrationStatus: mapStatus(camp.status, 0, camp.capacity),
     capacity: camp.capacity,
     startDate: camp.startDate,
     endDate: camp.endDate,
@@ -198,6 +230,7 @@ export function campToPublicShape(camp: Camp, paymentEmail?: string | null): Pub
     registrationClosesAt: camp.registrationClosesAt,
     registerPath: `/camp/${camp.slug}/register`,
     heroImage: camp.heroImage,
-    featuredOnEvents: camp.featuredOnEvents
+    featuredOnEvents: camp.featuredOnEvents,
+    activeCamperCount: 0
   };
 }

@@ -118,12 +118,11 @@ async function DashboardView({
   const primaryCamp = camps.find((c) => c.status === "open" || c.status === "full") ?? camps[0];
   const campStatusLabel = primaryCamp?.status ?? "no camp";
 
-  // Dead-man's switch: if Gmail is connected but hasn't polled in 30+ minutes,
-  // surface a red banner so the owner knows e-transfers might be backing up.
+  // Dead-man's switch: daily cron polls Gmail once per day — warn if stale 26+ hours.
   const heartbeatStale =
     gmailCreds &&
     (!gmailCreds.lastPolledAt ||
-      Date.now() - new Date(gmailCreds.lastPolledAt).getTime() > 30 * 60 * 1000);
+      Date.now() - new Date(gmailCreds.lastPolledAt).getTime() > 26 * 60 * 60 * 1000);
   const gmailErrored = gmailCreds?.lastPolledStatus === "error";
 
   const stats = [
@@ -144,7 +143,7 @@ async function DashboardView({
               <p className="font-display text-base tracking-tight text-ink">
                 {gmailErrored
                   ? "Gmail polling errored on last run"
-                  : "Gmail hasn't polled in over 30 minutes"}
+                  : "Gmail hasn't polled since yesterday's cron"}
               </p>
               <p className="mt-1 text-xs leading-relaxed text-ink-soft">
                 E-transfer auto-matching may be paused. Last poll:{" "}
