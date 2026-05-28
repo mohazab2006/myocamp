@@ -32,6 +32,7 @@ import {
   recomputeInvoiceAction,
   recordManualPaymentAction,
   sendReminderNowAction,
+  sendRegistrationEmailAction,
   toggleCashReceivedAction,
   toggleRemindersPausedAction,
   updateRegistrationDetailsAction,
@@ -156,7 +157,16 @@ export default async function AdminRegistrationDetailPage({
 
         {/* Right column: invoice tools */}
         <aside className="space-y-6">
-          {paymentUrl ? <PaymentLinkCard url={paymentUrl} /> : null}
+          {paymentUrl && invoice ? (
+            <PaymentLinkCard
+              url={paymentUrl}
+              slug={slug}
+              registrationId={registration.id}
+              invoiceId={invoice.id}
+              referenceCode={invoice.referenceCode}
+              parentEmail={registration.parentEmail}
+            />
+          ) : null}
           <RemindersCard
             slug={slug}
             registrationId={registration.id}
@@ -612,14 +622,18 @@ function CampersCard({ registration }: { registration: Registration }) {
 }
 
 function RawPayloadCard({ registration }: { registration: Registration }) {
-  if (Object.keys(registration.rawPayload).length === 0) return null;
+  const payload = registration.rawPayload;
+  if (Object.keys(payload).length === 0) return null;
+  // Manual admin entries — nothing useful to show.
+  if (Object.keys(payload).length === 1 && payload._manualEntry === true) return null;
+
   return (
     <details className="border border-line bg-paper-deep/35">
-      <summary className="cursor-pointer list-none px-5 py-3 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft hover:text-ink [&::-webkit-details-marker]:hidden">
-        Raw JotForm payload
+      <summary className="cursor-pointer px-5 py-3 text-xs font-semibold uppercase tracking-normal text-ink-soft hover:text-ink [&::-webkit-details-marker]:hidden">
+        <span className="inline-block">Submission data (from JotForm)</span>
       </summary>
       <pre className="max-h-[420px] overflow-auto border-t border-line bg-paper p-4 text-[11px] leading-relaxed text-ink">
-        {JSON.stringify(registration.rawPayload, null, 2)}
+        {JSON.stringify(payload, null, 2)}
       </pre>
     </details>
   );
@@ -629,7 +643,21 @@ function RawPayloadCard({ registration }: { registration: Registration }) {
 // Sidebar: payment link
 // ---------------------------------------------------------------------------
 
-function PaymentLinkCard({ url }: { url: string }) {
+function PaymentLinkCard({
+  url,
+  slug,
+  registrationId,
+  invoiceId,
+  referenceCode,
+  parentEmail
+}: {
+  url: string;
+  slug: string;
+  registrationId: string;
+  invoiceId: string;
+  referenceCode: string;
+  parentEmail: string | null;
+}) {
   return (
     <div className="border border-pine/40 bg-sky/35 p-5">
       <p className="eyebrow text-forest">Parent payment link</p>
@@ -637,8 +665,8 @@ function PaymentLinkCard({ url }: { url: string }) {
         Send to the family
       </h3>
       <p className="mt-2 text-xs leading-relaxed text-ink-soft">
-        Public URL with PayPal, e-Transfer instructions, and a one-click cash option.
-        Email it now while waiting on Day 6's auto-reminders.
+        Reference <span className="font-mono text-ink">{referenceCode}</span> — parents need this
+        for e-Transfer and the payment page. Email it with the link below, or copy both manually.
       </p>
       <div className="mt-3 break-all border border-line bg-paper p-3 font-mono text-xs text-ink">
         {url}
@@ -649,6 +677,11 @@ function PaymentLinkCard({ url }: { url: string }) {
           label="Copy link"
           className="inline-flex h-9 items-center gap-1.5 border border-line bg-paper px-3 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft transition hover:border-pine hover:text-ink"
         />
+        <CopyButton
+          value={referenceCode}
+          label="Copy ref"
+          className="inline-flex h-9 items-center gap-1.5 border border-line bg-paper px-3 text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft transition hover:border-pine hover:text-ink"
+        />
         <a
           href={url}
           target="_blank"
@@ -657,7 +690,24 @@ function PaymentLinkCard({ url }: { url: string }) {
         >
           Open
         </a>
+        {parentEmail ? (
+          <form action={sendRegistrationEmailAction}>
+            <input type="hidden" name="slug" value={slug} />
+            <input type="hidden" name="registrationId" value={registrationId} />
+            <input type="hidden" name="invoiceId" value={invoiceId} />
+            <AdminSubmitButton
+              idleLabel="Send confirmation email"
+              pendingLabel="Sending…"
+              icon={<PaperPlaneTilt size={12} weight="bold" />}
+            />
+          </form>
+        ) : null}
       </div>
+      {!parentEmail ? (
+        <p className="mt-3 text-xs text-brass">
+          No parent email on file — add one above to send the confirmation automatically.
+        </p>
+      ) : null}
     </div>
   );
 }

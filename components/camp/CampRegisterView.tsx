@@ -69,8 +69,9 @@ export function CampRegisterView({
               Register for {camp.title}.
             </h1>
             <p className="mt-6 max-w-[58ch] text-lg leading-relaxed text-camp-ink/85">
-              Submit the form below. You&apos;ll get an email right away with your reference code and a
-              payment link — PayPal, e-Transfer, or cash at drop-off. E-transfers go to{" "}
+              Submit the form below. You&apos;ll go straight to the payment page with your reference
+              code — PayPal, e-Transfer, or cash at drop-off. We&apos;ll also email a confirmation if
+              we have your address. E-transfers go to{" "}
               <a href={`mailto:${camp.paymentEmail}`} className="text-camp-flame underline">
                 {camp.paymentEmail}
               </a>
@@ -127,8 +128,8 @@ export function CampRegisterView({
             <div className="font-script text-2xl text-camp-flame">how to pay</div>
             <h2 className="font-camp mt-2 text-4xl text-camp-bark md:text-5xl">Three ways.</h2>
             <p className="mt-4 text-camp-ink/80">
-              After you register, use the payment link in your confirmation email. Include your reference
-              code in every e-Transfer memo.
+              After you register, use the payment page right away (or the link in your confirmation
+              email). Include your reference code in every e-Transfer memo.
             </p>
           </div>
           <div className="col-span-12 grid gap-5 md:col-span-8 md:grid-cols-3">

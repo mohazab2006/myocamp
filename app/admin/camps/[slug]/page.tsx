@@ -9,6 +9,7 @@ import {
 } from "@phosphor-icons/react/ssr";
 
 import { AdminFlashBanner } from "@/components/admin/flash-banner";
+import { CopyButton } from "@/components/admin/copy-button";
 import { AdminField, adminInputClass, adminTextareaClass } from "@/components/admin/field";
 import { AdminSubmitButton } from "@/components/admin/submit-button";
 import {
@@ -25,6 +26,7 @@ import { fetchCampBySlug, fetchCampStats } from "@/lib/admin/camps";
 import { fetchRegistrationsForCamp } from "@/lib/admin/registrations";
 import { fetchPaymentsForInvoice } from "@/lib/admin/payments";
 import { buildClaimUrl, fetchWaitlistForCamp } from "@/lib/admin/waitlist";
+import { jotformThankYouRedirectUrl } from "@/lib/content/camps-public";
 import type { Camp, WaitlistEntry } from "@/lib/types";
 import { createManualRegistrationAction } from "./registrations/actions";
 import { createManualWaitlistAction, expireOverdueClaimsAction } from "./waitlist/actions";
@@ -116,14 +118,13 @@ export default async function AdminCampDetailPage({
   }
 
   let waitlistEntries: WaitlistEntry[] = [];
-  let origin = "https://myo.camp";
+  const hdrs = await headers();
+  const host = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "myo.camp";
+  const proto = hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  const siteOrigin = `${proto}://${host}`;
+
   if (tab === "waitlist") {
     waitlistEntries = await fetchWaitlistForCamp(camp.id);
-    const hdrs = await headers();
-    const host = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "myo.camp";
-    const proto =
-      hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-    origin = `${proto}://${host}`;
   }
 
   const filter = pickFilter(sp.filter);
@@ -221,9 +222,9 @@ export default async function AdminCampDetailPage({
           <RegistrationsTab camp={camp} rows={registrationRows} filter={filter} />
         ) : null}
         {tab === "waitlist" ? (
-          <WaitlistTab camp={camp} entries={waitlistEntries} origin={origin} />
+          <WaitlistTab camp={camp} entries={waitlistEntries} origin={siteOrigin} />
         ) : null}
-        {tab === "settings" ? <SettingsTab camp={camp} /> : null}
+        {tab === "settings" ? <SettingsTab camp={camp} siteOrigin={siteOrigin} /> : null}
       </div>
     </main>
   );
@@ -468,7 +469,9 @@ function WaitlistManualForm({ campSlug }: { campSlug: string }) {
   );
 }
 
-function SettingsTab({ camp }: { camp: Camp }) {
+function SettingsTab({ camp, siteOrigin }: { camp: Camp; siteOrigin: string }) {
+  const thankYouRedirect = jotformThankYouRedirectUrl(siteOrigin, camp.slug);
+
   const rows: { label: string; value: React.ReactNode; hint?: string }[] = [
     { label: "Status", value: camp.status },
     {
@@ -522,6 +525,30 @@ function SettingsTab({ camp }: { camp: Camp }) {
         </>
       ) : (
         <span className="text-ink-soft">Not set</span>
+      )
+    },
+    {
+      label: "JotForm thank-you redirect",
+      value: (
+        <div className="space-y-2">
+          <p className="text-xs leading-relaxed text-ink-soft">
+            In JotForm → Settings → Thank You Page →{" "}
+            <strong className="text-ink">Redirect to an external link</strong>. Paste this on
+            both registration and waitlist forms. Keep{" "}
+            <code className="border border-line bg-paper px-1 py-0.5 text-[11px]">{`{id}`}</code>{" "}
+            exactly as shown.
+          </p>
+          <div className="flex flex-wrap items-center gap-2">
+            <code className="break-all border border-line bg-paper px-2 py-1 text-xs">
+              {thankYouRedirect}
+            </code>
+            <CopyButton
+              value={thankYouRedirect}
+              label="Copy"
+              className="inline-flex h-8 items-center gap-1.5 border border-line bg-paper px-2.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-soft transition hover:border-pine hover:text-ink"
+            />
+          </div>
+        </div>
       )
     },
     {

@@ -200,16 +200,15 @@ export function CampRegisterSelector({ camps }: CampRegisterSelectorProps) {
               Form → email → pay.
             </h2>
             <p className="mt-4 max-w-[52ch] text-camp-paper/85">
-              After you pick a session and submit the form, you&apos;ll get a confirmation email with your
-              reference code and a payment link. Same flow for every session — just make sure you picked
-              the right one first.
+              After you pick a session and submit the form, you&apos;re redirected to pay right away —
+              reference code included. We&apos;ll email a backup copy too.
             </p>
           </div>
           <div className="col-span-12 flex flex-col justify-center gap-4 md:col-span-5">
             {[
               { step: "01", label: "Choose your session above" },
               { step: "02", label: "Fill out the registration form" },
-              { step: "03", label: "Pay with the link in your email" }
+              { step: "03", label: "Pay on the next screen (or from email)" }
             ].map((item) => (
               <div
                 key={item.step}

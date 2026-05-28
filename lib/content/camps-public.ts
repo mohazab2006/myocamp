@@ -194,6 +194,11 @@ export function jotformEmbedUrl(formId: string, parentUrl?: string): string {
   return `${base}?${params.toString()}`;
 }
 
+/** JotForm thank-you redirect — paste in JotForm Settings → Thank You Page. Keep `{id}` literal. */
+export function jotformThankYouRedirectUrl(siteOrigin: string, _campSlug?: string): string {
+  return `${siteOrigin.replace(/\/$/, "")}/camp/register/complete?sid={id}`;
+}
+
 export function activeFormForCamp(camp: PublicCamp): {
   formId: string | null;
   mode: "registration" | "waitlist" | "none";

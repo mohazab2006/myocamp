@@ -159,6 +159,40 @@ export async function findRegistrationByJotformSubmission(
   return rowToRegistration(data as RegistrationRow);
 }
 
+/** Active registration for the same camp + parent email (blocks duplicate JotForm submits). */
+export async function findActiveRegistrationByCampAndEmail(
+  campId: string,
+  parentEmail: string | null
+): Promise<Registration | null> {
+  const email = parentEmail?.trim();
+  if (!email) return null;
+
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("registrations")
+    .select("*")
+    .eq("camp_id", campId)
+    .eq("status", "active")
+    .ilike("parent_email", email)
+    .order("submitted_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  if (error || !data) return null;
+  return rowToRegistration(data as RegistrationRow);
+}
+
+async function loadInvoiceForRegistration(registrationId: string): Promise<Invoice | null> {
+  const supabase = createSupabaseAdminClient();
+  const { data } = await supabase
+    .from("invoices")
+    .select("*")
+    .eq("registration_id", registrationId)
+    .maybeSingle();
+  if (!data) return null;
+  return rowToInvoice(data as InvoiceRow);
+}
+
 // ---------------------------------------------------------------------------
 // Create
 // ---------------------------------------------------------------------------
@@ -196,18 +230,42 @@ export async function createRegistrationWithInvoice(
   if (input.jotformSubmissionId) {
     const existing = await findRegistrationByJotformSubmission(input.jotformSubmissionId);
     if (existing) {
-      const { data: invRow } = await supabase
-        .from("invoices")
-        .select("*")
-        .eq("registration_id", existing.id)
-        .maybeSingle();
-      if (invRow) {
+      const invoice = await loadInvoiceForRegistration(existing.id);
+      if (invoice) {
         return {
           registration: existing,
-          invoice: rowToInvoice(invRow as InvoiceRow),
+          invoice,
           isNew: false
         };
       }
+    }
+  }
+
+  const existingByEmail = await findActiveRegistrationByCampAndEmail(
+    input.campId,
+    input.parentEmail
+  );
+  if (existingByEmail) {
+    const invoice = await loadInvoiceForRegistration(existingByEmail.id);
+    if (invoice) {
+      if (
+        input.jotformSubmissionId &&
+        input.jotformSubmissionId !== existingByEmail.jotformSubmissionId
+      ) {
+        await supabase
+          .from("registrations")
+          .update({ jotform_submission_id: input.jotformSubmissionId })
+          .eq("id", existingByEmail.id);
+      }
+      return {
+        registration:
+          input.jotformSubmissionId &&
+          input.jotformSubmissionId !== existingByEmail.jotformSubmissionId
+            ? { ...existingByEmail, jotformSubmissionId: input.jotformSubmissionId }
+            : existingByEmail,
+        invoice,
+        isNew: false
+      };
     }
   }
 

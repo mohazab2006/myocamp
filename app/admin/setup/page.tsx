@@ -371,6 +371,11 @@ export default async function AdminSetupPage({
             ? "✓ Secret is set — only requests with this URL (or the x-jotform-secret header) are accepted."
             : "No JOTFORM_WEBHOOK_SECRET set. For production, set one in your env vars so only JotForm can hit this URL."}
         </p>
+        <p className="mt-3 text-xs leading-relaxed text-ink-soft">
+          Also set each form&apos;s <strong>Thank You Page</strong> to redirect to MYO (see the
+          redirect URL on each camp&apos;s Settings tab). Parents land on the payment page right
+          after submit — no email required.
+        </p>
       </section>
 
       <section className="mt-8 border border-line bg-paper-deep/35 p-6 md:p-8">

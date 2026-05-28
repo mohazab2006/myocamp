@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { requireAuthorizedAdmin } from "@/lib/admin/guards";
@@ -105,11 +106,19 @@ export async function createManualRegistrationAction(formData: FormData) {
 
     revalidatePath(`/admin/camps/${slug}`);
     revalidatePath("/admin/camps");
-    flash(
-      regUrl(slug, result.registration.id),
-      "success",
-      `Added registration for ${parentName ?? parentEmail ?? "this family"} · ${result.invoice.referenceCode}.`
-    );
+    if (!result.isNew) {
+      flash(
+        regUrl(slug, result.registration.id),
+        "info",
+        `This email already has an active registration · ${result.invoice.referenceCode}.`
+      );
+    } else {
+      flash(
+        regUrl(slug, result.registration.id),
+        "success",
+        `Added registration for ${parentName ?? parentEmail ?? "this family"} · ${result.invoice.referenceCode}.`
+      );
+    }
   } catch (err) {
     flash(
       `/admin/camps/${slug}?tab=registrations`,
@@ -269,6 +278,56 @@ export async function recordManualPaymentAction(formData: FormData) {
         ? "E-transfer payment recorded."
         : `${method} payment recorded.`;
   flash(regUrl(slug, registrationId), "success", label);
+}
+
+// ---------------------------------------------------------------------------
+// Send registration confirmation (reference + payment link)
+// ---------------------------------------------------------------------------
+
+export async function sendRegistrationEmailAction(formData: FormData) {
+  await requireAuthorizedAdmin();
+  const slug = value(formData, "slug");
+  const registrationId = value(formData, "registrationId");
+  const invoiceId = value(formData, "invoiceId");
+  if (!invoiceId) {
+    flash(regUrl(slug, registrationId), "error", "Missing invoice id.");
+  }
+
+  const ctx = await loadRegistrationContextByInvoice(invoiceId);
+  if (!ctx) {
+    flash(regUrl(slug, registrationId), "error", "Could not load registration.");
+  }
+
+  if (!ctx!.registration.parentEmail) {
+    flash(
+      regUrl(slug, registrationId),
+      "error",
+      "No parent email on file. Add one above, or copy the payment link manually."
+    );
+  }
+
+  const hdrs = await headers();
+  const host = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "myo.camp";
+  const proto =
+    hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  const origin = `${proto}://${host}`;
+
+  const result = await notify.registrationReceived({ ...ctx!, origin });
+
+  revalidatePath(regUrl(slug, registrationId));
+  if (result.ok) {
+    flash(
+      regUrl(slug, registrationId),
+      "success",
+      `Confirmation email sent to ${ctx!.registration.parentEmail} with reference ${ctx!.invoice.referenceCode}.`
+    );
+  } else {
+    flash(
+      regUrl(slug, registrationId),
+      "error",
+      `Could not send email: ${result.reason ?? "unknown error"}. Set RESEND_API_KEY on Vercel, or copy the payment link below.`
+    );
+  }
 }
 
 // ---------------------------------------------------------------------------
