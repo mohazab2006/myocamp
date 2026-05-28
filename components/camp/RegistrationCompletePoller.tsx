@@ -2,18 +2,25 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight, CircleNotch, Warning } from "@phosphor-icons/react";
+import {
+  ArrowRight,
+  CheckCircle,
+  CircleNotch,
+  Confetti,
+  Warning
+} from "@phosphor-icons/react";
 
 type ReadyRegistration = {
-  status: "ready";
   kind: "registration";
   campTitle: string;
+  parentName: string | null;
+  camperName: string | null;
   referenceCode: string;
+  amountDue: number;
   paymentUrl: string;
 };
 
 type ReadyWaitlist = {
-  status: "ready";
   kind: "waitlist";
   campTitle: string;
   position: number;
@@ -21,13 +28,53 @@ type ReadyWaitlist = {
 };
 
 type PollState =
-  | { phase: "loading" }
-  | { phase: "ready"; data: ReadyRegistration | ReadyWaitlist }
+  | { phase: "confirming" }
+  | { phase: "confirmed"; data: ReadyRegistration }
+  | { phase: "waitlist"; data: ReadyWaitlist }
   | { phase: "timeout" }
   | { phase: "error"; message: string };
 
 const POLL_MS = 800;
 const MAX_ATTEMPTS = 25;
+const AUTO_PAY_REDIRECT_SEC = 6;
+
+function formatCad(amount: number) {
+  return amount.toLocaleString("en-CA", { style: "currency", currency: "CAD" });
+}
+
+function greetingName(parentName: string | null): string {
+  if (!parentName?.trim()) return "there";
+  const first = parentName.trim().split(/\s+/)[0];
+  return first || "there";
+}
+
+function ThankYouShell({
+  campTitle,
+  children
+}: {
+  campTitle: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="mx-auto max-w-xl text-center">
+      <div className="inline-flex h-16 w-16 items-center justify-center rounded-full border-2 border-camp-moss/50 bg-camp-moss/15">
+        <CheckCircle size={36} weight="duotone" className="text-camp-moss" />
+      </div>
+      <p className="font-script mt-5 text-2xl text-camp-flame">you&apos;re in</p>
+      <h1 className="font-camp mt-1 text-4xl leading-tight text-camp-bark md:text-5xl">
+        Thank you for registering!
+      </h1>
+      <p className="mx-auto mt-4 max-w-md text-lg leading-relaxed text-camp-ink/85">
+        We&apos;ve received your registration for{" "}
+        <strong className="text-camp-bark">{campTitle}</strong>. Your spot is reserved — you&apos;re
+        all good on our end.
+      </p>
+      <div className="mt-8 border-2 border-camp-bark/25 bg-camp-paper p-6 text-left md:p-8">
+        {children}
+      </div>
+    </div>
+  );
+}
 
 export function RegistrationCompletePoller({
   submissionId,
@@ -36,7 +83,9 @@ export function RegistrationCompletePoller({
   submissionId: string;
   campTitle: string;
 }) {
-  const [state, setState] = useState<PollState>({ phase: "loading" });
+  const [state, setState] = useState<PollState>({ phase: "confirming" });
+  const [displayCampTitle, setDisplayCampTitle] = useState(campTitle);
+  const [redirectIn, setRedirectIn] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,6 +106,9 @@ export function RegistrationCompletePoller({
             paymentUrl?: string;
             referenceCode?: string;
             campTitle?: string;
+            parentName?: string | null;
+            camperName?: string | null;
+            amountDue?: number;
             position?: number;
             registerUrl?: string;
             error?: string;
@@ -72,16 +124,19 @@ export function RegistrationCompletePoller({
             return;
           }
 
+          if (json.campTitle) setDisplayCampTitle(json.campTitle);
+
           if (json.status === "ready" && json.kind === "registration" && json.paymentUrl) {
-            window.location.replace(json.paymentUrl);
             if (!cancelled) {
               setState({
-                phase: "ready",
+                phase: "confirmed",
                 data: {
-                  status: "ready",
                   kind: "registration",
                   campTitle: json.campTitle ?? campTitle,
+                  parentName: json.parentName ?? null,
+                  camperName: json.camperName ?? null,
                   referenceCode: json.referenceCode ?? "",
+                  amountDue: json.amountDue ?? 0,
                   paymentUrl: json.paymentUrl
                 }
               });
@@ -92,9 +147,8 @@ export function RegistrationCompletePoller({
           if (json.status === "ready" && json.kind === "waitlist") {
             if (!cancelled) {
               setState({
-                phase: "ready",
+                phase: "waitlist",
                 data: {
-                  status: "ready",
                   kind: "waitlist",
                   campTitle: json.campTitle ?? campTitle,
                   position: json.position ?? 0,
@@ -105,7 +159,7 @@ export function RegistrationCompletePoller({
             return;
           }
         } catch {
-          // keep polling — webhook may still be in flight
+          // webhook may still be in flight
         }
 
         await new Promise((r) => setTimeout(r, POLL_MS));
@@ -120,83 +174,159 @@ export function RegistrationCompletePoller({
     };
   }, [submissionId, campTitle]);
 
-  if (state.phase === "loading") {
+  useEffect(() => {
+    if (state.phase !== "confirmed") return;
+
+    const paymentUrl = state.data.paymentUrl;
+    setRedirectIn(AUTO_PAY_REDIRECT_SEC);
+
+    const tick = window.setInterval(() => {
+      setRedirectIn((n) => {
+        if (n === null || n <= 1) {
+          window.clearInterval(tick);
+          window.location.href = paymentUrl;
+          return 0;
+        }
+        return n - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(tick);
+  }, [state]);
+
+  if (state.phase === "confirming") {
     return (
-      <div className="mx-auto max-w-xl border-2 border-camp-bark/30 bg-camp-paper p-10 text-center">
-        <CircleNotch size={40} weight="bold" className="mx-auto animate-spin text-camp-flame" />
-        <h1 className="font-camp mt-6 text-3xl text-camp-bark">Finishing your registration…</h1>
-        <p className="mt-3 text-camp-ink/80">
-          Hang tight — we&apos;re setting up your payment page for <strong>{campTitle}</strong>.
-        </p>
-      </div>
+      <ThankYouShell campTitle={displayCampTitle}>
+        <div className="flex flex-col items-center gap-3 text-center">
+          <CircleNotch size={28} weight="bold" className="animate-spin text-camp-flame" />
+          <p className="font-camp text-xl text-camp-bark">Almost done…</p>
+          <p className="text-sm leading-relaxed text-camp-ink/75">
+            We&apos;re generating your reference code and payment link. This usually takes just a
+            few seconds.
+          </p>
+        </div>
+      </ThankYouShell>
     );
   }
 
-  if (state.phase === "ready" && state.data.kind === "registration") {
+  if (state.phase === "confirmed") {
+    const { data } = state;
     return (
-      <div className="mx-auto max-w-xl border-2 border-camp-bark/30 bg-camp-paper p-10 text-center">
-        <h1 className="font-camp text-3xl text-camp-bark">Taking you to payment…</h1>
-        <p className="mt-3 text-camp-ink/80">
-          Reference <span className="font-mono text-camp-flame">{state.data.referenceCode}</span>
-        </p>
-        <a
-          href={state.data.paymentUrl}
-          className="mt-6 inline-flex items-center gap-2 font-camp text-xl text-camp-flame underline decoration-2 underline-offset-4"
-        >
-          Continue to payment <ArrowRight size={18} weight="bold" />
-        </a>
-      </div>
+      <ThankYouShell campTitle={data.campTitle}>
+        <div className="space-y-5 text-center">
+          <div className="flex items-center justify-center gap-2 text-camp-moss">
+            <Confetti size={22} weight="duotone" />
+            <p className="font-camp text-xl text-camp-bark">
+              Hi {greetingName(data.parentName)} — you&apos;re registered!
+            </p>
+          </div>
+
+          {data.camperName ? (
+            <p className="text-sm text-camp-ink/80">
+              Camper: <strong className="text-camp-bark">{data.camperName}</strong>
+            </p>
+          ) : null}
+
+          <div className="border border-dashed border-camp-bark/35 bg-camp-paper-soft px-4 py-3">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-camp-ink/60">
+              Your reference code
+            </p>
+            <p className="font-mono mt-1 text-2xl tracking-wide text-camp-flame">
+              {data.referenceCode}
+            </p>
+            {data.amountDue > 0 ? (
+              <p className="mt-1 text-sm text-camp-ink/75">
+                Amount due: <strong>{formatCad(data.amountDue)}</strong>
+              </p>
+            ) : null}
+          </div>
+
+          <p className="text-sm leading-relaxed text-camp-ink/80">
+            <strong className="text-camp-bark">One last step:</strong> complete payment to lock in
+            your spot. Save your reference code — you&apos;ll need it for e-Transfer.
+          </p>
+
+          <a
+            href={data.paymentUrl}
+            className="inline-flex w-full items-center justify-center gap-2 border-2 border-camp-flame bg-camp-flame px-5 py-3.5 font-camp text-xl text-camp-paper transition hover:bg-camp-bark hover:border-camp-bark"
+          >
+            Continue to payment <ArrowRight size={20} weight="bold" />
+          </a>
+
+          {redirectIn !== null && redirectIn > 0 ? (
+            <p className="text-xs text-camp-ink/60">
+              Redirecting to payment in {redirectIn} second{redirectIn === 1 ? "" : "s"}…
+            </p>
+          ) : null}
+        </div>
+      </ThankYouShell>
     );
   }
 
-  if (state.phase === "ready" && state.data.kind === "waitlist") {
+  if (state.phase === "waitlist") {
+    const { data } = state;
     return (
-      <div className="mx-auto max-w-xl border-2 border-camp-bark/30 bg-camp-paper p-10 text-center">
-        <h1 className="font-camp text-3xl text-camp-bark">You&apos;re on the waitlist</h1>
-        <p className="mt-3 text-camp-ink/80">
-          Thanks for signing up for <strong>{state.data.campTitle}</strong>. You&apos;re{" "}
-          <strong>#{state.data.position}</strong> on the list — we&apos;ll email you if a spot opens.
-        </p>
-        <Link
-          href={state.data.registerUrl}
-          className="mt-6 inline-block font-camp text-xl text-camp-flame underline decoration-2 underline-offset-4"
-        >
-          Back to camp page
-        </Link>
-      </div>
+      <ThankYouShell campTitle={data.campTitle}>
+        <div className="space-y-4 text-center">
+          <p className="font-camp text-xl text-camp-bark">You&apos;re on the waitlist</p>
+          <p className="text-sm leading-relaxed text-camp-ink/80">
+            This session is full, but you&apos;re{" "}
+            <strong className="text-camp-bark">#{data.position}</strong> on the list. We&apos;ll
+            email you if a spot opens up.
+          </p>
+          <Link
+            href={data.registerUrl}
+            className="inline-block font-camp text-lg text-camp-flame underline decoration-2 underline-offset-4"
+          >
+            Back to camp page
+          </Link>
+        </div>
+      </ThankYouShell>
     );
   }
 
   if (state.phase === "timeout") {
     return (
-      <div className="mx-auto max-w-xl border-2 border-camp-flame/50 bg-camp-paper p-10 text-center">
-        <Warning size={36} weight="duotone" className="mx-auto text-camp-flame" />
-        <h1 className="font-camp mt-4 text-3xl text-camp-bark">Still processing</h1>
-        <p className="mt-3 text-camp-ink/80">
-          Your form was submitted, but payment isn&apos;t ready yet. Refresh in a minute, or check
-          your email for a confirmation with your reference code.
-        </p>
-        <Link
-          href="/contact"
-          className="mt-6 inline-block font-camp text-xl text-camp-flame underline decoration-2 underline-offset-4"
-        >
-          Contact us
-        </Link>
-      </div>
+      <ThankYouShell campTitle={displayCampTitle}>
+        <div className="space-y-4 text-center">
+          <Warning size={32} weight="duotone" className="mx-auto text-camp-flame" />
+          <p className="font-camp text-xl text-camp-bark">Registration received</p>
+          <p className="text-sm leading-relaxed text-camp-ink/80">
+            Your form went through — we&apos;re still finishing the payment link on our side. Check
+            your email shortly, or refresh this page in a minute.
+          </p>
+          <button
+            type="button"
+            onClick={() => window.location.reload()}
+            className="font-camp text-lg text-camp-flame underline decoration-2 underline-offset-4"
+          >
+            Refresh this page
+          </button>
+          <Link
+            href="/contact"
+            className="block text-sm text-camp-ink/70 underline underline-offset-2 hover:text-camp-bark"
+          >
+            Contact us if you need help
+          </Link>
+        </div>
+      </ThankYouShell>
     );
   }
 
   return (
-    <div className="mx-auto max-w-xl border-2 border-camp-flame/50 bg-camp-paper p-10 text-center">
-      <Warning size={36} weight="duotone" className="mx-auto text-camp-flame" />
-      <h1 className="font-camp mt-4 text-3xl text-camp-bark">Couldn&apos;t load payment</h1>
-      <p className="mt-3 text-camp-ink/80">{state.phase === "error" ? state.message : ""}</p>
-      <Link
-        href="/contact"
-        className="mt-6 inline-block font-camp text-xl text-camp-flame underline decoration-2 underline-offset-4"
-      >
-        Contact us
-      </Link>
-    </div>
+    <ThankYouShell campTitle={displayCampTitle}>
+      <div className="space-y-4 text-center">
+        <Warning size={32} weight="duotone" className="mx-auto text-camp-flame" />
+        <p className="text-sm leading-relaxed text-camp-ink/80">
+          {state.phase === "error" ? state.message : "Something went wrong."}
+        </p>
+        <Link
+          href="/contact"
+          className="inline-block font-camp text-lg text-camp-flame underline decoration-2 underline-offset-4"
+        >
+          Contact us
+        </Link>
+      </div>
+    </ThankYouShell>
   );
 }

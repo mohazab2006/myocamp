@@ -38,6 +38,9 @@ export async function GET(req: NextRequest) {
   }
 
   const paymentUrl = buildPaymentUrl(outcome.invoice.referenceCode, origin);
+  const camper = outcome.registration.campers[0];
+  const camperName =
+    camper && typeof camper.name === "string" && camper.name.trim() ? camper.name.trim() : null;
 
   return NextResponse.json({
     ok: true,
@@ -45,6 +48,8 @@ export async function GET(req: NextRequest) {
     kind: "registration" as const,
     campTitle: outcome.camp.title,
     campSlug: outcome.camp.slug,
+    parentName: outcome.registration.parentName,
+    camperName,
     referenceCode: outcome.invoice.referenceCode,
     amountDue: outcome.invoice.amountDue,
     paymentUrl
