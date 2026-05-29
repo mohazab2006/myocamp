@@ -268,11 +268,13 @@ export function RegistrationCompletePoller({
     return (
       <ThankYouShell campTitle={data.campTitle}>
         <div className="space-y-4 text-center">
+          <CheckCircle size={40} weight="fill" className="mx-auto text-camp-flame" />
           <p className="font-camp text-xl text-camp-bark">You&apos;re on the waitlist</p>
           <p className="text-sm leading-relaxed text-camp-ink/80">
-            This session is full, but you&apos;re{" "}
-            <strong className="text-camp-bark">#{data.position}</strong> on the list. We&apos;ll
-            email you if a spot opens up.
+            Thanks for signing up. This session is full right now — you&apos;re{" "}
+            <strong className="text-camp-bark">#{data.position}</strong> on the waitlist. If a spot
+            opens up, we&apos;ll email you with a link to register. No need to check back; we&apos;ll
+            reach out when it&apos;s your turn.
           </p>
           <Link
             href={data.registerUrl}
