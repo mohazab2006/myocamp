@@ -194,6 +194,7 @@ export async function deleteCampAction(formData: FormData) {
   }
 
   revalidatePath("/admin/camps");
+  revalidatePath("/admin/inbox");
   revalidatePath("/admin");
   flash("/admin/camps", "success", "Camp deleted.");
 }

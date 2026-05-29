@@ -9,7 +9,8 @@ import {
   dismissUnrelatedInboundEmails,
   fetchInboundEmailById,
   markInboundEmailNotPayment,
-  matchInboundEmailToInvoice
+  matchInboundEmailToInvoice,
+  reconcileOrphanedInboundMatches
 } from "@/lib/admin/inbound-emails";
 import { findByReferenceCode } from "@/lib/admin/payment-links";
 
@@ -85,6 +86,27 @@ export async function dismissUnrelatedInboundAction() {
       "/admin/inbox?tab=unmatched",
       "error",
       err instanceof Error ? err.message : "Could not clear inbox."
+    );
+  }
+}
+
+export async function clearStaleMatchedAction() {
+  await requireAuthorizedAdmin();
+  try {
+    const n = await reconcileOrphanedInboundMatches();
+    revalidatePath("/admin/inbox");
+    flash(
+      "/admin/inbox?tab=matched",
+      "success",
+      n > 0
+        ? `Cleared ${n} stale auto-match${n === 1 ? "" : "es"} (camp or invoice was removed).`
+        : "No stale auto-matches to clear."
+    );
+  } catch (err) {
+    flash(
+      "/admin/inbox?tab=matched",
+      "error",
+      err instanceof Error ? err.message : "Could not clear stale matches."
     );
   }
 }

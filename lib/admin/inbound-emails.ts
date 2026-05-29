@@ -559,3 +559,74 @@ export async function markInboundEmailNotPayment(id: string): Promise<void> {
     errorMessage: "Marked as not a payment by admin."
   });
 }
+
+/**
+ * Inbox rows stay "matched" even after a camp/invoice is deleted (payments orphan).
+ * Move those to not_payment so Auto-matched tab stays accurate.
+ */
+export async function reconcileOrphanedInboundMatches(): Promise<number> {
+  const supabase = createSupabaseAdminClient();
+  const { data: rows, error } = await supabase
+    .from("inbound_emails")
+    .select("id, matched_payment_id, parsed_reference_code")
+    .eq("match_status", "matched");
+
+  if (error || !rows?.length) return 0;
+
+  let updated = 0;
+  for (const row of rows as Array<{
+    id: string;
+    matched_payment_id: string | null;
+    parsed_reference_code: string | null;
+  }>) {
+    let orphan = false;
+
+    if (!row.matched_payment_id) {
+      orphan = true;
+    } else {
+      const { data: payment } = await supabase
+        .from("payments")
+        .select("invoice_id")
+        .eq("id", row.matched_payment_id)
+        .maybeSingle();
+
+      if (!payment) {
+        orphan = true;
+      } else if (!payment.invoice_id) {
+        orphan = true;
+      } else {
+        const { data: invoice } = await supabase
+          .from("invoices")
+          .select("id")
+          .eq("id", payment.invoice_id)
+          .maybeSingle();
+        if (!invoice) orphan = true;
+      }
+    }
+
+    if (!orphan && row.parsed_reference_code) {
+      const { data: refInvoice } = await supabase
+        .from("invoices")
+        .select("id")
+        .eq("reference_code", row.parsed_reference_code)
+        .maybeSingle();
+      if (!refInvoice) orphan = true;
+    }
+
+    if (!orphan) continue;
+
+    const { error: updErr } = await supabase
+      .from("inbound_emails")
+      .update({
+        match_status: "not_payment",
+        matched_payment_id: null,
+        error_message: "Linked camp or registration was removed.",
+        processed_at: new Date().toISOString()
+      })
+      .eq("id", row.id);
+
+    if (!updErr) updated += 1;
+  }
+
+  return updated;
+}

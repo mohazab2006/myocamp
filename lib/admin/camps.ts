@@ -2,6 +2,7 @@ import "server-only";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { mergeCampData, parseCampData } from "@/lib/admin/camp-data";
+import { reconcileOrphanedInboundMatches } from "@/lib/admin/inbound-emails";
 import type { Camp, CampStats } from "@/lib/types";
 
 type CampRow = {
@@ -209,8 +210,47 @@ export async function archiveCamp(id: string): Promise<void> {
 
 export async function deleteCampHard(id: string): Promise<void> {
   const supabase = createSupabaseAdminClient();
+
+  const { data: regRows } = await supabase
+    .from("registrations")
+    .select("invoices ( id )")
+    .eq("camp_id", id);
+
+  const invoiceIds: string[] = [];
+  for (const reg of (regRows ?? []) as Array<{ invoices: { id: string }[] | { id: string } | null }>) {
+    const inv = reg.invoices;
+    if (Array.isArray(inv)) {
+      for (const i of inv) if (i?.id) invoiceIds.push(i.id);
+    } else if (inv?.id) {
+      invoiceIds.push(inv.id);
+    }
+  }
+
+  if (invoiceIds.length > 0) {
+    const { data: payRows } = await supabase
+      .from("payments")
+      .select("id")
+      .in("invoice_id", invoiceIds);
+
+    const paymentIds = (payRows ?? []).map((p: { id: string }) => p.id);
+    if (paymentIds.length > 0) {
+      await supabase
+        .from("inbound_emails")
+        .update({
+          match_status: "not_payment",
+          matched_payment_id: null,
+          error_message: "Linked camp was deleted.",
+          processed_at: new Date().toISOString()
+        })
+        .eq("match_status", "matched")
+        .in("matched_payment_id", paymentIds);
+    }
+  }
+
   const { error } = await supabase.from("camps").delete().eq("id", id);
   if (error) throw new Error(error.message);
+
+  await reconcileOrphanedInboundMatches();
 }
 
 /**

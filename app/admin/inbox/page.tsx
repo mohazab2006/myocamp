@@ -19,10 +19,10 @@ import {
   type AdminSearchParams
 } from "@/lib/admin/page-state";
 import { fetchGmailCredentials } from "@/lib/admin/gmail";
-import { fetchInboundEmails } from "@/lib/admin/inbound-emails";
+import { fetchInboundEmails, reconcileOrphanedInboundMatches } from "@/lib/admin/inbound-emails";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { InboundEmail, InboundEmailMatchStatus } from "@/lib/types";
-import { matchInboundEmailAction, dismissUnrelatedInboundAction, markNotPaymentAction } from "./actions";
+import { matchInboundEmailAction, dismissUnrelatedInboundAction, markNotPaymentAction, clearStaleMatchedAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -138,6 +138,8 @@ export default async function AdminInboxPage({
   const sp = (searchParams ? await searchParams : {}) as { tab?: string };
   const tab = pickTab(sp.tab);
 
+  await reconcileOrphanedInboundMatches();
+
   const [creds, emails, invoices] = await Promise.all([
     fetchGmailCredentials(),
     fetchInboundEmails({ statuses: statusesForTab(tab), limit: 100 }),
@@ -223,6 +225,17 @@ export default async function AdminInboxPage({
           );
         })}
       </nav>
+
+      {tab === "matched" && counts.matched > 0 ? (
+        <div className="mt-4 flex flex-wrap items-center gap-3 border border-line bg-paper-deep/35 px-4 py-3 text-sm text-ink-soft">
+          <span>
+            Deleted a camp but still see old matches? Clear entries whose invoice no longer exists.
+          </span>
+          <form action={clearStaleMatchedAction}>
+            <AdminSubmitButton idleLabel="Clear stale matches" variant="secondary" />
+          </form>
+        </div>
+      ) : null}
 
       {tab === "unmatched" && counts.unmatched > 0 ? (
         <div className="mt-4 flex flex-wrap items-center gap-3 border border-line bg-paper-deep/35 px-4 py-3 text-sm text-ink-soft">
