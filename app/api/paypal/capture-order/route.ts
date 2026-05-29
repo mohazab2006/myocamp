@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import { recordSplitFamilyPayment } from "@/lib/admin/family-billing";
 import { findByReferenceCode } from "@/lib/admin/payment-links";
 import { capturePayPalOrder, isPayPalConfigured } from "@/lib/admin/paypal";
 import { recordPayment } from "@/lib/admin/payments";
@@ -11,20 +12,16 @@ export const dynamic = "force-dynamic";
 
 /**
  * POST /api/paypal/capture-order
- * Body: { orderID: string, ref: string }
- *
- * Captures a PayPal order, verifies the amount, records a payment row, and
- * triggers invoice recompute. Idempotent — if the same PayPal capture id is
- * received twice, we skip the second insert.
+ * Body: { orderID: string, ref: string, familyRefs?: string[] }
  */
 export async function POST(req: NextRequest) {
   if (!isPayPalConfigured()) {
     return NextResponse.json({ error: "PayPal not configured." }, { status: 503 });
   }
 
-  let body: { orderID?: string; ref?: string };
+  let body: { orderID?: string; ref?: string; familyRefs?: string[] };
   try {
-    body = (await req.json()) as { orderID?: string; ref?: string };
+    body = (await req.json()) as { orderID?: string; ref?: string; familyRefs?: string[] };
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
@@ -39,6 +36,8 @@ export async function POST(req: NextRequest) {
   if (!lookup) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
 
   const { invoice } = lookup;
+  const familyRefs = body.familyRefs?.filter(Boolean) ?? [];
+  const isFamily = familyRefs.length > 1;
 
   let capture;
   try {
@@ -51,7 +50,6 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // PayPal returns the capture nested inside purchase_units[0].payments.captures[0].
   const captured = capture.purchase_units?.[0]?.payments?.captures?.[0];
   if (!captured) {
     return NextResponse.json(
@@ -60,16 +58,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Verify the reference id matches what we expect.
   const refOnOrder = capture.purchase_units?.[0]?.reference_id;
   if (refOnOrder && refOnOrder !== invoice.referenceCode) {
-    return NextResponse.json(
-      { error: "PayPal reference mismatch." },
-      { status: 409 }
-    );
+    return NextResponse.json({ error: "PayPal reference mismatch." }, { status: 409 });
   }
 
-  // Idempotency: if we've already saved this capture id, no-op.
   const supabase = createSupabaseAdminClient();
   const { data: existing } = await supabase
     .from("payments")
@@ -86,22 +79,39 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  let recordedAmount = Number(captured.amount.value);
+  const recordedAmount = Number(captured.amount.value);
+  const payerCommon = {
+    senderName:
+      [capture.payer?.name?.given_name, capture.payer?.name?.surname].filter(Boolean).join(" ") ||
+      null,
+    senderEmail: capture.payer?.email_address ?? null,
+    receivedAt: captured.create_time ?? new Date().toISOString(),
+    rawPayload: capture as unknown as Record<string, unknown>,
+    status: captured.status === "COMPLETED" ? ("received" as const) : ("pending" as const)
+  };
+
   try {
-    await recordPayment({
-      invoiceId: invoice.id,
-      method: "paypal",
-      amount: recordedAmount,
-      status: captured.status === "COMPLETED" ? "received" : "pending",
-      externalRef: captured.id,
-      senderName:
-        [capture.payer?.name?.given_name, capture.payer?.name?.surname]
-          .filter(Boolean)
-          .join(" ") || null,
-      senderEmail: capture.payer?.email_address ?? null,
-      receivedAt: captured.create_time ?? new Date().toISOString(),
-      rawPayload: capture as unknown as Record<string, unknown>
-    });
+    if (isFamily) {
+      const lookups = await Promise.all(familyRefs.map((r) => findByReferenceCode(r)));
+      const invoiceIds = lookups
+        .filter((l): l is NonNullable<typeof l> => l != null)
+        .map((l) => l.invoice.id);
+
+      await recordSplitFamilyPayment(invoiceIds, recordedAmount, {
+        method: "paypal",
+        externalRef: captured.id,
+        ...payerCommon,
+        notes: `PayPal family payment (${familyRefs.join(", ")})`
+      });
+    } else {
+      await recordPayment({
+        invoiceId: invoice.id,
+        method: "paypal",
+        amount: recordedAmount,
+        externalRef: captured.id,
+        ...payerCommon
+      });
+    }
   } catch (err) {
     console.error("[paypal/capture-order] recordPayment error:", err);
     return NextResponse.json(
@@ -110,14 +120,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Fire payment_confirmation email when the invoice is now paid in full.
   if (captured.status === "COMPLETED") {
-    const ctx = await loadRegistrationContextByInvoice(invoice.id);
-    if (ctx && ctx.invoice.status === "paid") {
-      const origin = req.nextUrl.origin;
-      void notify
-        .paymentConfirmation({ ...ctx, origin }, { amountPaid: recordedAmount, method: "paypal" })
-        .catch((err) => console.warn("[paypal/capture-order] notify failed:", err));
+    const notifyIds = isFamily
+      ? (
+          await Promise.all(familyRefs.map((r) => findByReferenceCode(r)))
+        )
+          .filter((l): l is NonNullable<typeof l> => l != null)
+          .map((l) => l.invoice.id)
+      : [invoice.id];
+
+    const origin = req.nextUrl.origin;
+    for (const invoiceId of notifyIds) {
+      const ctx = await loadRegistrationContextByInvoice(invoiceId);
+      if (ctx && ctx.invoice.status === "paid") {
+        void notify
+          .paymentConfirmation({ ...ctx, origin }, { amountPaid: recordedAmount, method: "paypal" })
+          .catch((err) => console.warn("[paypal/capture-order] notify failed:", err));
+      }
     }
   }
 

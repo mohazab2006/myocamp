@@ -159,7 +159,7 @@ export async function findRegistrationByJotformSubmission(
   return rowToRegistration(data as RegistrationRow);
 }
 
-/** Active registration for the same camp + parent email (blocks duplicate JotForm submits). */
+/** Active registration for the same camp + parent email (admin / family billing lookups). */
 export async function findActiveRegistrationByCampAndEmail(
   campId: string,
   parentEmail: string | null
@@ -238,34 +238,6 @@ export async function createRegistrationWithInvoice(
           isNew: false
         };
       }
-    }
-  }
-
-  const existingByEmail = await findActiveRegistrationByCampAndEmail(
-    input.campId,
-    input.parentEmail
-  );
-  if (existingByEmail) {
-    const invoice = await loadInvoiceForRegistration(existingByEmail.id);
-    if (invoice) {
-      if (
-        input.jotformSubmissionId &&
-        input.jotformSubmissionId !== existingByEmail.jotformSubmissionId
-      ) {
-        await supabase
-          .from("registrations")
-          .update({ jotform_submission_id: input.jotformSubmissionId })
-          .eq("id", existingByEmail.id);
-      }
-      return {
-        registration:
-          input.jotformSubmissionId &&
-          input.jotformSubmissionId !== existingByEmail.jotformSubmissionId
-            ? { ...existingByEmail, jotformSubmissionId: input.jotformSubmissionId }
-            : existingByEmail,
-        invoice,
-        isNew: false
-      };
     }
   }
 

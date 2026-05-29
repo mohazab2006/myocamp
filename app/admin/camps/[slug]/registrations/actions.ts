@@ -106,19 +106,11 @@ export async function createManualRegistrationAction(formData: FormData) {
 
     revalidatePath(`/admin/camps/${slug}`);
     revalidatePath("/admin/camps");
-    if (!result.isNew) {
-      flash(
-        regUrl(slug, result.registration.id),
-        "info",
-        `This email already has an active registration · ${result.invoice.referenceCode}.`
-      );
-    } else {
-      flash(
-        regUrl(slug, result.registration.id),
-        "success",
-        `Added registration for ${parentName ?? parentEmail ?? "this family"} · ${result.invoice.referenceCode}.`
-      );
-    }
+    flash(
+      regUrl(slug, result.registration.id),
+      "success",
+      `Added registration for ${parentName ?? parentEmail ?? "this family"} · ${result.invoice.referenceCode}.`
+    );
   } catch (err) {
     flash(
       `/admin/camps/${slug}?tab=registrations`,

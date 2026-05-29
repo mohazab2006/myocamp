@@ -9,6 +9,8 @@ interface PayPalButtonProps {
   amount: number;
   currency?: string;
   environment?: "sandbox" | "live";
+  /** When set, one PayPal charge covers all sibling registrations. */
+  familyRefs?: string[];
 }
 
 type PayPalSDK = {
@@ -31,7 +33,8 @@ export function PayPalButton({
   referenceCode,
   clientId,
   amount,
-  currency = "CAD"
+  currency = "CAD",
+  familyRefs
 }: PayPalButtonProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
@@ -86,10 +89,14 @@ export function PayPalButton({
           style: { layout: "vertical", color: "gold", shape: "rect", label: "pay" },
           createOrder: async () => {
             setPhase("processing");
+            const payload = {
+              ref: referenceCode,
+              ...(familyRefs && familyRefs.length > 1 ? { familyRefs } : {})
+            };
             const res = await fetch("/api/paypal/create-order", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ ref: referenceCode })
+              body: JSON.stringify(payload)
             });
             const json = await res.json();
             if (!res.ok || !json.id) {
@@ -101,10 +108,15 @@ export function PayPalButton({
           },
           onApprove: async (data) => {
             setPhase("processing");
+            const capturePayload = {
+              orderID: data.orderID,
+              ref: referenceCode,
+              ...(familyRefs && familyRefs.length > 1 ? { familyRefs } : {})
+            };
             const res = await fetch("/api/paypal/capture-order", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ orderID: data.orderID, ref: referenceCode })
+              body: JSON.stringify(capturePayload)
             });
             const json = await res.json();
             if (!res.ok || !json.ok) {
@@ -139,7 +151,7 @@ export function PayPalButton({
     return () => {
       cancelled = true;
     };
-  }, [clientId, currency, referenceCode, router]);
+  }, [clientId, currency, referenceCode, familyRefs, router]);
 
   return (
     <div className="space-y-3">

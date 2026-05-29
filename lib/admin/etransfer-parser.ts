@@ -28,6 +28,18 @@ export interface ParsedEtransfer {
 /** Looks like `MYO-2026-A4F2` or `MYO-2026-A4F2Q`. Case-insensitive. */
 export const MYO_REFERENCE_CODE_RE = /\bMYO[-\s]?(\d{4})[-\s]?([A-Z0-9]{4,6})\b/i;
 
+/** Every MYO reference code found in a memo, subject, or body. */
+export function extractAllReferenceCodes(haystack: string): string[] {
+  const re = new RegExp(MYO_REFERENCE_CODE_RE.source, "gi");
+  const codes = new Set<string>();
+  for (const match of haystack.matchAll(re)) {
+    if (match[1] && match[2]) {
+      codes.add(`MYO-${match[1]}-${match[2].toUpperCase()}`);
+    }
+  }
+  return [...codes];
+}
+
 const INTERAC_FROM_HINTS = [
   "payments.interac.ca",
   "interac.ca",

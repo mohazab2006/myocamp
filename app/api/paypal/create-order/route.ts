@@ -1,17 +1,56 @@
 import { NextResponse, type NextRequest } from "next/server";
 
+import {
+  familyTotalRemaining,
+  type FamilyBillingLine
+} from "@/lib/admin/family-billing";
 import { findByReferenceCode } from "@/lib/admin/payment-links";
 import { createPayPalOrder, isPayPalConfigured } from "@/lib/admin/paypal";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+async function loadFamilyCharge(
+  primaryRef: string,
+  familyRefs?: string[]
+): Promise<{
+  remaining: number;
+  referenceCodes: string[];
+  campTitle: string;
+  primaryReference: string;
+} | null> {
+  const primary = await findByReferenceCode(primaryRef);
+  if (!primary) return null;
+
+  const refs = familyRefs?.length ? familyRefs : [primaryRef];
+  const lookups = await Promise.all(refs.map((r) => findByReferenceCode(r)));
+  const valid = lookups.filter((l): l is NonNullable<typeof l> => l != null);
+
+  if (valid.length === 0) return null;
+
+  const lines: FamilyBillingLine[] = valid.map((l) => ({
+    registrationId: l.registration.id,
+    invoiceId: l.invoice.id,
+    referenceCode: l.invoice.referenceCode,
+    camperLabel: "",
+    amountDue: l.invoice.amountDue,
+    amountPaid: l.invoice.amountPaid,
+    remaining: Number((l.invoice.amountDue - l.invoice.amountPaid).toFixed(2)),
+    isCurrent: l.invoice.referenceCode === primaryRef
+  }));
+
+  const remaining = familyTotalRemaining(lines.filter((l) => l.remaining > 0));
+  return {
+    remaining,
+    referenceCodes: lines.map((l) => l.referenceCode),
+    campTitle: primary.camp.title,
+    primaryReference: primary.invoice.referenceCode
+  };
+}
+
 /**
  * POST /api/paypal/create-order
- * Body: { ref: string }
- *
- * Looks up the invoice by reference code, creates a PayPal order for the
- * remaining balance, and returns { id } back to the browser SDK.
+ * Body: { ref: string, familyRefs?: string[] }
  */
 export async function POST(req: NextRequest) {
   if (!isPayPalConfigured()) {
@@ -21,9 +60,9 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let body: { ref?: string };
+  let body: { ref?: string; familyRefs?: string[] };
   try {
-    body = (await req.json()) as { ref?: string };
+    body = (await req.json()) as { ref?: string; familyRefs?: string[] };
   } catch {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
@@ -34,7 +73,7 @@ export async function POST(req: NextRequest) {
   const lookup = await findByReferenceCode(ref);
   if (!lookup) return NextResponse.json({ error: "Invoice not found" }, { status: 404 });
 
-  const { invoice, registration, camp } = lookup;
+  const { registration, camp } = lookup;
 
   if (registration.status === "cancelled") {
     return NextResponse.json(
@@ -43,20 +82,25 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const remaining = Number((invoice.amountDue - invoice.amountPaid).toFixed(2));
-  if (remaining <= 0) {
+  const charge = await loadFamilyCharge(ref, body.familyRefs);
+  if (!charge || charge.remaining <= 0) {
     return NextResponse.json(
       { error: "This invoice is already paid in full." },
       { status: 409 }
     );
   }
 
+  const description =
+    charge.referenceCodes.length > 1
+      ? `${camp.title} — family payment (${charge.referenceCodes.join(", ")})`
+      : `${camp.title} — ${charge.primaryReference}`;
+
   try {
     const order = await createPayPalOrder({
-      amount: remaining,
+      amount: charge.remaining,
       currency: "CAD",
-      referenceId: invoice.referenceCode,
-      description: `${camp.title} — ${invoice.referenceCode}`,
+      referenceId: charge.primaryReference,
+      description,
       payeeEmail: lookup.paymentEmail
     });
     return NextResponse.json({ id: order.id });

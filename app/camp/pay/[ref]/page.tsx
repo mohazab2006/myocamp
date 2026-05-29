@@ -19,6 +19,13 @@ import {
 
 import { CopyButton } from "@/components/admin/copy-button";
 import { PayPalButton } from "@/components/payment/paypal-button";
+import {
+  familyReferenceCodes,
+  familyTotalRemaining,
+  fetchFamilyBillingLines,
+  formatFamilyMemo,
+  type FamilyBillingLine
+} from "@/lib/admin/family-billing";
 import { findByReferenceCode } from "@/lib/admin/payment-links";
 import { fetchPaymentsForInvoice } from "@/lib/admin/payments";
 import { isPayPalConfigured, getPayPalEnvironment } from "@/lib/admin/paypal";
@@ -65,6 +72,12 @@ export default async function CampPayPage({
   const { camp, registration, invoice, paymentEmail } = lookup;
   const payments = await fetchPaymentsForInvoice(invoice.id);
   const remaining = Number((invoice.amountDue - invoice.amountPaid).toFixed(2));
+  const familyLines = await fetchFamilyBillingLines(camp.id, registration.parentEmail, invoice.id);
+  const isFamilyPayment = familyLines.length > 1;
+  const familyRemaining = familyTotalRemaining(familyLines);
+  const familyRefs = familyReferenceCodes(familyLines);
+  const familyMemo = formatFamilyMemo(familyLines);
+  const payRemaining = isFamilyPayment ? familyRemaining : remaining;
 
   const isPaid = invoice.status === "paid";
   const isCancelled = registration.status === "cancelled";
@@ -139,11 +152,16 @@ export default async function CampPayPage({
           <UnpaidState
             referenceCode={invoice.referenceCode}
             remaining={remaining}
+            payRemaining={payRemaining}
             amountDue={invoice.amountDue}
             amountPaid={invoice.amountPaid}
             isPartial={isPartial}
             paymentEmail={paymentEmail}
             payments={payments}
+            familyLines={familyLines}
+            isFamilyPayment={isFamilyPayment}
+            familyMemo={familyMemo}
+            familyRefs={familyRefs}
           />
         )}
 
@@ -217,34 +235,52 @@ function CancelledState({ contactEmail }: { contactEmail: string | null }) {
 function UnpaidState({
   referenceCode,
   remaining,
+  payRemaining,
   amountDue,
   amountPaid,
   isPartial,
   paymentEmail,
-  payments
+  payments,
+  familyLines,
+  isFamilyPayment,
+  familyMemo,
+  familyRefs
 }: {
   referenceCode: string;
   remaining: number;
+  payRemaining: number;
   amountDue: number;
   amountPaid: number;
   isPartial: boolean;
   paymentEmail: string | null;
   payments: Payment[];
+  familyLines: FamilyBillingLine[];
+  isFamilyPayment: boolean;
+  familyMemo: string;
+  familyRefs: string[];
 }) {
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const paypalEnabled = isPayPalConfigured() && Boolean(paypalClientId);
 
   return (
     <>
+      {isFamilyPayment ? (
+        <FamilyPaymentBanner lines={familyLines} familyRemaining={payRemaining} />
+      ) : null}
+
       {/* Amount due */}
       <section className="mt-5 border border-line bg-paper p-6 md:p-8">
         <div className="grid gap-4 md:grid-cols-3">
           <div className="md:col-span-2">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
-              Amount due
+              {isFamilyPayment ? "Family total due" : "Amount due"}
             </p>
-            <p className="mt-2 font-display text-5xl text-ink">{fmt(remaining)}</p>
-            {isPartial ? (
+            <p className="mt-2 font-display text-5xl text-ink">{fmt(payRemaining)}</p>
+            {isFamilyPayment ? (
+              <p className="mt-2 text-xs text-ink-soft">
+                This page ({referenceCode}): {fmt(remaining)} · Pay once below for all children
+              </p>
+            ) : isPartial ? (
               <p className="mt-2 text-xs text-ink-soft">
                 {fmt(amountPaid)} of {fmt(amountDue)} received · {fmt(remaining)} remaining
               </p>
@@ -276,15 +312,18 @@ function UnpaidState({
           <div className="flex-1">
             <h3 className="font-display text-xl tracking-tight text-ink">Pay with PayPal</h3>
             <p className="mt-1 text-sm text-ink-soft">
-              Fastest option — confirmation is instant.
+              {isFamilyPayment
+                ? "One checkout covers every child listed above."
+                : "Fastest option — confirmation is instant."}
             </p>
             <div className="mt-4">
               {paypalEnabled && paypalClientId ? (
                 <PayPalButton
                   referenceCode={referenceCode}
                   clientId={paypalClientId}
-                  amount={remaining}
+                  amount={payRemaining}
                   environment={getPayPalEnvironment()}
+                  familyRefs={isFamilyPayment ? familyRefs : undefined}
                 />
               ) : (
                 <div className="border border-dashed border-line bg-paper-deep/15 p-4 text-xs text-ink-soft">
@@ -303,8 +342,9 @@ function UnpaidState({
           <div className="flex-1">
             <h3 className="font-display text-xl tracking-tight text-ink">Pay by e-Transfer</h3>
             <p className="mt-1 text-sm text-ink-soft">
-              Send an Interac e-Transfer and we'll match it automatically — usually within a
-              few minutes.
+              {isFamilyPayment
+                ? "Send one e-Transfer for the full family total. Include every reference code in the message."
+                : "Send an Interac e-Transfer and we'll match it automatically — usually within a few minutes."}
             </p>
             <div className="mt-4 grid gap-3 md:grid-cols-3 [&>*]:min-w-0">
               <ETransferField
@@ -312,15 +352,30 @@ function UnpaidState({
                 value={paymentEmail ?? "Contact us for payment details"}
                 canCopy={Boolean(paymentEmail)}
               />
-              <ETransferField label="Amount" value={fmt(remaining)} />
-              <ETransferField label="Message / memo" value={referenceCode} highlight />
+              <ETransferField label="Amount" value={fmt(payRemaining)} />
+              <ETransferField
+                label="Message / memo"
+                value={isFamilyPayment ? familyMemo : referenceCode}
+                highlight
+              />
             </div>
             <div className="mt-4 flex items-start gap-2 border-l-2 border-brass bg-brass/5 px-4 py-3 text-xs leading-relaxed text-ink-soft">
               <Info size={14} weight="duotone" className="mt-0.5 shrink-0 text-brass" />
               <p>
-                You must include <strong className="font-mono text-ink">{referenceCode}</strong>
-                {" "}in the message so we can match your payment to your registration. Without it,
-                confirming your spot may take longer.
+                {isFamilyPayment ? (
+                  <>
+                    Send <strong className="text-ink">{fmt(payRemaining)}</strong> once and put{" "}
+                    <strong className="font-mono text-ink">{familyMemo}</strong> in the message so
+                    we can mark every child paid.
+                  </>
+                ) : (
+                  <>
+                    You must include{" "}
+                    <strong className="font-mono text-ink">{referenceCode}</strong> in the message
+                    so we can match your payment to your registration. Without it, confirming your
+                    spot may take longer.
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -334,23 +389,43 @@ function UnpaidState({
           <div className="flex-1">
             <h3 className="font-display text-xl tracking-tight text-ink">Pay cash at drop-off</h3>
             <p className="mt-1 text-sm text-ink-soft">
-              Bring <strong className="text-ink">{fmt(remaining)}</strong> in exact cash on
-              drop-off day. We'll mark you as paid right now and collect at camp.
+              {isFamilyPayment ? (
+                <>
+                  Bring <strong className="text-ink">{fmt(payRemaining)}</strong> in exact cash for
+                  all children on drop-off day, or use PayPal / e-Transfer above for one combined
+                  payment.
+                </>
+              ) : (
+                <>
+                  Bring <strong className="text-ink">{fmt(remaining)}</strong> in exact cash on
+                  drop-off day. We&apos;ll mark you as paid right now and collect at camp.
+                </>
+              )}
             </p>
-            <form action={commitCashPaymentAction} className="mt-4">
-              <input type="hidden" name="ref" value={referenceCode} />
-              <button
-                type="submit"
-                className="inline-flex h-11 items-center gap-2 bg-forest px-5 text-sm font-semibold text-paper transition hover:bg-pine"
-              >
-                <Coins size={16} weight="bold" /> I'll bring cash to drop-off
-                <ArrowRight size={16} weight="bold" />
-              </button>
-            </form>
-            <p className="mt-3 text-xs text-ink-soft">
-              By selecting cash you commit to paying at drop-off. If you change your mind,
-              you can come back to this page and pay by PayPal or e-Transfer instead.
-            </p>
+            {!isFamilyPayment ? (
+              <form action={commitCashPaymentAction} className="mt-4">
+                <input type="hidden" name="ref" value={referenceCode} />
+                <button
+                  type="submit"
+                  className="inline-flex h-11 items-center gap-2 bg-forest px-5 text-sm font-semibold text-paper transition hover:bg-pine"
+                >
+                  <Coins size={16} weight="bold" /> I&apos;ll bring cash to drop-off
+                  <ArrowRight size={16} weight="bold" />
+                </button>
+              </form>
+            ) : (
+              <p className="mt-4 text-xs text-ink-soft">
+                For multiple children, pay online once above or bring the full family total in cash
+                on drop-off — tell staff all reference codes:{" "}
+                <code className="font-mono text-ink">{familyMemo}</code>
+              </p>
+            )}
+            {!isFamilyPayment ? (
+              <p className="mt-3 text-xs text-ink-soft">
+                By selecting cash you commit to paying at drop-off. If you change your mind, you
+                can come back to this page and pay by PayPal or e-Transfer instead.
+              </p>
+            ) : null}
           </div>
         </div>
       </section>
@@ -385,6 +460,55 @@ function UnpaidState({
         </section>
       ) : null}
     </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Family payment (one form per child, one payment for the household)
+// ---------------------------------------------------------------------------
+
+function FamilyPaymentBanner({
+  lines,
+  familyRemaining
+}: {
+  lines: FamilyBillingLine[];
+  familyRemaining: number;
+}) {
+  return (
+    <section className="mt-5 border-2 border-pine/35 bg-sky/35 p-6 md:p-8">
+      <p className="eyebrow text-forest">Family registration</p>
+      <h2 className="mt-2 font-display text-2xl tracking-tight text-ink">
+        One payment for all your children
+      </h2>
+      <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+        Each child has their own registration, but you can pay once for everyone. Use any
+        child&apos;s payment page — the total is the same.
+      </p>
+      <ul className="mt-4 divide-y divide-line/60 border border-line bg-paper text-sm">
+        {lines.map((line) => (
+          <li
+            key={line.invoiceId}
+            className="flex flex-wrap items-center justify-between gap-2 px-4 py-3"
+          >
+            <div>
+              <p className="font-medium text-ink">
+                {line.camperLabel}
+                {line.isCurrent ? (
+                  <span className="ml-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-pine">
+                    this page
+                  </span>
+                ) : null}
+              </p>
+              <p className="font-mono text-xs text-ink-soft">{line.referenceCode}</p>
+            </div>
+            <p className="font-display text-lg text-ink">{fmt(line.remaining)}</p>
+          </li>
+        ))}
+      </ul>
+      <p className="mt-4 text-right text-sm text-ink-soft">
+        Family total: <strong className="font-display text-xl text-ink">{fmt(familyRemaining)}</strong>
+      </p>
+    </section>
   );
 }
 

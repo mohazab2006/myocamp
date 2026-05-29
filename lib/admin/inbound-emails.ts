@@ -1,6 +1,8 @@
 import "server-only";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { extractAllReferenceCodes } from "@/lib/admin/etransfer-parser";
+import { recordSplitFamilyPayment } from "@/lib/admin/family-billing";
 import { recordPayment } from "@/lib/admin/payments";
 import { loadRegistrationContextByInvoice, notify } from "@/lib/email/notifications";
 import type {
@@ -274,14 +276,24 @@ export async function ingestEtransferEmail(input: AutoMatchInput): Promise<AutoM
   let matchedPaymentId: string | null = null;
   let errorMessage: string | null = null;
 
-  // Auto-match: exact reference code.
-  if (input.parsed.referenceCode) {
-    const invoice = await findInvoiceByReferenceCode(input.parsed.referenceCode);
-    if (!invoice) {
-      errorMessage = `Reference ${input.parsed.referenceCode} not found in invoices.`;
+  // Auto-match: one or more reference codes in the memo / body.
+  const refHaystack = [input.parsed.memo, input.subject, input.bodyText].filter(Boolean).join("\n");
+  const referenceCodes = extractAllReferenceCodes(refHaystack);
+  if (referenceCodes.length === 0 && input.parsed.referenceCode) {
+    referenceCodes.push(input.parsed.referenceCode);
+  }
+
+  if (referenceCodes.length > 0) {
+    const invoices = (
+      await Promise.all(referenceCodes.map((code) => findInvoiceByReferenceCode(code)))
+    ).filter((inv): inv is NonNullable<typeof inv> => inv != null);
+
+    if (invoices.length === 0) {
+      errorMessage = `Reference ${referenceCodes.join(", ")} not found in invoices.`;
     } else if (input.parsed.amount == null) {
       errorMessage = "Reference matched but amount could not be parsed.";
-    } else {
+    } else if (invoices.length === 1) {
+      const invoice = invoices[0]!;
       try {
         const payment = await recordPayment({
           invoiceId: invoice.id,
@@ -299,7 +311,6 @@ export async function ingestEtransferEmail(input: AutoMatchInput): Promise<AutoM
         matchStatus = "matched";
         matchedPaymentId = payment.id;
 
-        // Fire payment_confirmation when the e-transfer pushed the invoice to paid.
         try {
           const ctx = await loadRegistrationContextByInvoice(invoice.id);
           if (ctx && ctx.invoice.status === "paid") {
@@ -314,8 +325,60 @@ export async function ingestEtransferEmail(input: AutoMatchInput): Promise<AutoM
         matchStatus = "error";
         errorMessage = err instanceof Error ? err.message : "Could not record payment.";
       }
+    } else {
+      const missing = referenceCodes.filter(
+        (code) => !invoices.some((inv) => inv.referenceCode === code)
+      );
+      if (missing.length > 0) {
+        errorMessage = `Some references not found: ${missing.join(", ")}.`;
+      } else {
+        try {
+          const { paymentIds } = await recordSplitFamilyPayment(
+            invoices.map((inv) => inv.id),
+            input.parsed.amount,
+            {
+              method: "etransfer",
+              status: "received",
+              externalRef: input.gmailMessageId,
+              senderName: input.parsed.senderName,
+              senderEmail: input.parsed.senderEmail,
+              senderMemo: input.parsed.memo,
+              receivedAt: input.receivedAt,
+              notes: `Auto-matched family e-transfer (${referenceCodes.join(", ")})`,
+              rawPayload: input.rawPayload
+            }
+          );
+          if (paymentIds.length > 0) {
+            matchStatus = "matched";
+            matchedPaymentId = paymentIds[0] ?? null;
+            for (const invoice of invoices) {
+              try {
+                const ctx = await loadRegistrationContextByInvoice(invoice.id);
+                if (ctx && ctx.invoice.status === "paid") {
+                  void notify
+                    .paymentConfirmation(ctx, {
+                      amountPaid: input.parsed.amount,
+                      method: "etransfer"
+                    })
+                    .catch((nErr) => console.warn("[ingestEtransferEmail] notify failed:", nErr));
+                }
+              } catch {
+                // continue
+              }
+            }
+          } else {
+            errorMessage = "Family e-transfer could not be applied to any invoice.";
+          }
+        } catch (err) {
+          matchStatus = "error";
+          errorMessage = err instanceof Error ? err.message : "Could not record family payment.";
+        }
+      }
     }
   }
+
+  const storedReferenceCode =
+    referenceCodes.length > 0 ? referenceCodes.join(", ") : input.parsed.referenceCode;
 
   const inboundEmail = await createInboundEmail({
     gmailMessageId: input.gmailMessageId,
@@ -326,7 +389,7 @@ export async function ingestEtransferEmail(input: AutoMatchInput): Promise<AutoM
     parsedAmount: input.parsed.amount,
     parsedSenderName: input.parsed.senderName,
     parsedMemo: input.parsed.memo,
-    parsedReferenceCode: input.parsed.referenceCode,
+    parsedReferenceCode: storedReferenceCode,
     matchStatus,
     matchedPaymentId,
     errorMessage,
