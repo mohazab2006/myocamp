@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 
 import { CampRegisterView } from "@/components/camp/CampRegisterView";
 import { fetchPublicCampBySlug, fetchRegisterablePublicCamps } from "@/lib/content/camps-public";
-import { buildPageMetadata } from "@/lib/site";
+import { buildPageMetadata, SITE_URL } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -31,12 +30,7 @@ export default async function CampSlugRegisterPage({ params }: PageProps) {
 
   const allOpen = await fetchRegisterablePublicCamps();
 
-  const hdrs = await headers();
-  const host = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "myo.camp";
-  const proto = hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  const origin = `${proto}://${host}`;
-
   return (
-    <CampRegisterView camp={camp} siteOrigin={origin} otherOpenCamps={allOpen} currentSlug={slug} />
+    <CampRegisterView camp={camp} siteOrigin={SITE_URL} otherOpenCamps={allOpen} currentSlug={slug} />
   );
 }

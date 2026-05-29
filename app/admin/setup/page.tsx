@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import Link from "next/link";
 import {
   ArrowSquareOut,
@@ -23,6 +22,7 @@ import { hasSupabaseAuthEnv } from "@/lib/admin/auth";
 import { fetchGmailCredentials, isGoogleOAuthConfigured } from "@/lib/admin/gmail";
 import { getPayPalEnvironment, isPayPalConfigured } from "@/lib/admin/paypal";
 import { isResendConfigured } from "@/lib/email/resend";
+import { SITE_URL } from "@/lib/site";
 import { isSupabaseConfigured } from "@/lib/supabase/content";
 
 import {
@@ -58,14 +58,9 @@ export default async function AdminSetupPage({
   await requireAuthorizedAdmin();
   const { message, type } = await resolveAdminFlashState(searchParams);
 
-  // Derive the public webhook URL from the incoming request headers
-  // (works locally and in Vercel, both http and https).
-  const hdrs = await headers();
-  const host = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "myo.camp";
-  const proto = hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   const webhookSecret = process.env.JOTFORM_WEBHOOK_SECRET ?? "";
   const webhookUrl =
-    `${proto}://${host}/api/jotform-webhook` +
+    `${SITE_URL}/api/jotform-webhook` +
     (webhookSecret ? `?secret=${encodeURIComponent(webhookSecret)}` : "");
 
   const gmailCreds = await fetchGmailCredentials().catch(() => null);
@@ -108,6 +103,11 @@ export default async function AdminSetupPage({
       name: "ADMIN_EMAILS",
       value: process.env.ADMIN_EMAILS ?? process.env.ADMIN_EMAIL,
       hint: "Comma-separated allowlist of admin emails."
+    },
+    {
+      name: "NEXT_PUBLIC_SITE_URL",
+      value: process.env.NEXT_PUBLIC_SITE_URL,
+      hint: `Public site base URL. JotForm + payment links use ${SITE_URL} (myo.camp when deployed, not *.vercel.app).`
     },
     {
       name: "JOTFORM_WEBHOOK_SECRET",

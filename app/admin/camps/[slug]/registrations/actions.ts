@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { requireAuthorizedAdmin } from "@/lib/admin/guards";
@@ -298,13 +297,7 @@ export async function sendRegistrationEmailAction(formData: FormData) {
     );
   }
 
-  const hdrs = await headers();
-  const host = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "myo.camp";
-  const proto =
-    hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  const origin = `${proto}://${host}`;
-
-  const result = await notify.registrationReceived({ ...ctx!, origin });
+  const result = await notify.registrationReceived(ctx!);
 
   revalidatePath(regUrl(slug, registrationId));
   if (result.ok) {

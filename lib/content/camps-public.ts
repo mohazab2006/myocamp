@@ -4,6 +4,7 @@ import { createSupabaseAdminClient, isSupabaseAdminConfigured } from "@/lib/supa
 import { countActiveCampers } from "@/lib/admin/camp-capacity";
 import { parseCampData } from "@/lib/admin/camp-data";
 import { getCampSettings } from "@/lib/content/camp";
+import { SITE_URL } from "@/lib/site";
 import type { Camp, CampStatus } from "@/lib/types";
 
 export type PublicRegistrationStatus = "open" | "full" | "closed" | "opening-soon";
@@ -195,8 +196,8 @@ export function jotformEmbedUrl(formId: string, parentUrl?: string): string {
 }
 
 /** JotForm thank-you redirect — paste in JotForm Settings → Thank You Page. Keep `{id}` literal. */
-export function jotformThankYouRedirectUrl(siteOrigin: string, _campSlug?: string): string {
-  return `${siteOrigin.replace(/\/$/, "")}/camp/register/complete?sid={id}`;
+export function jotformThankYouRedirectUrl(_campSlug?: string): string {
+  return `${SITE_URL}/camp/register/complete?sid={id}`;
 }
 
 export function activeFormForCamp(camp: PublicCamp): {

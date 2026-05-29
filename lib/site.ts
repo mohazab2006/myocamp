@@ -1,8 +1,23 @@
 import type { Metadata } from "next";
 
 export const SITE_DOMAIN = "myo.camp";
-export const SITE_URL =
-  process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? `https://${SITE_DOMAIN}`;
+export const CANONICAL_SITE_URL = `https://${SITE_DOMAIN}`;
+
+/** Public URLs parents, JotForm, and emails use. Localhost for dev; myo.camp when deployed (never *.vercel.app). */
+function resolveSiteUrl(): string {
+  const env = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+  if (!env) return CANONICAL_SITE_URL;
+  try {
+    const { hostname } = new URL(env);
+    if (hostname === "localhost" || hostname === "127.0.0.1") return env;
+    if (hostname.endsWith(".vercel.app")) return CANONICAL_SITE_URL;
+  } catch {
+    return CANONICAL_SITE_URL;
+  }
+  return env;
+}
+
+export const SITE_URL = resolveSiteUrl();
 
 export const SITE_NAME = "Muslim Youth of Ottawa";
 export const SITE_NAME_SHORT = "MYO";

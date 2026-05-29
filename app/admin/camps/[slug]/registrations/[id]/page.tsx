@@ -13,8 +13,6 @@ import {
   XCircle
 } from "@phosphor-icons/react/ssr";
 
-import { headers } from "next/headers";
-
 import { AdminFlashBanner } from "@/components/admin/flash-banner";
 import { AdminField, adminInputClass, adminTextareaClass } from "@/components/admin/field";
 import { AdminSubmitButton } from "@/components/admin/submit-button";
@@ -88,12 +86,7 @@ export default async function AdminRegistrationDetailPage({
     ? Number((invoice.amountDue - invoice.amountPaid).toFixed(2))
     : 0;
 
-  // Build the public payment URL using the live request origin.
-  const hdrs = await headers();
-  const host = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "myo.camp";
-  const proto =
-    hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  const paymentUrl = invoice ? buildPaymentUrl(invoice.referenceCode, `${proto}://${host}`) : null;
+  const paymentUrl = invoice ? buildPaymentUrl(invoice.referenceCode) : null;
 
   return (
     <main className="mx-auto max-w-[1100px] px-5 py-10 md:px-8 md:py-14">

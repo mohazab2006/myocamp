@@ -1,4 +1,3 @@
-import { headers } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import {
@@ -27,6 +26,7 @@ import { fetchRegistrationsForCamp } from "@/lib/admin/registrations";
 import { fetchPaymentsForInvoice } from "@/lib/admin/payments";
 import { buildClaimUrl, fetchWaitlistForCamp } from "@/lib/admin/waitlist";
 import { jotformThankYouRedirectUrl } from "@/lib/content/camps-public";
+import { SITE_URL } from "@/lib/site";
 import type { Camp, WaitlistEntry } from "@/lib/types";
 import { createManualRegistrationAction } from "./registrations/actions";
 import { createManualWaitlistAction, expireOverdueClaimsAction } from "./waitlist/actions";
@@ -118,10 +118,7 @@ export default async function AdminCampDetailPage({
   }
 
   let waitlistEntries: WaitlistEntry[] = [];
-  const hdrs = await headers();
-  const host = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "myo.camp";
-  const proto = hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  const siteOrigin = `${proto}://${host}`;
+  const siteOrigin = SITE_URL;
 
   if (tab === "waitlist") {
     waitlistEntries = await fetchWaitlistForCamp(camp.id, { openOnly: true });
@@ -224,7 +221,7 @@ export default async function AdminCampDetailPage({
         {tab === "waitlist" ? (
           <WaitlistTab camp={camp} entries={waitlistEntries} origin={siteOrigin} />
         ) : null}
-        {tab === "settings" ? <SettingsTab camp={camp} siteOrigin={siteOrigin} /> : null}
+        {tab === "settings" ? <SettingsTab camp={camp} /> : null}
       </div>
     </main>
   );
@@ -466,8 +463,8 @@ function WaitlistManualForm({ campSlug }: { campSlug: string }) {
   );
 }
 
-function SettingsTab({ camp, siteOrigin }: { camp: Camp; siteOrigin: string }) {
-  const thankYouRedirect = jotformThankYouRedirectUrl(siteOrigin, camp.slug);
+function SettingsTab({ camp }: { camp: Camp }) {
+  const thankYouRedirect = jotformThankYouRedirectUrl(camp.slug);
 
   const rows: { label: string; value: React.ReactNode; hint?: string }[] = [
     { label: "Status", value: camp.status },
