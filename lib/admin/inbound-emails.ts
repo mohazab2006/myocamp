@@ -215,14 +215,73 @@ export async function findInvoiceByReferenceCode(
   };
 }
 
+/** Open invoice whose parent email + remaining balance match an e-Transfer without a MYO ref. */
+async function isLikelyCampPaymentWithoutRef(
+  senderEmail: string | null,
+  amount: number | null
+): Promise<boolean> {
+  const email = senderEmail?.trim();
+  if (!email || amount == null || amount <= 0) return false;
+
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("invoices")
+    .select("amount_due, amount_paid, status, registrations ( parent_email )")
+    .in("status", ["pending", "partial"]);
+
+  if (error || !data) return false;
+
+  type Row = {
+    amount_due: number | string;
+    amount_paid: number | string;
+    status: string;
+    registrations:
+      | { parent_email: string | null }
+      | Array<{ parent_email: string | null }>
+      | null;
+  };
+
+  const needle = email.toLowerCase();
+  for (const row of data as Row[]) {
+    const reg = Array.isArray(row.registrations) ? row.registrations[0] : row.registrations;
+    const parentEmail = reg?.parent_email?.trim().toLowerCase();
+    if (!parentEmail || parentEmail !== needle) continue;
+
+    const remaining = Number(
+      (Number(row.amount_due) - Number(row.amount_paid)).toFixed(2)
+    );
+    if (remaining <= 0) continue;
+    if (Math.abs(remaining - amount) <= 0.01) return true;
+  }
+
+  return false;
+}
+
+/** Hide personal e-transfers already sitting in Needs match (no MYO reference on file). */
+export async function dismissUnrelatedInboundEmails(): Promise<number> {
+  const supabase = createSupabaseAdminClient();
+  const { data, error } = await supabase
+    .from("inbound_emails")
+    .update({
+      match_status: "not_payment",
+      error_message: null,
+      processed_at: new Date().toISOString()
+    })
+    .in("match_status", ["unmatched", "pending"])
+    .or("parsed_reference_code.is.null,parsed_reference_code.eq.")
+    .select("id");
+
+  if (error) throw new Error(error.message);
+  return data?.length ?? 0;
+}
+
 /**
  * Try to auto-match an inbound e-transfer email to an invoice.
  *
  * Match rules (in order):
- *   1. EXACT — parsedReferenceCode hits an invoice exactly.
- *   2. NOTHING ELSE auto-matches. Anything ambiguous goes to triage.
- *
- * Returns the result + an InboundEmail row that's already been saved.
+ *   1. MYO reference in memo/body → auto-match (or family split).
+ *   2. No reference + sender/amount match an open invoice → Needs match (forgot ref).
+ *   3. No reference + no camp signal → ignored (not_payment, hidden from triage).
  */
 export interface AutoMatchInput {
   gmailMessageId: string;
@@ -281,6 +340,35 @@ export async function ingestEtransferEmail(input: AutoMatchInput): Promise<AutoM
   const referenceCodes = extractAllReferenceCodes(refHaystack);
   if (referenceCodes.length === 0 && input.parsed.referenceCode) {
     referenceCodes.push(input.parsed.referenceCode);
+  }
+
+  if (referenceCodes.length === 0) {
+    const likelyCamp = await isLikelyCampPaymentWithoutRef(
+      input.parsed.senderEmail,
+      input.parsed.amount
+    );
+    if (!likelyCamp) {
+      const inboundEmail = await createInboundEmail({
+        gmailMessageId: input.gmailMessageId,
+        fromAddress: input.fromAddress,
+        subject: input.subject,
+        bodyText: input.bodyText,
+        bodyHtml: input.bodyHtml,
+        parsedAmount: input.parsed.amount,
+        parsedSenderName: input.parsed.senderName,
+        parsedMemo: input.parsed.memo,
+        parsedReferenceCode: null,
+        matchStatus: "not_payment",
+        matchedPaymentId: null,
+        errorMessage: null,
+        receivedAt: input.receivedAt,
+        processedAt: new Date().toISOString(),
+        rawPayload: input.rawPayload
+      });
+      return { inboundEmail, matched: false, paymentId: null };
+    }
+    errorMessage =
+      "Looks like a camp payment (parent email + amount match) but no MYO reference in the memo.";
   }
 
   if (referenceCodes.length > 0) {

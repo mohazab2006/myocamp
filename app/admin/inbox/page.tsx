@@ -22,7 +22,7 @@ import { fetchGmailCredentials } from "@/lib/admin/gmail";
 import { fetchInboundEmails } from "@/lib/admin/inbound-emails";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { InboundEmail, InboundEmailMatchStatus } from "@/lib/types";
-import { matchInboundEmailAction, markNotPaymentAction } from "./actions";
+import { matchInboundEmailAction, dismissUnrelatedInboundAction, markNotPaymentAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -167,8 +167,9 @@ export default async function AdminInboxPage({
         </p>
         <h1 className="headline-display mt-3 text-3xl md:text-4xl">Inbox</h1>
         <p className="mt-3 max-w-2xl text-sm leading-relaxed text-ink-soft">
-          Every Interac notification we poll lands here. Reference-code matches auto-mark
-          their invoice; anything ambiguous needs one click to assign.
+          Camp e-Transfers with a <strong className="text-ink">MYO-2026-XXXX</strong> reference in
+          the memo auto-match. Only transfers missing a reference but matching a parent email +
+          invoice amount appear here. Personal transfers are ignored automatically.
         </p>
         {creds ? (
           <p className="mt-2 text-xs text-ink-soft">
@@ -222,6 +223,17 @@ export default async function AdminInboxPage({
           );
         })}
       </nav>
+
+      {tab === "unmatched" && counts.unmatched > 0 ? (
+        <div className="mt-4 flex flex-wrap items-center gap-3 border border-line bg-paper-deep/35 px-4 py-3 text-sm text-ink-soft">
+          <span>
+            Seeing personal e-Transfers? Clear items with no camp reference from this list.
+          </span>
+          <form action={dismissUnrelatedInboundAction}>
+            <AdminSubmitButton idleLabel="Clear unrelated" variant="secondary" />
+          </form>
+        </div>
+      ) : null}
 
       <div className="mt-6 space-y-4">
         {emails.length === 0 ? (

@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { requireAuthorizedAdmin } from "@/lib/admin/guards";
 import { buildAdminRedirect } from "@/lib/admin/page-state";
 import {
+  dismissUnrelatedInboundEmails,
   fetchInboundEmailById,
   markInboundEmailNotPayment,
   matchInboundEmailToInvoice
@@ -65,4 +66,25 @@ export async function markNotPaymentAction(formData: FormData) {
 
   revalidatePath("/admin/inbox");
   flash("/admin/inbox", "success", "Marked as not a payment.");
+}
+
+export async function dismissUnrelatedInboundAction() {
+  await requireAuthorizedAdmin();
+  try {
+    const n = await dismissUnrelatedInboundEmails();
+    revalidatePath("/admin/inbox");
+    flash(
+      "/admin/inbox?tab=unmatched",
+      "success",
+      n > 0
+        ? `Cleared ${n} personal e-Transfer${n === 1 ? "" : "s"} (no camp reference).`
+        : "No unrelated e-Transfers to clear."
+    );
+  } catch (err) {
+    flash(
+      "/admin/inbox?tab=unmatched",
+      "error",
+      err instanceof Error ? err.message : "Could not clear inbox."
+    );
+  }
 }
