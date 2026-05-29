@@ -6,7 +6,8 @@ import { AdminSubmitButton } from "@/components/admin/submit-button";
 import { BlogPostForm } from "@/components/admin/blog-post-form";
 import { requireAuthorizedAdmin } from "@/lib/admin/guards";
 import { resolveAdminFlashState, type AdminSearchParams } from "@/lib/admin/page-state";
-import { getBlogPosts } from "@/lib/content/blog";
+import { getAdminBlogPosts } from "@/lib/content/blog";
+import { isSupabaseConfigured } from "@/lib/supabase/content";
 
 import { deleteBlogPostAction } from "../actions";
 
@@ -19,7 +20,8 @@ export default async function AdminBlogPage({
 }) {
   await requireAuthorizedAdmin();
   const { message, type } = await resolveAdminFlashState(searchParams);
-  const posts = await getBlogPosts();
+  const posts = await getAdminBlogPosts();
+  const supabaseContent = isSupabaseConfigured();
 
   return (
     <main className="mx-auto max-w-[1180px] px-5 py-10 md:px-8 md:py-14">
@@ -62,7 +64,13 @@ export default async function AdminBlogPage({
       <div className="mt-6 grid gap-10">
         {posts.length === 0 ? (
           <p className="border border-dashed border-line bg-paper-deep/20 p-6 text-sm text-ink-soft">
-            No posts yet. Use the form above to publish your first story.
+            No posts in the database yet. Use the form above to publish your first story.
+            {supabaseContent ? (
+              <>
+                {" "}
+                The public site may still show built-in demo posts until you add real ones here.
+              </>
+            ) : null}
           </p>
         ) : null}
 

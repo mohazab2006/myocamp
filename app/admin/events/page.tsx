@@ -7,7 +7,8 @@ import { EventForm } from "@/components/admin/event-form";
 import { requireAuthorizedAdmin } from "@/lib/admin/guards";
 import { resolveAdminFlashState, type AdminSearchParams } from "@/lib/admin/page-state";
 import { fetchCampsForEventLink } from "@/lib/admin/camps";
-import { getEvents } from "@/lib/content/events";
+import { getAdminEvents } from "@/lib/content/events";
+import { isSupabaseConfigured } from "@/lib/supabase/content";
 
 import { deleteEventAction } from "../actions";
 
@@ -20,7 +21,8 @@ export default async function AdminEventsPage({
 }) {
   await requireAuthorizedAdmin();
   const { message, type } = await resolveAdminFlashState(searchParams);
-  const events = await getEvents();
+  const events = await getAdminEvents();
+  const supabaseContent = isSupabaseConfigured();
   const camps = await fetchCampsForEventLink();
   const liveCount = events.filter((event) => !event.archived).length;
 
@@ -65,7 +67,13 @@ export default async function AdminEventsPage({
       <div className="mt-6 grid gap-10">
         {events.length === 0 ? (
           <p className="border border-dashed border-line bg-paper-deep/20 p-6 text-sm text-ink-soft">
-            No events yet. Use the form above to add your first event.
+            No events in the database yet. Use the form above to add your first event.
+            {supabaseContent ? (
+              <>
+                {" "}
+                The public site may still show built-in demo events until you add real ones here.
+              </>
+            ) : null}
           </p>
         ) : null}
 

@@ -129,8 +129,13 @@ export async function deleteSupabaseEvent(slug: string) {
   const supabase = getSupabaseContentClient();
   if (!supabase) throw new Error("Supabase is not configured.");
 
-  const { error } = await supabase.from("content_events").delete().eq("slug", slug);
+  const { data, error } = await supabase
+    .from("content_events")
+    .delete()
+    .eq("slug", slug)
+    .select("slug");
   if (error) throw new Error(error.message);
+  if (!data?.length) throw new Error("Event not found.");
 }
 
 export async function upsertSupabaseBlogPost(post: BlogPost) {
@@ -151,8 +156,13 @@ export async function deleteSupabaseBlogPost(slug: string) {
   const supabase = getSupabaseContentClient();
   if (!supabase) throw new Error("Supabase is not configured.");
 
-  const { error } = await supabase.from("content_blog_posts").delete().eq("slug", slug);
+  const { data, error } = await supabase
+    .from("content_blog_posts")
+    .delete()
+    .eq("slug", slug)
+    .select("slug");
   if (error) throw new Error(error.message);
+  if (!data?.length) throw new Error("Blog post not found.");
 }
 
 export async function fetchSupabaseCampSettings() {

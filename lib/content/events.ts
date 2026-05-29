@@ -1,5 +1,9 @@
 import type { OrgEvent } from "../types";
-import { fetchSupabaseEvent, fetchSupabaseEvents } from "@/lib/supabase/content";
+import {
+  fetchSupabaseEvent,
+  fetchSupabaseEvents,
+  isSupabaseConfigured
+} from "@/lib/supabase/content";
 
 // MSA Bonfire, LIT leadership track, and main camp are owner-confirmed.
 // Past entries stay on the list for the archive. Supabase becomes the source once configured.
@@ -90,12 +94,19 @@ const seedEvents: OrgEvent[] = [
 
 export async function getEvents(): Promise<OrgEvent[]> {
   const supabaseEvents = await fetchSupabaseEvents();
-  if (supabaseEvents?.length) return supabaseEvents;
+  if (supabaseEvents !== null) return supabaseEvents;
   return seedEvents;
 }
 
 export async function getEvent(slug: string): Promise<OrgEvent | null> {
-  const supabaseEvent = await fetchSupabaseEvent(slug);
-  if (supabaseEvent) return supabaseEvent;
+  if (isSupabaseConfigured()) {
+    return fetchSupabaseEvent(slug);
+  }
   return seedEvents.find((e) => e.slug === slug) ?? null;
+}
+
+/** Admin list: never show seed/demo events when Supabase is the content store. */
+export async function getAdminEvents(): Promise<OrgEvent[]> {
+  if (!isSupabaseConfigured()) return seedEvents;
+  return (await fetchSupabaseEvents()) ?? [];
 }

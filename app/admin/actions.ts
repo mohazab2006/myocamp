@@ -205,6 +205,7 @@ export async function deleteEventAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/admin/events");
   revalidatePath("/events");
+  revalidatePath(`/events/${slug}`);
   flash("/admin/events", "success", "Event deleted.");
 }
 
@@ -268,6 +269,7 @@ export async function deleteBlogPostAction(formData: FormData) {
   revalidatePath("/admin");
   revalidatePath("/admin/blog");
   revalidatePath("/blog");
+  revalidatePath(`/blog/${slug}`);
   flash("/admin/blog", "success", "Blog post deleted.");
 }
 

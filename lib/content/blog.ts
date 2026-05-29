@@ -1,5 +1,9 @@
 import type { BlogPost } from "../types";
-import { fetchSupabaseBlogPost, fetchSupabaseBlogPosts } from "@/lib/supabase/content";
+import {
+  fetchSupabaseBlogPost,
+  fetchSupabaseBlogPosts,
+  isSupabaseConfigured
+} from "@/lib/supabase/content";
 
 const seedPosts: BlogPost[] = [
   {
@@ -64,7 +68,7 @@ const seedPosts: BlogPost[] = [
 
 export async function getBlogPosts(): Promise<BlogPost[]> {
   const supabasePosts = await fetchSupabaseBlogPosts();
-  if (supabasePosts?.length) return supabasePosts;
+  if (supabasePosts !== null) return supabasePosts;
 
   return [...seedPosts].sort(
     (a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt)
@@ -72,8 +76,13 @@ export async function getBlogPosts(): Promise<BlogPost[]> {
 }
 
 export async function getBlogPost(slug: string): Promise<BlogPost | null> {
-  const supabasePost = await fetchSupabaseBlogPost(slug);
-  if (supabasePost) return supabasePost;
-
+  if (isSupabaseConfigured()) {
+    return fetchSupabaseBlogPost(slug);
+  }
   return seedPosts.find((post) => post.slug === slug) ?? null;
+}
+
+export async function getAdminBlogPosts(): Promise<BlogPost[]> {
+  if (!isSupabaseConfigured()) return seedPosts;
+  return (await fetchSupabaseBlogPosts()) ?? [];
 }
