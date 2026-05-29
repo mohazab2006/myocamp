@@ -59,12 +59,16 @@ function rowToEntry(row: WaitlistRow): WaitlistEntry {
 // Read
 // ---------------------------------------------------------------------------
 
-export async function fetchWaitlistForCamp(campId: string): Promise<WaitlistEntry[]> {
+export async function fetchWaitlistForCamp(
+  campId: string,
+  options?: { openOnly?: boolean }
+): Promise<WaitlistEntry[]> {
   const supabase = createSupabaseAdminClient();
-  const { data, error } = await supabase
-    .from("waitlist_entries")
-    .select("*")
-    .eq("camp_id", campId)
+  let q = supabase.from("waitlist_entries").select("*").eq("camp_id", campId);
+  if (options?.openOnly) {
+    q = q.in("status", ["active", "promoted", "expired"]);
+  }
+  const { data, error } = await q
     .order("position", { ascending: true, nullsFirst: false })
     .order("submitted_at", { ascending: true });
   if (error) {
@@ -299,9 +303,8 @@ export async function markWaitlistClaimed(
     .from("waitlist_entries")
     .update({
       status: "claimed",
-      claimed_registration_id: registrationId,
-      // Invalidate the token so the same link can't be re-used to make a second registration.
-      claim_token: null
+      claimed_registration_id: registrationId
+      // Keep claim_token so parents can reopen the email link and see payment info.
     })
     .eq("id", id);
   if (error) throw new Error(error.message);

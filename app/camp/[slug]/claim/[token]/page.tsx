@@ -13,9 +13,11 @@ import {
 } from "@phosphor-icons/react/ssr";
 
 import { fetchCampBySlug } from "@/lib/admin/camps";
+import { buildPaymentUrl } from "@/lib/admin/payment-links";
 import { findWaitlistByClaimToken } from "@/lib/admin/waitlist";
-import type { Camp, WaitlistEntry, WaitlistEntryStatus } from "@/lib/types";
-import { acceptClaimAction } from "./actions";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { ClaimConfirmButton } from "@/components/camp/ClaimConfirmButton";
+import type { Camp, WaitlistEntry } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +64,12 @@ export default async function CampClaimPage({
   if (!camp) notFound();
 
   const entry = await findWaitlistByClaimToken(token);
+  const siteOrigin =
+    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://myo.camp";
+  const claimedPaymentUrl =
+    entry?.status === "claimed"
+      ? await paymentUrlForClaimedRegistration(entry.claimedRegistrationId, siteOrigin)
+      : null;
 
   return (
     <main className="min-h-dvh bg-paper py-12 md:py-16">
@@ -97,7 +105,7 @@ export default async function CampClaimPage({
         {!entry ? (
           <InvalidState />
         ) : entry.status === "claimed" ? (
-          <AlreadyClaimedState />
+          <AlreadyClaimedState paymentUrl={claimedPaymentUrl} />
         ) : entry.status === "expired" ||
           (entry.claimExpiresAt && new Date(entry.claimExpiresAt).getTime() < Date.now()) ? (
           <ExpiredState />
@@ -149,33 +157,11 @@ function PromotedState({
         />
       </div>
 
-      <form action={acceptClaimAction} className="mt-6 space-y-4">
-        <input type="hidden" name="token" value={token} />
-        <input type="hidden" name="slug" value={camp.slug} />
-        {!entry.camperName ? (
-          <label className="grid gap-2">
-            <span className="text-xs font-semibold uppercase tracking-[0.14em] text-ink">
-              Camper name (optional — you can edit later)
-            </span>
-            <input
-              name="camperName"
-              className="min-h-11 w-full border border-line bg-paper px-3 py-2 text-sm"
-              placeholder="e.g. Salma Hassan"
-            />
-          </label>
-        ) : null}
-        <button
-          type="submit"
-          className="inline-flex h-11 items-center gap-2 bg-forest px-5 text-sm font-semibold text-paper transition hover:bg-pine"
-        >
-          <CheckCircle size={16} weight="bold" /> Confirm my spot
-          <ArrowRight size={16} weight="bold" />
-        </button>
-        <p className="text-xs leading-relaxed text-ink-soft">
-          By confirming you agree to pay the registration fee on the next screen (PayPal,
-          e-Transfer, or cash at drop-off). The link below stops working once you confirm.
-        </p>
-      </form>
+      <ClaimConfirmButton
+        slug={camp.slug}
+        token={token}
+        showCamperNameField={!entry.camperName}
+      />
     </section>
   );
 }
@@ -197,20 +183,29 @@ function ExpiredState() {
   );
 }
 
-function AlreadyClaimedState() {
+function AlreadyClaimedState({ paymentUrl }: { paymentUrl: string | null }) {
   return (
     <section className="mt-5 border-2 border-pine/40 bg-sky/35 p-6 md:p-8">
       <div className="flex items-start gap-3">
         <CheckCircle size={26} weight="fill" className="mt-1 text-forest" />
         <div>
-          <p className="font-display text-xl text-ink">Already claimed</p>
+          <p className="font-display text-xl text-ink">Spot confirmed</p>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-            This spot has already been confirmed. Check your email for the payment link, or{" "}
-            <Link href="/camp" className="text-pine underline">
-              return to the camp page
-            </Link>
-            .
+            You already confirmed this spot. Continue to payment below, or check your email for
+            the payment link.
           </p>
+          {paymentUrl ? (
+            <Link
+              href={paymentUrl}
+              className="mt-4 inline-flex h-11 items-center gap-2 bg-forest px-5 text-sm font-semibold text-paper transition hover:bg-pine"
+            >
+              Go to payment page <ArrowRight size={16} weight="bold" />
+            </Link>
+          ) : (
+            <Link href="/camp" className="mt-4 inline-block text-pine underline">
+              Return to camp page
+            </Link>
+          )}
         </div>
       </div>
     </section>
@@ -286,4 +281,20 @@ function Fact({ label, value, icon }: { label: string; value: string; icon?: Rea
       <p className="mt-1 text-sm text-ink">{value}</p>
     </div>
   );
+}
+
+async function paymentUrlForClaimedRegistration(
+  registrationId: string | null,
+  origin: string
+): Promise<string | null> {
+  if (!registrationId) return null;
+  const supabase = createSupabaseAdminClient();
+  const { data } = await supabase
+    .from("invoices")
+    .select("reference_code")
+    .eq("registration_id", registrationId)
+    .maybeSingle();
+  const ref = (data as { reference_code: string } | null)?.reference_code;
+  if (!ref) return null;
+  return buildPaymentUrl(ref, origin);
 }

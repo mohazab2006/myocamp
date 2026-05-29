@@ -402,30 +402,32 @@ function UnpaidState({
                 </>
               )}
             </p>
-            {!isFamilyPayment ? (
-              <form action={commitCashPaymentAction} className="mt-4">
-                <input type="hidden" name="ref" value={referenceCode} />
-                <button
-                  type="submit"
-                  className="inline-flex h-11 items-center gap-2 bg-forest px-5 text-sm font-semibold text-paper transition hover:bg-pine"
-                >
-                  <Coins size={16} weight="bold" /> I&apos;ll bring cash to drop-off
-                  <ArrowRight size={16} weight="bold" />
-                </button>
-              </form>
-            ) : (
-              <p className="mt-4 text-xs text-ink-soft">
-                For multiple children, pay online once above or bring the full family total in cash
-                on drop-off — tell staff all reference codes:{" "}
+            <form action={commitCashPaymentAction} className="mt-4">
+              <input type="hidden" name="ref" value={referenceCode} />
+              {isFamilyPayment ? (
+                <input type="hidden" name="familyRefs" value={familyRefs.join(",")} />
+              ) : null}
+              <button
+                type="submit"
+                className="inline-flex h-11 items-center gap-2 bg-forest px-5 text-sm font-semibold text-paper transition hover:bg-pine"
+              >
+                <Coins size={16} weight="bold" />
+                {isFamilyPayment
+                  ? "We'll bring cash for all children at drop-off"
+                  : "I'll bring cash to drop-off"}
+                <ArrowRight size={16} weight="bold" />
+              </button>
+            </form>
+            {isFamilyPayment ? (
+              <p className="mt-3 text-xs text-ink-soft">
+                Reference codes for staff:{" "}
                 <code className="font-mono text-ink">{familyMemo}</code>
               </p>
-            )}
-            {!isFamilyPayment ? (
-              <p className="mt-3 text-xs text-ink-soft">
-                By selecting cash you commit to paying at drop-off. If you change your mind, you
-                can come back to this page and pay by PayPal or e-Transfer instead.
-              </p>
             ) : null}
+            <p className="mt-3 text-xs text-ink-soft">
+              By selecting cash you commit to paying at drop-off. If you change your mind, you can
+              come back to this page and pay by PayPal or e-Transfer instead.
+            </p>
           </div>
         </div>
       </section>
@@ -524,7 +526,8 @@ function StatusBanner({ status, className }: { status: string; className?: strin
     "cash-pledged": {
       tone: "ok",
       icon: <CheckCircle size={18} weight="fill" />,
-      label: "Got it. Bring cash to drop-off — you're all set, and we'll collect payment at camp."
+      label:
+        "Got it. Bring cash to drop-off — you're all set, and we'll collect payment at camp."
     },
     "already-paid": {
       tone: "info",

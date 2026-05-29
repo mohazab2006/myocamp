@@ -124,7 +124,7 @@ export default async function AdminCampDetailPage({
   const siteOrigin = `${proto}://${host}`;
 
   if (tab === "waitlist") {
-    waitlistEntries = await fetchWaitlistForCamp(camp.id);
+    waitlistEntries = await fetchWaitlistForCamp(camp.id, { openOnly: true });
   }
 
   const filter = pickFilter(sp.filter);
@@ -369,22 +369,21 @@ function WaitlistTab({
 
   const active = entries.filter((e) => e.status === "active").length;
   const promoted = entries.filter((e) => e.status === "promoted").length;
-  const claimed = entries.filter((e) => e.status === "claimed").length;
   const expired = entries.filter((e) => e.status === "expired").length;
 
   return (
     <div className="space-y-5">
-      <div className="grid gap-3 md:grid-cols-4">
+      <div className="grid gap-3 md:grid-cols-3">
         <Stat label="Active" value={active} tone="ok" />
         <Stat label="Promoted (awaiting claim)" value={promoted} tone="warn" />
-        <Stat label="Claimed" value={claimed} tone="ok" />
         <Stat label="Expired" value={expired} tone="muted" />
       </div>
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-xs leading-relaxed text-ink-soft">
           Add a waitlist JotForm ID in <strong>Settings</strong> to fill this from your form
-          submissions. You can also add entries manually below.
+          submissions. You can also add entries manually below. After a family claims a spot,
+          they move to <strong>Registrations</strong> and leave this list.
         </p>
         <div className="flex flex-wrap gap-2">
           <form action={expireOverdueClaimsAction}>

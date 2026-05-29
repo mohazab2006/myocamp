@@ -89,11 +89,11 @@ If you've already paid, please ignore this — your e-Transfer may still be in t
 
 Good news — a spot just opened at **{{camp_title}}** ({{camp_dates}}) and **{{camper_name}}** is next in line.
 
-Click below to confirm within **{{claim_window}}** before we pass it to the next family:
+Open the link below to **review your offer** — you'll confirm on the next page (not in this email). You have **{{claim_window}}** before we pass it to the next family:
 
-[Claim your spot →]({{claim_url}})
+[Review and confirm →]({{claim_url}})
 
-After you confirm, you'll be taken straight to the payment page (PayPal, e-Transfer, or cash at drop-off).
+After you confirm on that page, you'll go straight to payment (PayPal, e-Transfer, or cash at drop-off).
 
 — MYO Camp$$
   ),
