@@ -292,11 +292,9 @@ function RegistrationsTab({
 
       {!camp.registrationFormJotformId ? (
         <div className="border border-dashed border-line bg-paper-deep/15 p-5 text-sm text-ink-soft">
-          <p className="font-semibold uppercase tracking-[0.14em] text-ink-soft">
-            JotForm not wired
-          </p>
+          <p className="font-semibold text-ink">Registration form not connected</p>
           <p className="mt-1">
-            Add the registration form's JotForm ID in{" "}
+            Add your JotForm ID in{" "}
             <Link
               href={`/admin/camps/${camp.slug}/edit`}
               className="text-pine underline underline-offset-4 hover:text-forest"

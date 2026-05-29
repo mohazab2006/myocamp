@@ -462,7 +462,7 @@ export async function voidPaymentAction(formData: FormData) {
 }
 
 // ---------------------------------------------------------------------------
-// Force-recompute invoice totals (debug button on detail page)
+// Refresh invoice totals from recorded payments.
 // ---------------------------------------------------------------------------
 
 export async function recomputeInvoiceAction(formData: FormData) {
@@ -487,5 +487,5 @@ export async function recomputeInvoiceAction(formData: FormData) {
 
   revalidatePath(`/admin/camps/${slug}`);
   revalidatePath(regUrl(slug, registrationId));
-  flash(regUrl(slug, registrationId), "success", "Invoice totals recomputed.");
+  flash(regUrl(slug, registrationId), "success", "Balance recalculated from payment records.");
 }

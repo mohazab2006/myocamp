@@ -110,7 +110,7 @@ export default async function AdminRegistrationDetailPage({
             <p className="flex items-center gap-2 text-xs text-ink-soft">
               <CalendarBlank size={14} weight="duotone" />
               <span>Submitted {fmtDateTime(registration.submittedAt)}</span>
-              <span>· source: {registration.source}</span>
+              <span>· {sourceLabel(registration.source)}</span>
             </p>
             <h1 className="headline-display mt-2 text-3xl">
               {registration.parentName ?? registration.parentEmail ?? "Unknown family"}
@@ -130,7 +130,7 @@ export default async function AdminRegistrationDetailPage({
       </section>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.4fr_1fr]">
-        {/* Left column: details, payments, raw payload */}
+        {/* Left column: registration details */}
         <div className="space-y-6">
           <InvoiceSummary invoice={invoice} remaining={remaining} />
 
@@ -151,8 +151,6 @@ export default async function AdminRegistrationDetailPage({
           <DetailsForm slug={slug} registration={registration} />
 
           <CampersCard registration={registration} />
-
-          <RawPayloadCard registration={registration} />
         </div>
 
         {/* Right column: invoice tools */}
@@ -285,9 +283,8 @@ function InvoiceSummary({ invoice, remaining }: { invoice: Invoice | null; remai
   if (!invoice) {
     return (
       <div className="border border-dashed border-brass/40 bg-brass/10 p-5 text-sm text-ink">
-        This registration has no invoice attached. Use{" "}
-        <strong>Recompute invoice</strong> in the side panel to create one, or recreate the
-        registration.
+        This registration has no invoice yet. Use{" "}
+        <strong>Recalculate balance</strong> in the sidebar, or contact support if this looks wrong.
       </div>
     );
   }
@@ -444,7 +441,7 @@ function RecordPaymentCard({
       </form>
       {!invoice ? (
         <p className="mt-3 text-xs text-ember">
-          No invoice exists yet. Recompute the invoice in the side panel first.
+          No invoice yet. Use <strong>Recalculate balance</strong> in the sidebar first.
         </p>
       ) : null}
     </div>
@@ -593,14 +590,14 @@ function DetailsForm({ slug, registration }: { slug: string; registration: Regis
 }
 
 // ---------------------------------------------------------------------------
-// Campers + raw payload
+// Campers
 // ---------------------------------------------------------------------------
 
 function CampersCard({ registration }: { registration: Registration }) {
   if (registration.campers.length === 0) {
     return (
       <div className="border border-dashed border-line bg-paper-deep/15 p-5 text-sm text-ink-soft">
-        No camper info captured. Check the raw payload below.
+        No camper details on file. Update the registration above or check the submission in JotForm.
       </div>
     );
   }
@@ -621,22 +618,17 @@ function CampersCard({ registration }: { registration: Registration }) {
   );
 }
 
-function RawPayloadCard({ registration }: { registration: Registration }) {
-  const payload = registration.rawPayload;
-  if (Object.keys(payload).length === 0) return null;
-  // Manual admin entries — nothing useful to show.
-  if (Object.keys(payload).length === 1 && payload._manualEntry === true) return null;
-
-  return (
-    <details className="border border-line bg-paper-deep/35">
-      <summary className="cursor-pointer px-5 py-3 text-xs font-semibold uppercase tracking-normal text-ink-soft hover:text-ink [&::-webkit-details-marker]:hidden">
-        <span className="inline-block">Submission data (from JotForm)</span>
-      </summary>
-      <pre className="max-h-[420px] overflow-auto border-t border-line bg-paper p-4 text-[11px] leading-relaxed text-ink">
-        {JSON.stringify(payload, null, 2)}
-      </pre>
-    </details>
-  );
+function sourceLabel(source: Registration["source"]): string {
+  switch (source) {
+    case "jotform":
+      return "Online form";
+    case "manual":
+      return "Added manually";
+    case "waitlist_claim":
+      return "Waitlist claim";
+    default:
+      return "Registration";
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -877,14 +869,15 @@ function InvoiceToolsCard({
             <input type="hidden" name="registrationId" value={registrationId} />
             <input type="hidden" name="invoiceId" value={invoice.id} />
             <AdminSubmitButton
-              idleLabel="Recompute totals"
+              idleLabel="Recalculate balance"
               variant="secondary"
               className="w-full"
             />
           </form>
         ) : null}
         <p className="border-t border-line/60 pt-3 text-xs leading-relaxed text-ink-soft">
-          Invoice email + payment links land in day 3 (PayPal) and day 6 (Resend reminders).
+          Send the payment link from the card above. Automatic reminder emails run before camp if
+          email is configured in Setup.
         </p>
       </div>
     </div>
