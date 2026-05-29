@@ -181,7 +181,7 @@ function ConnectedPanel({
             Connected to <span className="font-mono">{creds.email}</span>
           </h2>
           <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-            Polling every 5 minutes for Interac e-Transfer notifications. Reference-code
+            Polls daily via cron (and on demand below) for Interac e-Transfer notifications. Reference-code
             matches auto-mark their invoice; everything else routes to{" "}
             <Link href="/admin/inbox" className="text-pine underline underline-offset-4">
               /admin/inbox

@@ -306,7 +306,7 @@ function UnpaidState({
               Send an Interac e-Transfer and we'll match it automatically — usually within a
               few minutes.
             </p>
-            <div className="mt-4 grid gap-3 md:grid-cols-3">
+            <div className="mt-4 grid gap-3 md:grid-cols-3 [&>*]:min-w-0">
               <ETransferField
                 label="Send to"
                 value={paymentEmail ?? "Contact us for payment details"}
@@ -448,14 +448,22 @@ function ETransferField({
 }) {
   return (
     <div
-      className={`border ${highlight ? "border-pine bg-sky/35" : "border-line bg-paper-deep/40"} p-3`}
+      className={`min-w-0 overflow-hidden border ${highlight ? "border-pine bg-sky/35" : "border-line bg-paper-deep/40"} p-3`}
     >
       <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-ink-soft">{label}</p>
-      <div className="mt-1 flex items-center justify-between gap-2">
-        <span className={`font-mono text-sm ${highlight ? "text-ink font-semibold" : "text-ink"}`}>
+      <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+        <span
+          className={`min-w-0 flex-1 break-all font-mono text-sm leading-snug ${highlight ? "font-semibold text-ink" : "text-ink"}`}
+        >
           {value}
         </span>
-        {canCopy !== false ? <CopyButton value={value} label="Copy" /> : null}
+        {canCopy !== false ? (
+          <CopyButton
+            value={value}
+            label="Copy"
+            className="inline-flex h-7 shrink-0 items-center gap-1 self-start border border-line bg-paper px-2 text-[10px] uppercase tracking-[0.16em] text-ink-soft transition hover:border-pine hover:text-ink"
+          />
+        ) : null}
       </div>
     </div>
   );
