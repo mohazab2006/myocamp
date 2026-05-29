@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { requireAuthorizedAdmin } from "@/lib/admin/guards";
 import { buildAdminRedirect } from "@/lib/admin/page-state";
 import {
+  dismissInboundEmailFromQueue,
   dismissUnrelatedInboundEmails,
   fetchInboundEmailById,
   markInboundEmailNotPayment,
@@ -55,7 +56,6 @@ export async function markNotPaymentAction(formData: FormData) {
   const inboundId = value(formData, "inboundId");
   if (!inboundId) flash("/admin/inbox", "error", "Missing inbound id.");
 
-  // Sanity check the email exists.
   const email = await fetchInboundEmailById(inboundId);
   if (!email) flash("/admin/inbox", "error", "Email not found.");
 
@@ -67,6 +67,30 @@ export async function markNotPaymentAction(formData: FormData) {
 
   revalidatePath("/admin/inbox");
   flash("/admin/inbox", "success", "Marked as not a payment.");
+}
+
+export async function removeInboundFromQueueAction(formData: FormData) {
+  await requireAuthorizedAdmin();
+  const inboundId = value(formData, "inboundId");
+  const tab = value(formData, "tab") || "unmatched";
+  if (!inboundId) flash(`/admin/inbox?tab=${tab}`, "error", "Missing inbound id.");
+
+  try {
+    await dismissInboundEmailFromQueue(inboundId);
+  } catch (err) {
+    flash(
+      `/admin/inbox?tab=${tab}`,
+      "error",
+      err instanceof Error ? err.message : "Could not remove."
+    );
+  }
+
+  revalidatePath("/admin/inbox");
+  flash(
+    `/admin/inbox?tab=${tab}`,
+    "success",
+    "Removed from Needs match. It stays in All for your records."
+  );
 }
 
 export async function dismissUnrelatedInboundAction() {

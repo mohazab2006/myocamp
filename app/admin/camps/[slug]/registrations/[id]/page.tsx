@@ -38,6 +38,7 @@ import {
 } from "../actions";
 import { fetchRemindersForInvoice } from "@/lib/admin/reminder-log";
 import type { ReminderLogRow } from "@/lib/types";
+import { JotformResponsesPanel } from "@/components/admin/jotform-responses-panel";
 
 export const dynamic = "force-dynamic";
 
@@ -172,6 +173,10 @@ export default async function AdminRegistrationDetailPage({
             remaining={remaining}
           />
         </aside>
+      </div>
+
+      <div className="mt-6">
+        <JotformResponsesPanel rawPayload={registration.rawPayload} />
       </div>
     </main>
   );

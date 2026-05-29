@@ -14,6 +14,7 @@ import {
 import { reopenCampRegistration } from "@/lib/admin/camp-capacity";
 import { requireAuthorizedAdmin } from "@/lib/admin/guards";
 import { buildAdminRedirect } from "@/lib/admin/page-state";
+import { resolveCampSlug } from "@/lib/slug";
 import type { Camp } from "@/lib/types";
 
 function value(formData: FormData, key: string) {
@@ -30,14 +31,6 @@ function numberOrNull(formData: FormData, key: string): number | null {
   if (v === "") return null;
   const n = Number(v);
   return Number.isFinite(n) ? n : null;
-}
-
-function slugify(input: string) {
-  return input
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 80);
 }
 
 function flash(base: string, type: "success" | "error" | "info", message: string): never {
@@ -57,7 +50,12 @@ function parseInput(formData: FormData): { input: UpsertCampInput; error?: strin
     };
   }
 
-  const slug = value(formData, "slug") || slugify(title);
+  const slug = resolveCampSlug({
+    title,
+    slugInput: value(formData, "slug"),
+    originalSlug: optional(formData, "originalSlug") ?? undefined,
+    originalTitle: optional(formData, "originalTitle") ?? undefined
+  });
   const feeRaw = value(formData, "feePerCamper");
   const fee = feeRaw === "" ? 0 : Number(feeRaw);
 
@@ -136,7 +134,9 @@ export async function updateCampAction(formData: FormData) {
 
   revalidatePath("/admin/camps");
   revalidatePath(`/admin/camps/${originalSlug}`);
+  revalidatePath(`/admin/camps/${originalSlug}/edit`);
   revalidatePath(`/admin/camps/${camp.slug}`);
+  revalidatePath(`/admin/camps/${camp.slug}/edit`);
   revalidatePath("/admin");
   revalidatePath("/camp/register");
   revalidatePath(`/camp/${camp.slug}/register`);

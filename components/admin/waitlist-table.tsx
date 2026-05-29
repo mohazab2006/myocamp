@@ -114,15 +114,26 @@ export function WaitlistTable({ campSlug, entries, claimUrlFor }: WaitlistTableP
             {/* Identity */}
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
-                <p className="font-display text-base tracking-tight text-ink">
-                  {entry.parentName ?? entry.parentEmail ?? "Unknown"}
-                </p>
+                <Link
+                  href={`/admin/camps/${campSlug}/waitlist/${entry.id}`}
+                  className="font-display text-base tracking-tight text-ink underline-offset-4 hover:text-pine hover:underline"
+                >
+                  {entry.camperName ?? entry.parentName ?? entry.parentEmail ?? "Unknown"}
+                </Link>
                 <div className="hidden md:block">
                   <StatusPill status={entry.status} />
                 </div>
               </div>
-              {entry.camperName ? (
-                <p className="text-sm text-ink-soft">Camper: {entry.camperName}</p>
+              {entry.camperName && entry.parentName ? (
+                <p className="text-sm text-ink-soft">
+                  Parent:{" "}
+                  <Link
+                    href={`/admin/camps/${campSlug}/waitlist/${entry.id}`}
+                    className="hover:text-ink hover:underline"
+                  >
+                    {entry.parentName}
+                  </Link>
+                </p>
               ) : null}
               {entry.parentEmail ? (
                 <p className="text-xs text-ink-soft">{entry.parentEmail}</p>

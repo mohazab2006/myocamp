@@ -560,6 +560,29 @@ export async function markInboundEmailNotPayment(id: string): Promise<void> {
   });
 }
 
+/** Remove one row from Needs match / Errors — keeps audit log, hides from triage tabs. */
+export async function dismissInboundEmailFromQueue(id: string): Promise<void> {
+  const email = await fetchInboundEmailById(id);
+  if (!email) throw new Error("Inbound email not found.");
+
+  if (email.matchStatus === "matched" && email.matchedPaymentId) {
+    throw new Error(
+      "This e-Transfer is already matched to a payment. Void the payment on the registration if you need to undo it."
+    );
+  }
+
+  const allowed: InboundEmailMatchStatus[] = ["unmatched", "pending", "error"];
+  if (!allowed.includes(email.matchStatus)) {
+    throw new Error("Only Needs match or error items can be removed from the queue.");
+  }
+
+  await updateInboundEmailMatch(id, {
+    matchStatus: "not_payment",
+    matchedPaymentId: null,
+    errorMessage: "Removed from Needs match by admin."
+  });
+}
+
 /**
  * Inbox rows stay "matched" even after a camp/invoice is deleted (payments orphan).
  * Move those to not_payment so Auto-matched tab stays accurate.

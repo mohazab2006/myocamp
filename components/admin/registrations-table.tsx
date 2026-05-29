@@ -200,7 +200,14 @@ export function RegistrationsTable({ campSlug, rows, filter }: RegistrationsTabl
                     <div className="text-xs text-ink-soft">{reg.parentEmail}</div>
                   ) : null}
                 </td>
-                <td className="px-3 py-3 align-top text-ink-soft">{camperLabel}</td>
+                <td className="px-3 py-3 align-top">
+                  <Link
+                    href={`/admin/camps/${campSlug}/registrations/${reg.id}`}
+                    className="font-medium text-ink hover:text-forest hover:underline"
+                  >
+                    {camperLabel}
+                  </Link>
+                </td>
                 <td className="px-3 py-3 text-right align-top font-mono text-ink">
                   {inv ? fmt(inv.amountDue) : "—"}
                 </td>

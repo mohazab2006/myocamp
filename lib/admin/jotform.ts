@@ -35,6 +35,10 @@ const PARENT_NAME_ALIASES = [
   "parentsname",
   "parentfullname",
   "guardianname",
+  "parentguardian",
+  "parentguardian1",
+  "parentorguardian1",
+  "parentorguardian",
   "name",
   "fullname",
   "yourname",
@@ -44,6 +48,12 @@ const PARENT_NAME_ALIASES = [
 const PARENT_EMAIL_ALIASES = [
   "parentemail",
   "guardianemail",
+  "primaryemail",
+  "primaryeemail",
+  "primaryemailaddress",
+  "secondaryemail",
+  "secondlyeemail",
+  "secondlyeemailaddress",
   "email",
   "emailaddress",
   "contactemail"
@@ -52,16 +62,23 @@ const PARENT_EMAIL_ALIASES = [
 const PARENT_PHONE_ALIASES = [
   "parentphone",
   "guardianphone",
+  "primaryphone",
+  "primaryphonenumber",
+  "secondaryphone",
+  "secondaryphonenumber",
   "phone",
   "phonenumber",
   "telephone",
   "mobile",
   "cell",
-  "contactphone"
+  "contactphone",
+  "litcamperswhatsappphone",
+  "litcamperswhatsappphonenumber"
 ];
 
 const CAMPER_NAME_ALIASES = [
   "campername",
+  "campersname",
   "childname",
   "childsname",
   "participantname",
@@ -81,21 +98,36 @@ function normalizeKey(key: string): string {
 }
 
 /** Coerce JotForm field value (string | object | array) into a flat string. */
-function flatten(value: unknown): string {
+export function flattenJotformValue(value: unknown): string {
   if (value == null) return "";
   if (typeof value === "string") return value.trim();
   if (typeof value === "number" || typeof value === "boolean") return String(value);
-  if (Array.isArray(value)) return value.map(flatten).filter(Boolean).join(" ");
+  if (Array.isArray(value)) return value.map(flattenJotformValue).filter(Boolean).join(" ");
   if (typeof value === "object") {
     // JotForm name fields: { first: "Salma", last: "Hassan" }
     const obj = value as Record<string, unknown>;
     if ("first" in obj || "last" in obj) {
-      return [obj.first, obj.middle, obj.last].map(flatten).filter(Boolean).join(" ").trim();
+      return [obj.first, obj.middle, obj.last].map(flattenJotformValue).filter(Boolean).join(" ").trim();
+    }
+    // JotForm address fields
+    if ("addr_line1" in obj || "postal" in obj || "city" in obj) {
+      const lines = [
+        obj.addr_line1,
+        obj.addr_line2,
+        [obj.city, obj.state, obj.postal].map(flattenJotformValue).filter(Boolean).join(", "),
+        obj.country
+      ]
+        .map(flattenJotformValue)
+        .filter(Boolean);
+      return lines.join("\n");
     }
     // JotForm phone fields: { full: "(613) 555-0123" } or { phone: "..." }
-    if ("full" in obj) return flatten(obj.full);
-    if ("phone" in obj) return flatten(obj.phone);
-    return Object.values(obj).map(flatten).filter(Boolean).join(" ");
+    if ("full" in obj) return flattenJotformValue(obj.full);
+    if ("phone" in obj) return flattenJotformValue(obj.phone);
+    if ("year" in obj && "month" in obj && "day" in obj) {
+      return [obj.month, obj.day, obj.year].map(flattenJotformValue).filter(Boolean).join(" / ");
+    }
+    return Object.values(obj).map(flattenJotformValue).filter(Boolean).join(" ");
   }
   return String(value);
 }
@@ -108,7 +140,7 @@ function tryMatch(
     for (const [key, value] of entries) {
       const norm = normalizeKey(key);
       if (norm === alias || norm.includes(alias)) {
-        const flat = flatten(value);
+        const flat = flattenJotformValue(value);
         if (flat) return flat;
       }
     }
@@ -118,7 +150,7 @@ function tryMatch(
 
 function findEmail(entries: Array<[string, unknown]>): string | null {
   for (const [, value] of entries) {
-    const flat = flatten(value);
+    const flat = flattenJotformValue(value);
     if (EMAIL_RE.test(flat)) return flat;
   }
   return null;
@@ -126,7 +158,7 @@ function findEmail(entries: Array<[string, unknown]>): string | null {
 
 function findPhone(entries: Array<[string, unknown]>, used: Set<string>): string | null {
   for (const [key, value] of entries) {
-    const flat = flatten(value);
+    const flat = flattenJotformValue(value);
     if (used.has(flat)) continue;
     // Must look like a phone AND not be an email.
     if (PHONE_RE.test(flat) && !EMAIL_RE.test(flat) && /\d{3}/.test(flat)) {

@@ -3,7 +3,8 @@ import "server-only";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { mergeCampData, parseCampData } from "@/lib/admin/camp-data";
 import { reconcileOrphanedInboundMatches } from "@/lib/admin/inbound-emails";
-import type { Camp, CampStats } from "@/lib/types";
+import { slugifyCampTitle } from "@/lib/slug";
+import type { Camp, CampStats, CampStatus } from "@/lib/types";
 
 type CampRow = {
   id: string;
@@ -109,6 +110,45 @@ function campDataFromInput(input: UpsertCampInput) {
   };
 }
 
+function shouldAutoFeatureOnOpen(
+  previousStatus: CampStatus | null | undefined,
+  newStatus: CampStatus
+): boolean {
+  return newStatus === "open" && previousStatus !== "open";
+}
+
+function withAutoFeatureOnOpen(
+  input: UpsertCampInput,
+  previousStatus?: CampStatus | null
+): UpsertCampInput {
+  if (!shouldAutoFeatureOnOpen(previousStatus, input.status)) return input;
+  return { ...input, featuredOnEvents: true };
+}
+
+/** Feature on /events when a camp newly opens (only one featured at a time). */
+export async function autoFeatureCampIfOpen(
+  campId: string,
+  previousStatus: CampStatus,
+  newStatus: CampStatus
+): Promise<void> {
+  if (!shouldAutoFeatureOnOpen(previousStatus, newStatus)) return;
+
+  const supabase = createSupabaseAdminClient();
+  const { data: row, error } = await supabase
+    .from("camps")
+    .select("data")
+    .eq("id", campId)
+    .maybeSingle();
+  if (error || !row) return;
+
+  const existingData = (row.data as Record<string, unknown> | null) ?? null;
+  const parsed = parseCampData(existingData);
+  const merged = mergeCampData(existingData, { ...parsed, featuredOnEvents: true });
+
+  await supabase.from("camps").update({ data: merged }).eq("id", campId);
+  await clearOtherFeaturedCamps(campId);
+}
+
 async function clearOtherFeaturedCamps(exceptId: string): Promise<void> {
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase.from("camps").select("id, data");
@@ -123,25 +163,48 @@ async function clearOtherFeaturedCamps(exceptId: string): Promise<void> {
   }
 }
 
+async function ensureUniqueCampSlug(base: string, exceptId?: string): Promise<string> {
+  let candidate = slugifyCampTitle(base) || "camp";
+  let suffix = 2;
+
+  while (true) {
+    const supabase = createSupabaseAdminClient();
+    const { data } = await supabase
+      .from("camps")
+      .select("id")
+      .eq("slug", candidate)
+      .maybeSingle();
+
+    if (!data || (exceptId && (data as { id: string }).id === exceptId)) {
+      return candidate;
+    }
+
+    candidate = `${slugifyCampTitle(base).slice(0, 72)}-${suffix}`;
+    suffix++;
+  }
+}
+
 export async function createCamp(input: UpsertCampInput): Promise<Camp> {
   const supabase = createSupabaseAdminClient();
+  const slug = await ensureUniqueCampSlug(input.slug);
+  const effective = withAutoFeatureOnOpen(input, null);
   const { data, error } = await supabase
     .from("camps")
     .insert({
-      slug: input.slug,
-      title: input.title,
-      status: input.status,
-      capacity: input.capacity,
-      start_date: input.startDate,
-      end_date: input.endDate,
-      location: input.location,
-      fee_per_camper: input.feePerCamper,
-      registration_form_jotform_id: input.registrationFormJotformId,
-      waitlist_form_jotform_id: input.waitlistFormJotformId,
-      registration_closes_at: input.registrationClosesAt,
-      auto_close_at_capacity: input.autoCloseAtCapacity,
-      notes: input.notes,
-      data: mergeCampData(null, campDataFromInput(input))
+      slug,
+      title: effective.title,
+      status: effective.status,
+      capacity: effective.capacity,
+      start_date: effective.startDate,
+      end_date: effective.endDate,
+      location: effective.location,
+      fee_per_camper: effective.feePerCamper,
+      registration_form_jotform_id: effective.registrationFormJotformId,
+      waitlist_form_jotform_id: effective.waitlistFormJotformId,
+      registration_closes_at: effective.registrationClosesAt,
+      auto_close_at_capacity: effective.autoCloseAtCapacity,
+      notes: effective.notes,
+      data: mergeCampData(null, campDataFromInput(effective))
     })
     .select("*")
     .single();
@@ -149,7 +212,7 @@ export async function createCamp(input: UpsertCampInput): Promise<Camp> {
   if (error) throw new Error(error.message);
   const camp = rowToCamp(data as CampRow);
 
-  if (input.featuredOnEvents) {
+  if (effective.featuredOnEvents) {
     await clearOtherFeaturedCamps(camp.id);
   }
 
@@ -158,34 +221,38 @@ export async function createCamp(input: UpsertCampInput): Promise<Camp> {
 
 export async function updateCamp(id: string, input: UpsertCampInput): Promise<Camp> {
   const supabase = createSupabaseAdminClient();
+  const slug = await ensureUniqueCampSlug(input.slug, id);
 
   const { data: existing, error: readErr } = await supabase
     .from("camps")
-    .select("data")
+    .select("data, status")
     .eq("id", id)
     .maybeSingle();
 
   if (readErr) throw new Error(readErr.message);
 
+  const previousStatus = (existing?.status as CampStatus | undefined) ?? null;
+  const effective = withAutoFeatureOnOpen(input, previousStatus);
+
   const { data, error } = await supabase
     .from("camps")
     .update({
-      slug: input.slug,
-      title: input.title,
-      status: input.status,
-      capacity: input.capacity,
-      start_date: input.startDate,
-      end_date: input.endDate,
-      location: input.location,
-      fee_per_camper: input.feePerCamper,
-      registration_form_jotform_id: input.registrationFormJotformId,
-      waitlist_form_jotform_id: input.waitlistFormJotformId,
-      registration_closes_at: input.registrationClosesAt,
-      auto_close_at_capacity: input.autoCloseAtCapacity,
-      notes: input.notes,
+      slug,
+      title: effective.title,
+      status: effective.status,
+      capacity: effective.capacity,
+      start_date: effective.startDate,
+      end_date: effective.endDate,
+      location: effective.location,
+      fee_per_camper: effective.feePerCamper,
+      registration_form_jotform_id: effective.registrationFormJotformId,
+      waitlist_form_jotform_id: effective.waitlistFormJotformId,
+      registration_closes_at: effective.registrationClosesAt,
+      auto_close_at_capacity: effective.autoCloseAtCapacity,
+      notes: effective.notes,
       data: mergeCampData(
         (existing?.data as Record<string, unknown> | null) ?? null,
-        campDataFromInput(input)
+        campDataFromInput(effective)
       )
     })
     .eq("id", id)
@@ -195,7 +262,7 @@ export async function updateCamp(id: string, input: UpsertCampInput): Promise<Ca
   if (error) throw new Error(error.message);
   const camp = rowToCamp(data as CampRow);
 
-  if (input.featuredOnEvents) {
+  if (effective.featuredOnEvents) {
     await clearOtherFeaturedCamps(camp.id);
   }
 

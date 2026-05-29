@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { autoFeatureCampIfOpen } from "@/lib/admin/camps";
 import type { Camp, CampStatus } from "@/lib/types";
 
 type RegistrationRow = {
@@ -80,6 +81,7 @@ export async function syncCampCapacityStatus(campId: string): Promise<CapacitySy
 
   if (newStatus !== camp.status) {
     await supabase.from("camps").update({ status: newStatus }).eq("id", campId);
+    await autoFeatureCampIfOpen(campId, camp.status, newStatus);
   }
 
   return {
@@ -135,7 +137,10 @@ export async function reopenCampRegistration(campId: string): Promise<{
     return { status: "closed", changed: false };
   }
 
+  await autoFeatureCampIfOpen(campId, "closed", "open");
+
   const sync = await syncCampCapacityStatus(campId);
+
   return {
     status: sync?.newStatus ?? "open",
     changed: true

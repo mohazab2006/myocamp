@@ -1,12 +1,12 @@
 import Link from "next/link";
 import {
-  ArrowSquareOut,
   CheckCircle,
   EnvelopeSimple,
   Info,
   Money,
   PaperPlaneTilt,
   Question,
+  Trash,
   Warning,
   XCircle
 } from "@phosphor-icons/react/ssr";
@@ -22,7 +22,7 @@ import { fetchGmailCredentials } from "@/lib/admin/gmail";
 import { fetchInboundEmails, reconcileOrphanedInboundMatches } from "@/lib/admin/inbound-emails";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { InboundEmail, InboundEmailMatchStatus } from "@/lib/types";
-import { matchInboundEmailAction, dismissUnrelatedInboundAction, markNotPaymentAction, clearStaleMatchedAction } from "./actions";
+import { matchInboundEmailAction, dismissUnrelatedInboundAction, markNotPaymentAction, removeInboundFromQueueAction, clearStaleMatchedAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -253,7 +253,7 @@ export default async function AdminInboxPage({
           <EmptyState tab={tab} />
         ) : (
           emails.map((email) => (
-            <EmailCard key={email.id} email={email} invoices={invoices} />
+            <EmailCard key={email.id} email={email} invoices={invoices} tab={tab} />
           ))
         )}
       </div>
@@ -352,15 +352,19 @@ function statusBadge(status: InboundEmailMatchStatus) {
 
 function EmailCard({
   email,
-  invoices
+  invoices,
+  tab
 }: {
   email: InboundEmail;
   invoices: InvoiceCandidate[];
+  tab: TabKey;
 }) {
   const canMatchManually =
     email.matchStatus === "unmatched" ||
     email.matchStatus === "pending" ||
     email.matchStatus === "error";
+
+  const canRemoveFromQueue = canMatchManually;
 
   return (
     <article className="border border-line bg-paper">
@@ -373,7 +377,21 @@ function EmailCard({
             From {email.fromAddress ?? "unknown"} · received {fmtDateTime(email.receivedAt)}
           </p>
         </div>
-        <div className="flex items-center gap-2">{statusBadge(email.matchStatus)}</div>
+        <div className="flex flex-wrap items-center gap-2">
+          {statusBadge(email.matchStatus)}
+          {canRemoveFromQueue ? (
+            <form action={removeInboundFromQueueAction}>
+              <input type="hidden" name="inboundId" value={email.id} />
+              <input type="hidden" name="tab" value={tab} />
+              <AdminSubmitButton
+                idleLabel="Remove"
+                pendingLabel="Removing…"
+                variant="ghost"
+                icon={<Trash size={12} weight="bold" />}
+              />
+            </form>
+          ) : null}
+        </div>
       </header>
 
       <div className="grid gap-4 px-5 py-4 md:grid-cols-3">
@@ -444,10 +462,15 @@ function EmailCard({
             </label>
             <AdminSubmitButton idleLabel="Match" icon={<CheckCircle size={14} weight="bold" />} />
           </form>
-          <form action={markNotPaymentAction} className="mt-3">
+          <p className="mt-3 text-xs leading-relaxed text-ink-soft">
+            Wrong transfer, duplicate, or already handled elsewhere? Click{" "}
+            <strong className="text-ink">Remove</strong> above — it leaves the audit trail under
+            All.
+          </p>
+          <form action={markNotPaymentAction} className="mt-2">
             <input type="hidden" name="inboundId" value={email.id} />
             <AdminSubmitButton
-              idleLabel="Not a payment"
+              idleLabel="Not a camp payment (personal / unrelated)"
               variant="ghost"
               icon={<XCircle size={12} weight="bold" />}
             />
@@ -455,12 +478,7 @@ function EmailCard({
         </footer>
       ) : email.matchStatus === "matched" && email.matchedPaymentId ? (
         <footer className="border-t border-line/60 bg-paper-deep/15 px-5 py-3 text-xs text-ink-soft">
-          <Link
-            href={`/admin/camps`}
-            className="inline-flex items-center gap-1.5 text-pine underline underline-offset-4"
-          >
-            View matched payment <ArrowSquareOut size={11} weight="bold" />
-          </Link>
+          Matched to a registration payment — open the camp registration to void if needed.
         </footer>
       ) : null}
     </article>

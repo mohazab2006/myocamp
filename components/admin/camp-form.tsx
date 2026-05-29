@@ -1,6 +1,7 @@
 import { CheckCircle } from "@phosphor-icons/react/ssr";
 
 import { AdminField, adminInputClass, adminTextareaClass } from "@/components/admin/field";
+import { CampTitleSlugFields } from "@/components/admin/camp-title-slug-fields";
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { AdminSubmitButton } from "@/components/admin/submit-button";
 import type { Camp } from "@/lib/types";
@@ -36,25 +37,12 @@ export function CampForm({ camp }: CampFormProps) {
         </>
       ) : null}
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <AdminField label="Title" required>
-          <input
-            className={adminInputClass}
-            name="title"
-            defaultValue={camp?.title}
-            placeholder="MYO Main Camp 2026"
-            required
-          />
-        </AdminField>
-        <AdminField label="Slug" hint="URL path. Auto-generated from title if blank.">
-          <input
-            className={adminInputClass}
-            name="slug"
-            defaultValue={camp?.slug}
-            placeholder="main-camp-2026"
-          />
-        </AdminField>
-      </div>
+      <CampTitleSlugFields
+        initialTitle={camp?.title}
+        initialSlug={camp?.slug}
+        originalTitle={isEditing ? camp?.title : undefined}
+        originalSlug={isEditing ? camp?.slug : undefined}
+      />
 
       <div className="grid gap-4 md:grid-cols-3">
         <AdminField
@@ -139,7 +127,7 @@ export function CampForm({ camp }: CampFormProps) {
           type="checkbox"
           defaultChecked={camp?.featuredOnEvents ?? false}
         />
-        Feature this camp on the events page (only one camp can be featured at a time)
+        Feature this camp on the events page (auto-enabled when status is Open; only one camp featured at a time)
       </label>
 
       <AdminField
