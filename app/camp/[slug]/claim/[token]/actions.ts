@@ -1,11 +1,13 @@
 "use server";
 
+import { headers } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { fetchCampBySlug } from "@/lib/admin/camps";
 import { createRegistrationWithInvoice } from "@/lib/admin/registrations";
 import { findWaitlistByClaimToken, markWaitlistClaimed } from "@/lib/admin/waitlist";
-import { fetchCampBySlug } from "@/lib/admin/camps";
+import { loadRegistrationContextByInvoice, notify } from "@/lib/email/notifications";
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
@@ -67,6 +69,18 @@ export async function acceptClaimAction(formData: FormData) {
     });
 
     await markWaitlistClaimed(entry!.id, result.registration.id);
+
+    const ctx = await loadRegistrationContextByInvoice(result.invoice.id);
+    if (ctx) {
+      const hdrs = await headers();
+      const host = hdrs.get("x-forwarded-host") ?? hdrs.get("host") ?? "myo.camp";
+      const proto =
+        hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+      const origin = `${proto}://${host}`;
+      void notify.registrationReceived({ ...ctx, origin }).catch((err) => {
+        console.warn("[acceptClaimAction] notify.registrationReceived failed:", err);
+      });
+    }
 
     revalidatePath(`/admin/camps/${camp.slug}`);
     revalidatePath("/admin/camps");
