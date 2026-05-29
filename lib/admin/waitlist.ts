@@ -3,6 +3,7 @@ import "server-only";
 import { randomBytes } from "node:crypto";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
+import { SITE_URL } from "@/lib/site";
 import type {
   CamperInfo,
   WaitlistEntry,
@@ -319,6 +320,6 @@ export function buildClaimUrl(
   token: string,
   origin?: string | null
 ): string {
-  const base = origin ?? process.env.NEXT_PUBLIC_SITE_URL ?? "https://myo.camp";
+  const base = origin ?? SITE_URL;
   return `${base.replace(/\/$/, "")}/camp/${encodeURIComponent(campSlug)}/claim/${encodeURIComponent(token)}`;
 }

@@ -55,6 +55,11 @@ export async function CampFooter() {
             <li>
               <Link href="/" className="text-camp-bark hover:text-camp-flame">← Back to MYO</Link>
             </li>
+            <li>
+              <a href="https://myo.camp" className="text-camp-bark hover:text-camp-flame">
+                myo.camp
+              </a>
+            </li>
           </ul>
         </div>
       </div>

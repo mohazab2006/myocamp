@@ -6,6 +6,12 @@ import { AdminNav } from "@/components/admin/admin-nav";
 import { getAdminSession } from "@/lib/admin/auth";
 import { logoutAction } from "./actions";
 
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  robots: { index: false, follow: false }
+};
+
 export default async function AdminLayout({ children }: { children: ReactNode }) {
   const session = await getAdminSession();
   const isSignedIn = session.status === "authorized" || session.status === "forbidden";

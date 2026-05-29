@@ -5,11 +5,14 @@ import { getSiteSettings } from "@/lib/content/org";
 import { ButtonAnchor, ButtonLink } from "@/components/main/Button";
 import { PageHero } from "@/components/main/PageHero";
 import { SectionHeader } from "@/components/main/SectionHeader";
+import { buildPageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Support MYO",
-  description: "Donate, volunteer, or sponsor MYO programs and the camp."
-};
+  description:
+    "Donate, volunteer, or sponsor MYO programs and summer camp. PayPal and e-Transfer accepted at myo.camp.",
+  path: "/support"
+});
 
 export default async function SupportPage() {
   const settings = await getSiteSettings();

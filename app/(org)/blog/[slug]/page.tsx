@@ -6,6 +6,7 @@ import { BlogPostBody } from "@/components/main/BlogPostBody";
 import { BlogPostShareLink } from "@/components/main/BlogPostShareLink";
 import { getBlogPost, getBlogPosts } from "@/lib/content/blog";
 import { formatPostDate } from "@/lib/date";
+import { buildPageMetadata } from "@/lib/site";
 
 export async function generateStaticParams() {
   const posts = await getBlogPosts();
@@ -20,7 +21,12 @@ export async function generateMetadata({
   const { slug } = await params;
   const post = await getBlogPost(slug);
   if (!post) return { title: "Post not found" };
-  return { title: post.title, description: post.excerpt };
+  return buildPageMetadata({
+    title: post.title,
+    description: post.excerpt,
+    path: `/blog/${post.slug}`,
+    image: post.heroImage
+  });
 }
 
 export default async function BlogPostPage({

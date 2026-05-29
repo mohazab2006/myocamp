@@ -15,6 +15,7 @@ import {
 import { fetchCampBySlug } from "@/lib/admin/camps";
 import { buildPaymentUrl } from "@/lib/admin/payment-links";
 import { findWaitlistByClaimToken } from "@/lib/admin/waitlist";
+import { SITE_URL } from "@/lib/site";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { ClaimConfirmButton } from "@/components/camp/ClaimConfirmButton";
 import type { Camp, WaitlistEntry } from "@/lib/types";
@@ -64,8 +65,7 @@ export default async function CampClaimPage({
   if (!camp) notFound();
 
   const entry = await findWaitlistByClaimToken(token);
-  const siteOrigin =
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://myo.camp";
+  const siteOrigin = SITE_URL;
   const claimedPaymentUrl =
     entry?.status === "claimed"
       ? await paymentUrlForClaimedRegistration(entry.claimedRegistrationId, siteOrigin)

@@ -60,7 +60,12 @@ export async function OrgFooter() {
       </div>
       <div className="border-t border-paper/12">
         <div className="mx-auto flex max-w-[1320px] flex-wrap items-center justify-between gap-4 px-6 py-6 text-xs text-paper/60 md:px-10">
-          <span>© {new Date().getFullYear()} Muslim Youth of Ottawa. Volunteer-run, community-funded.</span>
+          <span>
+            © {new Date().getFullYear()} Muslim Youth of Ottawa ·{" "}
+            <a href="https://myo.camp" className="hover:text-paper">
+              myo.camp
+            </a>
+          </span>
           <span>Built with the woods in mind.</span>
         </div>
       </div>

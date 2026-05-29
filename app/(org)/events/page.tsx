@@ -4,11 +4,14 @@ import { fetchFeaturedPublicCamps, fetchPublicCampsIndex } from "@/lib/content/c
 import { EventFilters } from "@/components/main/EventFilters";
 import { FeaturedCampCards } from "@/components/main/EventCampPanel";
 import { PageHero } from "@/components/main/PageHero";
+import { buildPageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Events",
-  description: "Hikes, halaqas, service days, and the camp — everything MYO is running."
-};
+  description:
+    "Hikes, halaqas, service days, and camp registration — everything MYO is running. Updated at myo.camp.",
+  path: "/events"
+});
 
 export default async function EventsPage() {
   const [events, featuredCamps, campIndex] = await Promise.all([

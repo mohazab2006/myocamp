@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 
 import { CampRegisterView } from "@/components/camp/CampRegisterView";
 import { fetchPublicCampBySlug, fetchRegisterablePublicCamps } from "@/lib/content/camps-public";
+import { buildPageMetadata } from "@/lib/site";
 
 export const dynamic = "force-dynamic";
 
@@ -15,10 +16,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const { slug } = await params;
   const camp = await fetchPublicCampBySlug(slug);
   if (!camp) return { title: "Camp · Register" };
-  return {
+  return buildPageMetadata({
     title: `Register · ${camp.title}`,
-    description: `Register for ${camp.title} at MYO Camp.`
-  };
+    description: `Register for ${camp.title} at MYO Camp — myo.camp.`,
+    path: `/camp/${camp.slug}/register`,
+    image: camp.heroImage
+  });
 }
 
 export default async function CampSlugRegisterPage({ params }: PageProps) {

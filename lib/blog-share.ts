@@ -1,7 +1,7 @@
-const SITE_ORIGIN = "https://myo.camp";
+import { absoluteUrl } from "@/lib/site";
 
 export function getBlogPostUrl(slug: string): string {
-  return `${SITE_ORIGIN}/blog/${slug}`;
+  return absoluteUrl(`/blog/${slug}`);
 }
 
 export function getXPostShareUrl(post: { slug: string; title: string }): string {

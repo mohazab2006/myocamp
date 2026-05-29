@@ -308,7 +308,7 @@ export default async function HomePage() {
           <SectionHeader
             eyebrow="Adventure Blog"
             title="From the trail and the field."
-            description="Hike announcements, service days, and trip notes from MYO Monthly Adventures — the same feed that lived on the old site."
+            description="Hike announcements, service days, and trip notes from MYO Monthly Adventures."
             scribbleColor="pine"
             action={
               <Link

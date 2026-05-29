@@ -2,13 +2,15 @@ import { CampNav } from "@/components/camp/CampNav";
 import { CampFooter } from "@/components/camp/CampFooter";
 import { NewsletterCallout } from "@/components/main/NewsletterCallout";
 import { BodyTheme } from "@/components/shared/BodyTheme";
+import { buildPageMetadata, SITE_NAME_SHORT } from "@/lib/site";
 import type { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "MYO Camp",
+export const metadata: Metadata = buildPageMetadata({
+  title: `${SITE_NAME_SHORT} Camp`,
   description:
-    "MYO Summer Camp at Camp Smitty in Eganville, Ontario. Two focused four-day sessions — LIT leadership track and main camp — with cabins, canoes, fire-circles, prayer, and friendship for Muslim youth ages 9 to 19."
-};
+    "MYO Summer Camp at Camp Smitty in Eganville, Ontario. Register for LIT or main camp online at myo.camp.",
+  path: "/camp"
+});
 
 export default function CampLayout({
   children

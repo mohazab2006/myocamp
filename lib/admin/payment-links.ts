@@ -2,6 +2,7 @@ import "server-only";
 
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { parseCampData } from "@/lib/admin/camp-data";
+import { SITE_URL } from "@/lib/site";
 import type { Camp, CamperInfo, Invoice, Registration } from "@/lib/types";
 
 export interface InvoiceLookupResult {
@@ -201,9 +202,6 @@ export async function findByReferenceCode(
  * Uses NEXT_PUBLIC_SITE_URL → fallback to the request origin (caller passes it in).
  */
 export function buildPaymentUrl(referenceCode: string, origin?: string | null): string {
-  const base =
-    origin ??
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    "https://myo.camp";
+  const base = origin ?? SITE_URL;
   return `${base.replace(/\/$/, "")}/camp/pay/${encodeURIComponent(referenceCode)}`;
 }

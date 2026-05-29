@@ -3,11 +3,14 @@ import { getBlogPosts } from "@/lib/content/blog";
 import { BlogFeedEntry } from "@/components/main/BlogFeedEntry";
 import { PageHero } from "@/components/main/PageHero";
 import { RevealOnScroll } from "@/components/main/RevealOnScroll";
+import { buildPageMetadata } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = buildPageMetadata({
   title: "Adventure Blog",
-  description: "Past and upcoming MYO adventures — hikes, service days, and community meetups."
-};
+  description:
+    "Past and upcoming MYO adventures — hikes, service days, and community meetups at myo.camp.",
+  path: "/blog"
+});
 
 export default async function BlogPage() {
   const posts = await getBlogPosts();

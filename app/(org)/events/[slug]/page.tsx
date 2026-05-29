@@ -5,6 +5,7 @@ import { ArrowLeft, CalendarBlank, MapPin, Tag } from "@phosphor-icons/react/ssr
 import { getEvent, getEvents } from "@/lib/content/events";
 import { fetchPublicCampBySlug } from "@/lib/content/camps-public";
 import { formatRange, isUpcoming } from "@/lib/date";
+import { buildPageMetadata } from "@/lib/site";
 import { ButtonAnchor, ButtonLink } from "@/components/main/Button";
 import { EventCampPanel } from "@/components/main/EventCampPanel";
 
@@ -23,7 +24,13 @@ export async function generateMetadata({
   const { slug } = await params;
   const event = await getEvent(slug);
   if (!event) return { title: "Event not found" };
-  return { title: event.title, description: event.blurb };
+  const heroImage = event.heroImage ?? null;
+  return buildPageMetadata({
+    title: event.title,
+    description: event.blurb,
+    path: `/events/${event.slug}`,
+    image: heroImage
+  });
 }
 
 export default async function EventPage({

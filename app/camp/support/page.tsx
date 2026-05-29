@@ -2,10 +2,14 @@ import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/content/org";
 import { CampIcon, PaintedDivider, SectionScatter } from "@/components/camp/Illustrations";
 
-export const metadata: Metadata = {
+import { buildPageMetadata } from "@/lib/site";
+
+export const metadata = buildPageMetadata({
   title: "Camp · Support",
-  description: "Subsidise a camper, donate gear, or volunteer for the week at MYO Camp."
-};
+  description:
+    "Subsidise a camper, donate gear, or volunteer for the week at MYO Camp. Donate via PayPal or e-Transfer at myo.camp.",
+  path: "/camp/support"
+});
 
 export default async function CampSupportPage() {
   const settings = await getSiteSettings();
