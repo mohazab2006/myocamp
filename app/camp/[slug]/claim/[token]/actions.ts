@@ -77,9 +77,11 @@ export async function acceptClaimAction(formData: FormData) {
       const proto =
         hdrs.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
       const origin = `${proto}://${host}`;
-      void notify.registrationReceived({ ...ctx, origin }).catch((err) => {
+      try {
+        await notify.registrationReceived({ ...ctx, origin });
+      } catch (err) {
         console.warn("[acceptClaimAction] notify.registrationReceived failed:", err);
-      });
+      }
     }
 
     revalidatePath(`/admin/camps/${camp.slug}`);

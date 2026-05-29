@@ -72,15 +72,16 @@ export async function POST(req: NextRequest) {
         rawPayload: parsed.rawPayload
       });
 
-      // Fire the registration_received email (best-effort, don't block webhook
-      // response on Resend latency or failure).
+      // Await send so Vercel doesn't tear down the function before Resend completes.
       if (result.isNew) {
         const ctx = await loadRegistrationContextByInvoice(result.invoice.id);
         if (ctx) {
           const origin = req.nextUrl.origin;
-          void notify.registrationReceived({ ...ctx, origin }).catch((err) => {
+          try {
+            await notify.registrationReceived({ ...ctx, origin });
+          } catch (err) {
             console.warn("[jotform-webhook] notify.registrationReceived failed:", err);
-          });
+          }
         }
       }
 
