@@ -253,6 +253,7 @@ export interface GmailCredentials {
 
 export type ReminderKind =
   | "registration_received"
+  | "payment_followup_d2"
   | "invoice_reminder_t7"
   | "invoice_reminder_t3"
   | "invoice_reminder_t1"

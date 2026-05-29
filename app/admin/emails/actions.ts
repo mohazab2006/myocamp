@@ -13,6 +13,7 @@ import {
 
 const VALID_SLUGS: EmailTemplateSlug[] = [
   "registration_received",
+  "payment_followup",
   "invoice_reminder",
   "waitlist_promoted",
   "payment_confirmation"

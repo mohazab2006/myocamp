@@ -32,6 +32,7 @@ interface PageProps {
 
 const TEMPLATE_SLUGS: EmailTemplateSlug[] = [
   "registration_received",
+  "payment_followup",
   "invoice_reminder",
   "waitlist_promoted",
   "payment_confirmation"
@@ -45,7 +46,19 @@ const SAMPLE_VALUES: Record<EmailTemplateSlug, Record<string, string>> = {
     camp_dates: "July 6 – July 12, 2026",
     ref: "MYO-2026-A7X2",
     amount: "$325.00",
-    payment_url: "https://myo.camp/camp/pay/MYO-2026-A7X2"
+    payment_url: "https://myo.camp/camp/pay/MYO-2026-A7X2",
+    etransfer_memo: "MYO-2026-A7X2 Omar"
+  },
+  payment_followup: {
+    parent_name: "Sarah Patel",
+    camper_name: "Omar Patel",
+    camp_title: "Main Camp 2026",
+    camp_dates: "July 6 – July 12, 2026",
+    ref: "MYO-2026-A7X2",
+    amount: "$325.00",
+    payment_url: "https://myo.camp/camp/pay/MYO-2026-A7X2",
+    etransfer_memo: "MYO-2026-A7X2 Omar",
+    contact_email: "myoadmin@gmail.com"
   },
   invoice_reminder: {
     parent_name: "Sarah Patel",

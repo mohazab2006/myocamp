@@ -4,6 +4,7 @@ import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 
 export type EmailTemplateSlug =
   | "registration_received"
+  | "payment_followup"
   | "invoice_reminder"
   | "waitlist_promoted"
   | "payment_confirmation";
@@ -51,7 +52,19 @@ export const TEMPLATE_PLACEHOLDERS: Record<EmailTemplateSlug, string[]> = {
     "camp_dates",
     "ref",
     "amount",
-    "payment_url"
+    "payment_url",
+    "etransfer_memo"
+  ],
+  payment_followup: [
+    "parent_name",
+    "camper_name",
+    "camp_title",
+    "camp_dates",
+    "ref",
+    "amount",
+    "payment_url",
+    "etransfer_memo",
+    "contact_email"
   ],
   invoice_reminder: [
     "parent_name",

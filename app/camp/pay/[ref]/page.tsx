@@ -23,6 +23,7 @@ import {
   familyReferenceCodes,
   familyTotalRemaining,
   fetchFamilyBillingLines,
+  formatEtransferMemo,
   formatFamilyMemo,
   type FamilyBillingLine
 } from "@/lib/admin/family-billing";
@@ -76,13 +77,16 @@ export default async function CampPayPage({
   const isFamilyPayment = familyLines.length > 1;
   const familyRemaining = familyTotalRemaining(familyLines);
   const familyRefs = familyReferenceCodes(familyLines);
+  const camperLabel = describeCampers(registration);
   const familyMemo = formatFamilyMemo(familyLines);
+  const etransferMemo = isFamilyPayment
+    ? familyMemo
+    : formatEtransferMemo(invoice.referenceCode, camperLabel);
   const payRemaining = isFamilyPayment ? familyRemaining : remaining;
 
   const isPaid = invoice.status === "paid";
   const isCancelled = registration.status === "cancelled";
   const isPartial = invoice.status === "partial";
-  const camperLabel = describeCampers(registration);
 
   return (
     <main className="min-h-dvh bg-paper py-12 md:py-16">
@@ -161,6 +165,7 @@ export default async function CampPayPage({
             familyLines={familyLines}
             isFamilyPayment={isFamilyPayment}
             familyMemo={familyMemo}
+            etransferMemo={etransferMemo}
             familyRefs={familyRefs}
           />
         )}
@@ -244,6 +249,7 @@ function UnpaidState({
   familyLines,
   isFamilyPayment,
   familyMemo,
+  etransferMemo,
   familyRefs
 }: {
   referenceCode: string;
@@ -257,6 +263,7 @@ function UnpaidState({
   familyLines: FamilyBillingLine[];
   isFamilyPayment: boolean;
   familyMemo: string;
+  etransferMemo: string;
   familyRefs: string[];
 }) {
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
@@ -355,7 +362,7 @@ function UnpaidState({
               <ETransferField label="Amount" value={fmt(payRemaining)} />
               <ETransferField
                 label="Message / memo"
-                value={isFamilyPayment ? familyMemo : referenceCode}
+                value={etransferMemo}
                 highlight
               />
             </div>
@@ -370,10 +377,10 @@ function UnpaidState({
                   </>
                 ) : (
                   <>
-                    You must include{" "}
-                    <strong className="font-mono text-ink">{referenceCode}</strong> in the message
-                    so we can match your payment to your registration. Without it, confirming your
-                    spot may take longer.
+                    Send <strong className="text-ink">{fmt(payRemaining)}</strong> and put{" "}
+                    <strong className="font-mono text-ink">{etransferMemo}</strong> in the message
+                    (reference + your child&apos;s first name) so we can match your payment right
+                    away.
                   </>
                 )}
               </p>

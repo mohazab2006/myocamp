@@ -184,7 +184,9 @@ function PlaceholderReference() {
         { key: "amount", desc: "Outstanding balance, formatted as $325.00" },
         { key: "amount_paid", desc: "Most recent payment amount" },
         { key: "payment_method", desc: 'e.g. "PayPal", "Interac e-Transfer"' },
-        { key: "payment_url", desc: "Direct link to /camp/pay/{ref}" }
+        { key: "payment_url", desc: "Direct link to /camp/pay/{ref}" },
+        { key: "etransfer_memo", desc: 'Reference + first name, e.g. "MYO-2026-A7X2 Omar"' },
+        { key: "contact_email", desc: "Support / reply-to address for payment questions" }
       ]
     },
     {

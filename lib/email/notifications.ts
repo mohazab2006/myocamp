@@ -2,6 +2,7 @@ import "server-only";
 
 import { fetchEmailTemplate, type EmailTemplateSlug } from "@/lib/admin/email-templates";
 import { parseCampData } from "@/lib/admin/camp-data";
+import { formatEtransferMemo } from "@/lib/admin/family-billing";
 import { bumpInvoiceReminderMeta, recordReminder } from "@/lib/admin/reminder-log";
 import { buildPaymentUrl } from "@/lib/admin/payment-links";
 import { isResendConfigured, sendEmail } from "@/lib/email/resend";
@@ -64,6 +65,15 @@ function firstCamperName(registration: Registration): string {
   if (first && typeof first.name === "string" && first.name.trim()) return first.name.trim();
   if (registration.campers.length > 1) return `${registration.campers.length} campers`;
   return "your camper";
+}
+
+function paymentContactEmail(camp: Camp): string {
+  return (
+    process.env.EMAIL_REPLY_TO?.trim() ||
+    camp.paymentEmail?.trim() ||
+    process.env.PAYMENT_EMAIL?.trim() ||
+    "myoadmin@gmail.com"
+  );
 }
 
 function paymentMethodLabel(method: PaymentMethod | string): string {
@@ -231,6 +241,7 @@ export const notify = {
   /** Sent right after a JotForm submission lands. Includes the payment link. */
   async registrationReceived(ctx: RegistrationContext): Promise<SendResult> {
     const paymentUrl = buildPaymentUrl(ctx.invoice.referenceCode, ctx.origin);
+    const camperName = firstCamperName(ctx.registration);
     return dispatch({
       slug: "registration_received",
       reminderNumber: "registration_received",
@@ -240,12 +251,39 @@ export const notify = {
       registrationId: ctx.registration.id,
       values: {
         parent_name: ctx.registration.parentName ?? "there",
-        camper_name: firstCamperName(ctx.registration),
+        camper_name: camperName,
         camp_title: ctx.camp.title,
         camp_dates: formatDateRange(ctx.camp.startDate, ctx.camp.endDate),
         ref: ctx.invoice.referenceCode,
         amount: formatMoney(ctx.invoice.amountDue),
-        payment_url: paymentUrl
+        payment_url: paymentUrl,
+        etransfer_memo: formatEtransferMemo(ctx.invoice.referenceCode, camperName)
+      }
+    });
+  },
+
+  /** Sent ~2 days after registration when no payment signal is on file. */
+  async paymentFollowup(ctx: RegistrationContext): Promise<SendResult> {
+    const paymentUrl = buildPaymentUrl(ctx.invoice.referenceCode, ctx.origin);
+    const remainder = Math.max(0, ctx.invoice.amountDue - ctx.invoice.amountPaid);
+    const camperName = firstCamperName(ctx.registration);
+    return dispatch({
+      slug: "payment_followup",
+      reminderNumber: "payment_followup_d2",
+      trigger: "auto",
+      recipient: ctx.registration.parentEmail,
+      invoiceId: ctx.invoice.id,
+      registrationId: ctx.registration.id,
+      values: {
+        parent_name: ctx.registration.parentName ?? "there",
+        camper_name: camperName,
+        camp_title: ctx.camp.title,
+        camp_dates: formatDateRange(ctx.camp.startDate, ctx.camp.endDate),
+        ref: ctx.invoice.referenceCode,
+        amount: formatMoney(remainder),
+        payment_url: paymentUrl,
+        etransfer_memo: formatEtransferMemo(ctx.invoice.referenceCode, camperName),
+        contact_email: paymentContactEmail(ctx.camp)
       }
     });
   },

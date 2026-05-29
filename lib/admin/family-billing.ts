@@ -92,8 +92,16 @@ export function familyReferenceCodes(lines: FamilyBillingLine[]): string[] {
   return lines.map((l) => l.referenceCode);
 }
 
+/** e-Transfer memo: reference + camper name so admin can match even without auto-ref. */
+export function formatEtransferMemo(referenceCode: string, camperLabel: string): string {
+  const name = camperLabel.trim();
+  if (!name || name === "your camper" || name === "Camper") return referenceCode;
+  const firstName = name.split(/\s+/)[0] ?? name;
+  return `${referenceCode} ${firstName}`;
+}
+
 export function formatFamilyMemo(lines: FamilyBillingLine[]): string {
-  return familyReferenceCodes(lines).join(", ");
+  return lines.map((l) => formatEtransferMemo(l.referenceCode, l.camperLabel)).join(", ");
 }
 
 /** Apply one payment across multiple invoices (oldest registration first). */
