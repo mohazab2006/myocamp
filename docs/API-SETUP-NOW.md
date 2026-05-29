@@ -89,21 +89,38 @@ Also copy this URL from `/admin/setup` on the public host.
 
 Only needed if you want Gmail to auto-match Interac emails. Manual match in `/admin/inbox` works without this.
 
+**The env var does not configure Google for you.** You must add origins + redirect URIs in Google Cloud Console by hand.
+
 1. Go to [console.cloud.google.com](https://console.cloud.google.com)
 2. **New project** → name `myocamp`
 3. **APIs & Services → Library** → search **Gmail API** → Enable
 4. **APIs & Services → OAuth consent screen** → External → add your email as test user
-5. **Credentials → Create Credentials → OAuth client ID** → Web application
-6. **Authorized redirect URIs** — add BOTH:
+5. **Credentials → Create Credentials → OAuth client ID** → **Web application**
+6. In Google Cloud, add **both** of these sections (every environment you use):
+
+   **Authorized JavaScript origins** (no `/api/...` path):
+   ```
+   http://localhost:3000
+   https://myo.camp
+   https://YOUR-PROJECT.vercel.app
+   ```
+
+   **Authorized redirect URIs** (full callback path):
    ```
    http://localhost:3000/api/gmail/oauth/callback
+   https://myo.camp/api/gmail/oauth/callback
+   https://YOUR-PROJECT.vercel.app/api/gmail/oauth/callback
    ```
-   (Add Vercel preview URL later when you deploy.)
+
+   Or open `/admin/setup/gmail` on each environment — it shows the exact strings to copy.
+
 7. Copy Client ID + Secret into `.env.local`:
    ```
    GOOGLE_CLIENT_ID=xxx.apps.googleusercontent.com
    GOOGLE_CLIENT_SECRET=GOCSPX-xxx
    ```
+   Optional (only if you need a fixed redirect): `GOOGLE_OAUTH_REDIRECT=https://myo.camp/api/gmail/oauth/callback` — must match Google **exactly**.
+
 8. Restart → go to `/admin/setup/gmail` → **Connect Gmail**
 9. Sign in with the inbox that receives e-Transfer notifications (e.g. `myoadmin@gmail.com`)
 

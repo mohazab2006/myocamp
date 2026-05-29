@@ -125,18 +125,75 @@ Only if Resend dashboard asks for **Receiving** / inbound MX on root — follow 
 
 ---
 
-## Part 4 — Google OAuth (not DNS — Mahfouthi or whoever owns Google Cloud)
+## Part 4 — Google OAuth (not DNS — manual Google Cloud Console steps)
 
-If using Gmail auto-match for e-Transfers, add this **Authorized redirect URI** in Google Cloud Console (no DNS):
+**Important:** `GOOGLE_OAUTH_REDIRECT` in Vercel does **not** register anything with Google. The app can *compute* a redirect URL at runtime, but **you must paste the matching URLs into Google Cloud yourself** or OAuth will fail with `redirect_uri_mismatch`.
+
+### 4A. Create OAuth client (Web application)
+
+1. [console.cloud.google.com](https://console.cloud.google.com) → your project.
+2. Enable **Gmail API**.
+3. **APIs & Services → OAuth consent screen** → External → add test users (while in testing mode).
+4. **APIs & Services → Credentials → Create credentials → OAuth client ID → Web application**.
+
+### 4B. Add BOTH fields in Google (required — copy/paste exactly)
+
+**Authorized JavaScript origins** (no path, no trailing slash):
+
+```
+https://myo.camp
+```
+
+For local dev, also add:
+
+```
+http://localhost:3000
+```
+
+For Vercel preview deploys, also add (replace with your project URL):
+
+```
+https://YOUR-PROJECT.vercel.app
+```
+
+**Authorized redirect URIs** (full path to callback):
 
 ```
 https://myo.camp/api/gmail/oauth/callback
 ```
 
-For staging/preview, also add:
+For local dev:
+
+```
+http://localhost:3000/api/gmail/oauth/callback
+```
+
+For Vercel preview:
+
 ```
 https://YOUR-PROJECT.vercel.app/api/gmail/oauth/callback
 ```
+
+### 4C. Optional env override
+
+Only set this if the redirect must differ from the site URL (unusual):
+
+```env
+GOOGLE_OAUTH_REDIRECT=https://myo.camp/api/gmail/oauth/callback
+```
+
+If set, the **same exact string** must appear under **Authorized redirect URIs** in Google Cloud.
+
+### 4D. Env vars + connect
+
+```env
+GOOGLE_CLIENT_ID=....apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=GOCSPX-...
+```
+
+Then redeploy → `/admin/setup/gmail` → **Connect Gmail** (use the inbox that receives Interac emails, e.g. `myoadmin@gmail.com`).
+
+The setup page at `/admin/setup/gmail` shows the **exact** origin + redirect URI for the environment you're on — copy those into Google if unsure.
 
 ---
 

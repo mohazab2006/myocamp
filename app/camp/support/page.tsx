@@ -87,23 +87,35 @@ export default async function CampSupportPage() {
             </div>
           </div>
 
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-3">
-            <a
-              href={settings.donateUrl}
-              target="_blank"
-              rel="noopener"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink bg-camp-flame px-6 py-3 text-sm font-medium text-camp-paper transition hover:translate-y-[-1px]"
-            >
-              Donate via PayPal
-            </a>
-            <a
-              href={settings.volunteerUrl}
-              target="_blank"
-              rel="noopener"
-              className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink/80 bg-camp-paper px-6 py-3 text-sm font-medium text-camp-ink transition hover:rotate-[1deg]"
-            >
-              Volunteer for camp
-            </a>
+          <div className="mt-12 flex flex-col items-center gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <a
+                href={settings.donateUrl}
+                target="_blank"
+                rel="noopener"
+                className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink bg-camp-flame px-6 py-3 text-sm font-medium text-camp-paper transition hover:translate-y-[-1px]"
+              >
+                Donate via PayPal
+              </a>
+              <a
+                href={settings.volunteerUrl}
+                target="_blank"
+                rel="noopener"
+                className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink/80 bg-camp-paper px-6 py-3 text-sm font-medium text-camp-ink transition hover:rotate-[1deg]"
+              >
+                Volunteer for camp
+              </a>
+            </div>
+            <p className="max-w-md text-center text-sm leading-relaxed text-camp-ink/75">
+              Prefer e-Transfer? Send to{" "}
+              <a
+                href={`mailto:${settings.email}`}
+                className="font-medium text-camp-bark underline decoration-camp-bark/30 underline-offset-2"
+              >
+                {settings.email}
+              </a>{" "}
+              — put &ldquo;Donation&rdquo; in the message so we know it&apos;s a gift, not camp fees.
+            </p>
           </div>
         </div>
       </section>

@@ -182,6 +182,7 @@ export async function saveEventAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/admin/events");
+  revalidatePath(`/admin/events/${event.slug}/edit`);
   revalidatePath("/events");
   revalidatePath(`/events/${event.slug}`);
   flash("/admin/events", "success", `Saved "${event.title}".`);
@@ -204,6 +205,7 @@ export async function deleteEventAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/admin/events");
+  revalidatePath(`/admin/events/${slug}/edit`);
   revalidatePath("/events");
   revalidatePath(`/events/${slug}`);
   flash("/admin/events", "success", "Event deleted.");
@@ -246,6 +248,7 @@ export async function saveBlogPostAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/admin/blog");
+  revalidatePath(`/admin/blog/${post.slug}/edit`);
   revalidatePath("/blog");
   revalidatePath(`/blog/${post.slug}`);
   flash("/admin/blog", "success", `Saved "${post.title}".`);
@@ -268,6 +271,7 @@ export async function deleteBlogPostAction(formData: FormData) {
 
   revalidatePath("/admin");
   revalidatePath("/admin/blog");
+  revalidatePath(`/admin/blog/${slug}/edit`);
   revalidatePath("/blog");
   revalidatePath(`/blog/${slug}`);
   flash("/admin/blog", "success", "Blog post deleted.");

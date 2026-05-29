@@ -171,12 +171,24 @@ Parents pay at `/camp/pay/{reference-code}`.
 
 ### You do
 1. [console.cloud.google.com](https://console.cloud.google.com) → project → enable **Gmail API**.
-2. OAuth client (Web application).
-3. Authorized redirect URI:
+2. OAuth client (**Web application**).
+3. **Manually** add in Google Cloud (the app does not do this for you):
+
+   | Google Cloud field | Production example |
+   |--------------------|--------------------|
+   | **Authorized JavaScript origins** | `https://myo.camp` |
+   | **Authorized redirect URIs** | `https://myo.camp/api/gmail/oauth/callback` |
+
+   Also add `http://localhost:3000` + `http://localhost:3000/api/gmail/oauth/callback` for local dev, and your Vercel preview URL + `/api/gmail/oauth/callback` for preview deploys.
+
+4. Env vars:
+   ```env
+   GOOGLE_CLIENT_ID=...
+   GOOGLE_CLIENT_SECRET=...
+   # Optional — must match a redirect URI in Google exactly if set:
+   GOOGLE_OAUTH_REDIRECT=https://myo.camp/api/gmail/oauth/callback
    ```
-   https://myo.camp/api/gmail/oauth/callback
-   ```
-4. `/admin/setup/gmail` → Connect the inbox that receives Interac notifications.
+5. `/admin/setup/gmail` → copy the shown origin + redirect if unsure → **Connect Gmail**.
 
 Parents put reference code `MYO-YYYY-XXXX` in e-Transfer memo. Unmatched → `/admin/inbox`.
 

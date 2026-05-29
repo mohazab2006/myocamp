@@ -315,14 +315,22 @@ function SetupGuide({ origin, redirectUri }: { origin: string; redirectUri: stri
         <li>
           <strong>5.</strong> Go to <em>APIs &amp; Services → Credentials → Create credentials → OAuth client ID</em>.
           Pick <code className="border border-line bg-paper px-1 py-0.5">Web application</code>.
-          Add these:
+          <p className="mt-2 border border-ember/30 bg-ember/10 p-3 text-xs leading-relaxed text-ink-soft">
+            <strong className="text-ink">You must paste these into Google Cloud yourself.</strong>{" "}
+            Setting <code className="border border-line bg-paper px-1 py-0.5">GOOGLE_OAUTH_REDIRECT</code> in
+            Vercel only tells the app what URL to use — Google will reject OAuth until the same values are
+            saved under <em>Authorized JavaScript origins</em> and <em>Authorized redirect URIs</em>.
+          </p>
+          Add these (add every environment you use — prod, localhost, Vercel preview):
           <div className="mt-2 space-y-2 border-l-2 border-pine/30 pl-3 text-xs">
             <div>
-              Authorized JavaScript origin: <code className="break-all border border-line bg-paper px-1 py-0.5">{origin}</code>
+              <span className="font-semibold text-ink">Authorized JavaScript origin</span> (no path):{" "}
+              <code className="break-all border border-line bg-paper px-1 py-0.5">{origin}</code>
               <CopyButton value={origin} label="Copy" className="ml-2 inline-flex h-6 items-center gap-1 border border-line bg-paper px-1.5 text-[10px] uppercase tracking-[0.16em] text-ink-soft hover:border-pine hover:text-ink" />
             </div>
             <div>
-              Authorized redirect URI: <code className="break-all border border-line bg-paper px-1 py-0.5">{redirectUri}</code>
+              <span className="font-semibold text-ink">Authorized redirect URI</span> (full callback path):{" "}
+              <code className="break-all border border-line bg-paper px-1 py-0.5">{redirectUri}</code>
               <CopyButton value={redirectUri} label="Copy" className="ml-2 inline-flex h-6 items-center gap-1 border border-line bg-paper px-1.5 text-[10px] uppercase tracking-[0.16em] text-ink-soft hover:border-pine hover:text-ink" />
             </div>
           </div>

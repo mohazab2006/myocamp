@@ -148,6 +148,11 @@ export default async function AdminSetupPage({
       mask: true
     },
     {
+      name: "GOOGLE_OAUTH_REDIRECT",
+      value: process.env.GOOGLE_OAUTH_REDIRECT,
+      hint: "Optional. If unset, derived from site URL at runtime. You must still add the same redirect URI + JavaScript origin in Google Cloud Console manually."
+    },
+    {
       name: "CRON_SECRET",
       value: process.env.CRON_SECRET,
       hint: "Bearer secret for manual cron runs from admin or curl.",

@@ -110,3 +110,10 @@ export async function getAdminEvents(): Promise<OrgEvent[]> {
   if (!isSupabaseConfigured()) return seedEvents;
   return (await fetchSupabaseEvents()) ?? [];
 }
+
+export async function getAdminEvent(slug: string): Promise<OrgEvent | null> {
+  if (!isSupabaseConfigured()) {
+    return seedEvents.find((event) => event.slug === slug) ?? null;
+  }
+  return fetchSupabaseEvent(slug);
+}

@@ -84,5 +84,13 @@ export async function getBlogPost(slug: string): Promise<BlogPost | null> {
 
 export async function getAdminBlogPosts(): Promise<BlogPost[]> {
   if (!isSupabaseConfigured()) return seedPosts;
-  return (await fetchSupabaseBlogPosts()) ?? [];
+  const posts = (await fetchSupabaseBlogPosts()) ?? [];
+  return [...posts].sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt));
+}
+
+export async function getAdminBlogPost(slug: string): Promise<BlogPost | null> {
+  if (!isSupabaseConfigured()) {
+    return seedPosts.find((post) => post.slug === slug) ?? null;
+  }
+  return fetchSupabaseBlogPost(slug);
 }

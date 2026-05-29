@@ -37,8 +37,15 @@ export default async function SupportPage() {
               </div>
               <h2 className="font-display mt-5 text-3xl tracking-tight md:text-4xl">Donate</h2>
               <p className="mx-auto mt-4 max-w-sm text-base leading-relaxed text-ink-soft md:text-lg">
-                One-time or monthly. Donations go straight to camp subsidies, gear replacement, and program
-                materials. PayPal handles tax receipts where applicable.
+                One-time or monthly via PayPal, or send an Interac e-Transfer to{" "}
+                <a
+                  href={`mailto:${settings.email}`}
+                  className="font-medium text-ink underline decoration-line underline-offset-2 transition hover:text-forest"
+                >
+                  {settings.email}
+                </a>
+                . Donations go to camp subsidies, gear replacement, and program materials. PayPal
+                handles tax receipts where applicable.
               </p>
               <div className="mt-7 flex justify-center">
                 <ButtonAnchor href={settings.donateUrl} target="_blank" rel="noopener">
