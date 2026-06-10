@@ -108,7 +108,7 @@ export function ImageUploader({ name, defaultValue, folder, aspect = "16/9" }: I
         {!isPending ? (
           <label
             htmlFor={inputId}
-            className="absolute inset-0 z-[1] cursor-pointer"
+            className="absolute inset-0 z-1 cursor-pointer"
             aria-label={url ? "Replace image" : "Upload image"}
           />
         ) : null}
@@ -143,7 +143,7 @@ export function ImageUploader({ name, defaultValue, folder, aspect = "16/9" }: I
         ) : null}
 
         {url ? (
-          <div className="absolute inset-x-0 bottom-0 z-[2] flex items-center justify-between gap-2 bg-ink/70 px-3 py-2 text-paper backdrop-blur-sm">
+          <div className="absolute inset-x-0 bottom-0 z-2 flex items-center justify-between gap-2 bg-ink/70 px-3 py-2 text-paper backdrop-blur-sm">
             <span className="inline-flex items-center gap-2 text-xs pointer-events-none">
               <ImageIcon size={14} weight="duotone" />
               <span className="max-w-[220px] truncate" title={url}>
