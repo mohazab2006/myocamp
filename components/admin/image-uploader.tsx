@@ -69,8 +69,16 @@ export function ImageUploader({ name, defaultValue, folder, aspect = "16/9" }: I
 
   const onDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
+    event.stopPropagation();
     setIsDragging(false);
     onFile(event.dataTransfer.files?.[0]);
+  };
+
+  const openFilePicker = (event?: React.MouseEvent) => {
+    event?.preventDefault();
+    event?.stopPropagation();
+    if (isPending) return;
+    fileInputRef.current?.click();
   };
 
   const clear = () => {
@@ -84,29 +92,27 @@ export function ImageUploader({ name, defaultValue, folder, aspect = "16/9" }: I
       <input type="hidden" name={name} value={url} />
 
       <div
-        role="button"
-        tabIndex={0}
-        aria-controls={inputId}
-        onClick={() => fileInputRef.current?.click()}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            event.preventDefault();
-            fileInputRef.current?.click();
-          }
-        }}
         onDragOver={(event) => {
           event.preventDefault();
           setIsDragging(true);
         }}
         onDragLeave={() => setIsDragging(false)}
         onDrop={onDrop}
-        className={`group relative cursor-pointer border-2 border-dashed transition ${
+        className={`group relative border-2 border-dashed transition ${
           isDragging
             ? "border-pine bg-sky/40"
             : "border-line bg-paper-deep/30 hover:border-pine/60 hover:bg-paper-deep/50"
         }`}
         style={{ aspectRatio: aspect }}
       >
+        {!isPending ? (
+          <label
+            htmlFor={inputId}
+            className="absolute inset-0 z-[1] cursor-pointer"
+            aria-label={url ? "Replace image" : "Upload image"}
+          />
+        ) : null}
+
         {url ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -115,7 +121,7 @@ export function ImageUploader({ name, defaultValue, folder, aspect = "16/9" }: I
             className="absolute inset-0 h-full w-full object-cover"
           />
         ) : (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 p-6 text-center pointer-events-none">
             <div className="flex h-12 w-12 items-center justify-center border border-line bg-paper text-pine">
               {isPending ? (
                 <CircleNotch size={22} weight="bold" className="animate-spin" />
@@ -137,8 +143,8 @@ export function ImageUploader({ name, defaultValue, folder, aspect = "16/9" }: I
         ) : null}
 
         {url ? (
-          <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-2 bg-ink/70 px-3 py-2 text-paper backdrop-blur-sm">
-            <span className="inline-flex items-center gap-2 text-xs">
+          <div className="absolute inset-x-0 bottom-0 z-[2] flex items-center justify-between gap-2 bg-ink/70 px-3 py-2 text-paper backdrop-blur-sm">
+            <span className="inline-flex items-center gap-2 text-xs pointer-events-none">
               <ImageIcon size={14} weight="duotone" />
               <span className="max-w-[220px] truncate" title={url}>
                 {url.split("/").pop()}
@@ -147,10 +153,7 @@ export function ImageUploader({ name, defaultValue, folder, aspect = "16/9" }: I
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  fileInputRef.current?.click();
-                }}
+                onClick={openFilePicker}
                 className="text-[11px] font-semibold uppercase tracking-[0.14em] text-paper/90 hover:text-paper"
               >
                 Replace
@@ -158,6 +161,7 @@ export function ImageUploader({ name, defaultValue, folder, aspect = "16/9" }: I
               <button
                 type="button"
                 onClick={(event) => {
+                  event.preventDefault();
                   event.stopPropagation();
                   clear();
                 }}
@@ -177,7 +181,12 @@ export function ImageUploader({ name, defaultValue, folder, aspect = "16/9" }: I
         type="file"
         accept={ACCEPT}
         className="sr-only"
-        onChange={(event) => onFile(event.target.files?.[0])}
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          // Reset so picking the same file again still fires change.
+          event.target.value = "";
+          onFile(file);
+        }}
       />
 
       {error ? (
