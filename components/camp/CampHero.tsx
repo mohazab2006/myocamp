@@ -23,6 +23,7 @@ import {
   SparkIcon,
   WaveIcon
 } from "./Illustrations";
+import { FloatingMyoIsland } from "./FloatingMyoIsland";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
@@ -83,9 +84,9 @@ export function CampHero({ mainRange, litRange }: CampHeroProps) {
   return (
     <section
       ref={root}
-      className="topo-bg paper-grain relative overflow-hidden bg-camp-paper"
+      className="topo-bg paper-grain relative overflow-visible bg-camp-paper"
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-camp-sky/40 via-transparent to-camp-paper" />
+      <div className="absolute inset-0 bg-linear-to-b from-camp-sky/40 via-transparent to-camp-paper" />
 
       <LeafIcon
         size={42}
@@ -116,7 +117,14 @@ export function CampHero({ mainRange, litRange }: CampHeroProps) {
         className="camp-hero-decoration absolute right-[6%] bottom-[6%] hidden text-camp-flame/80 md:block"
       />
 
-      <div className="relative mx-auto max-w-[1440px] px-6 pb-24 pt-4 md:px-10 md:pb-36 md:pt-6">
+      <div className="camp-hero-island-layer hidden md:block" aria-hidden>
+        <FloatingMyoIsland
+          size="hero"
+          className="bottom-9 left-4 lg:bottom-10 lg:left-6"
+        />
+      </div>
+
+      <div className="camp-hero-content relative z-10 mx-auto max-w-[1440px] px-6 pb-24 pt-4 md:px-10 md:pb-36 md:pt-6">
         <div className="flex items-center justify-between text-camp-bark">
           <div className="font-script text-2xl md:text-3xl">est. Camp Smitty &middot; Eganville</div>
           <div className="font-script text-xl md:text-2xl">two focused sessions · July &amp; August</div>
@@ -231,13 +239,13 @@ export function CampHero({ mainRange, litRange }: CampHeroProps) {
         <div className="camp-hero-meta mt-12 flex flex-wrap items-center justify-center gap-3">
           <a
             href="/camp/register"
-            className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink bg-camp-flame px-6 py-3 text-sm font-medium text-camp-paper transition hover:translate-y-[-1px] hover:rotate-[-1deg]"
+            className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink bg-camp-flame px-6 py-3 text-sm font-medium text-camp-paper transition hover:-translate-y-px hover:-rotate-1"
           >
             Open registration
           </a>
           <a
             href="/camp/story"
-            className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink/80 bg-camp-paper px-6 py-3 text-sm font-medium text-camp-ink transition hover:rotate-[1deg]"
+            className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink/80 bg-camp-paper px-6 py-3 text-sm font-medium text-camp-ink transition hover:rotate-1"
           >
             What is this place?
           </a>

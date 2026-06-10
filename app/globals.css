@@ -97,6 +97,18 @@ body[data-theme="camp"] ::selection {
 }
 .paper-grain > * { position: relative; z-index: 1; }
 
+.paper-grain .camp-hero-content {
+  z-index: 10 !important;
+}
+
+.paper-grain .camp-hero-island-layer {
+  position: absolute !important;
+  inset: 0;
+  z-index: 5 !important;
+  pointer-events: none;
+  overflow: visible;
+}
+
 .topo-bg {
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='600' viewBox='0 0 600 600'><g fill='none' stroke='%235a3a1f' stroke-opacity='0.12' stroke-width='1.2'><path d='M-50 320 Q 150 220 320 300 T 700 290'/><path d='M-50 360 Q 160 270 320 340 T 700 340'/><path d='M-50 400 Q 170 320 320 380 T 700 390'/><path d='M-50 440 Q 180 360 320 420 T 700 430'/><path d='M-50 240 Q 140 180 320 230 T 700 230'/><path d='M-50 180 Q 130 140 320 170 T 700 175'/></g></svg>");
   background-size: 600px 600px;

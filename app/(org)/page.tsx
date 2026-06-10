@@ -84,9 +84,9 @@ export default async function HomePage() {
                 <Link
                   key={p.title}
                   href={p.href}
-                  className="group relative block overflow-hidden bg-ink transition duration-500 hover:rotate-[-0.4deg] hover:shadow-[0_18px_40px_-20px_oklch(22%_0.018_132_/_0.6)]"
+                  className="group relative block overflow-hidden bg-ink transition duration-500 hover:rotate-[-0.4deg] hover:shadow-[0_18px_40px_-20px_oklch(22%_0.018_132/0.6)]"
                 >
-                  <div className="aspect-[4/5] w-full">
+                  <div className="aspect-4/5 w-full">
                     <img
                       src={p.image}
                       alt=""
@@ -103,10 +103,10 @@ export default async function HomePage() {
                   <Icon
                     size={56}
                     aria-hidden
-                    className="pointer-events-none absolute right-5 top-5 text-paper/0 transition duration-500 group-hover:text-paper/90 group-hover:rotate-[6deg]"
+                    className="pointer-events-none absolute right-5 top-5 text-paper/0 transition duration-500 group-hover:text-paper/90 group-hover:rotate-6"
                   />
 
-                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-ink via-ink/60 to-transparent p-6 text-paper">
+                  <div className="absolute inset-x-0 bottom-0 bg-linear-to-t from-ink via-ink/60 to-transparent p-6 text-paper">
                     <div className="font-display text-4xl tracking-tight md:text-5xl">{p.title}</div>
                     <div className="mt-1 flex items-center justify-between text-sm text-paper/80">
                       <span>{p.note}</span>
@@ -183,7 +183,7 @@ export default async function HomePage() {
         <div className="absolute inset-0 opacity-30">
           <img src="/Pictures/canoes2.jpg" alt="" className="h-full w-full object-cover" />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-b from-forest/85 via-forest/70 to-forest/95" />
+        <div className="absolute inset-0 bg-linear-to-b from-forest/85 via-forest/70 to-forest/95" />
 
         {/* Forest-toned marquee at the top edge */}
         <div className="relative">
@@ -238,7 +238,7 @@ export default async function HomePage() {
               <>
                 <Link
                   href="/camp"
-                  className="group inline-flex items-center gap-2 rounded-full bg-ember px-6 py-3 text-sm font-medium text-paper shadow-[0_1px_0_oklch(22%_0.018_132)] transition hover:translate-y-[-1px]"
+                  className="group inline-flex items-center gap-2 rounded-full bg-ember px-6 py-3 text-sm font-medium text-paper shadow-[0_1px_0_oklch(22%_0.018_132)] transition hover:-translate-y-px"
                 >
                   <Flame
                     size={14}
@@ -275,7 +275,7 @@ export default async function HomePage() {
             ].map((src, i) => (
               <div
                 key={src}
-                className={`group aspect-[4/5] overflow-hidden transition duration-500 hover:scale-[1.02] ${
+                className={`group aspect-4/5 overflow-hidden transition duration-500 hover:scale-[1.02] ${
                   i % 2 ? "hover:-rotate-1" : "hover:rotate-1"
                 }`}
               >
@@ -413,7 +413,7 @@ export default async function HomePage() {
             ].map((src, i) => (
               <div
                 key={src}
-                className={`group aspect-[4/5] overflow-hidden bg-paper transition duration-500 hover:scale-[1.02] ${
+                className={`group aspect-4/5 overflow-hidden bg-paper transition duration-500 hover:scale-[1.02] ${
                   i % 2 ? "hover:-rotate-1" : "hover:rotate-1"
                 }`}
               >

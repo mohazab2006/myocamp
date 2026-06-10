@@ -10,6 +10,8 @@
 | [API-SETUP-NOW.md](API-SETUP-NOW.md) | Step-by-step API signup (PayPal, Resend, JotForm, Google) |
 | [EMAIL-TO-MAHFOUTHI.md](EMAIL-TO-MAHFOUTHI.md) | Copy-paste email — website DNS only (2 records) |
 | [DNS-FOR-MAHFOUTHI.md](DNS-FOR-MAHFOUTHI.md) | Full DNS reference (website + email, for later) |
+| [MAHFOUTHI.md](MAHFOUTHI.md) | DNS + PayPal checklist for Mahfouthi |
+| [MAHFOUTHI-MEETING.md](MAHFOUTHI-MEETING.md) | Meeting runbook — screen share walkthrough |
 
 ## Config (repo root)
 
