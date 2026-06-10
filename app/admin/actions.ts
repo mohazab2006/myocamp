@@ -25,7 +25,16 @@ const eventTypes: EventType[] = [
   "camp",
   "workshop"
 ];
-const audienceTags: AudienceTag[] = ["youth", "parents", "families", "leaders", "all"];
+const eventAudienceTags: AudienceTag[] = ["brothers", "sisters", "all"];
+const audienceTags: AudienceTag[] = [
+  "youth",
+  "parents",
+  "families",
+  "leaders",
+  "brothers",
+  "sisters",
+  "all"
+];
 const registrationStatuses: CampSettings["registrationStatus"][] = [
   "open",
   "full",
@@ -138,10 +147,14 @@ export async function saveEventAction(formData: FormData) {
   const blurb = value(formData, "blurb");
   const type = value(formData, "type") as EventType;
   const slug = value(formData, "slug") || slugify(`${title}-${startDate}`);
-  const audience = formData
-    .getAll("audience")
-    .map((entry) => String(entry))
-    .filter((entry): entry is AudienceTag => audienceTags.includes(entry as AudienceTag));
+  const audienceRaw = value(formData, "audience");
+  const audience: AudienceTag[] =
+    audienceRaw && eventAudienceTags.includes(audienceRaw as AudienceTag)
+      ? [audienceRaw as AudienceTag]
+      : formData
+          .getAll("audience")
+          .map((entry) => String(entry))
+          .filter((entry): entry is AudienceTag => audienceTags.includes(entry as AudienceTag));
 
   if (!title || !startDate || !location || !blurb || !eventTypes.includes(type) || audience.length === 0) {
     flash(

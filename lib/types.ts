@@ -1,4 +1,11 @@
-export type AudienceTag = "youth" | "parents" | "families" | "leaders" | "all";
+export type AudienceTag =
+  | "youth"
+  | "parents"
+  | "families"
+  | "leaders"
+  | "brothers"
+  | "sisters"
+  | "all";
 export type EventType =
   | "hike"
   | "campfire"

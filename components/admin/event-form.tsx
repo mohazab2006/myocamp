@@ -4,7 +4,8 @@ import { AdminField, adminInputClass, adminTextareaClass } from "@/components/ad
 import { ImageUploader } from "@/components/admin/image-uploader";
 import { AdminSubmitButton } from "@/components/admin/submit-button";
 import { saveEventAction } from "@/app/admin/actions";
-import type { AudienceTag, Camp, EventType, OrgEvent } from "@/lib/types";
+import { EVENT_AUDIENCE_OPTIONS, primaryEventAudience } from "@/lib/content/event-audience";
+import type { Camp, EventType, OrgEvent } from "@/lib/types";
 
 const eventTypes: EventType[] = [
   "hike",
@@ -15,7 +16,6 @@ const eventTypes: EventType[] = [
   "camp",
   "workshop"
 ];
-const audienceTags: AudienceTag[] = ["youth", "parents", "families", "leaders", "all"];
 
 type EventFormProps = {
   event?: OrgEvent;
@@ -23,6 +23,8 @@ type EventFormProps = {
 };
 
 export function EventForm({ event, camps = [] }: EventFormProps) {
+  const selectedAudience = event ? primaryEventAudience(event.audience) : "all";
+
   return (
     <form action={saveEventAction} className="grid gap-5 border border-line bg-paper-deep/35 p-5 md:p-6">
       <div className="flex items-center justify-between gap-4">
@@ -94,20 +96,25 @@ export function EventForm({ event, camps = [] }: EventFormProps) {
         />
       </AdminField>
 
-      <AdminField label="Audience" required hint="Who this event is for. Pick at least one.">
+      <AdminField
+        label="Audience"
+        required
+        hint="Brothers-only, sisters-only, or open to everyone."
+      >
         <div className="flex flex-wrap gap-2">
-          {audienceTags.map((tag) => (
+          {EVENT_AUDIENCE_OPTIONS.map((opt) => (
             <label
-              key={tag}
-              className="inline-flex items-center gap-2 border border-line bg-paper px-3 py-2 text-sm"
+              key={opt.value}
+              className="inline-flex cursor-pointer items-center gap-2 border border-line bg-paper px-3 py-2 text-sm has-[:checked]:border-pine has-[:checked]:bg-sky/40"
             >
               <input
                 name="audience"
-                type="checkbox"
-                value={tag}
-                defaultChecked={event?.audience.includes(tag) ?? tag === "youth"}
+                type="radio"
+                value={opt.value}
+                defaultChecked={selectedAudience === opt.value}
+                required
               />
-              <span className="capitalize">{tag}</span>
+              <span>{opt.label}</span>
             </label>
           ))}
         </div>

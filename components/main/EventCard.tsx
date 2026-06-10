@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { OrgEvent } from "@/lib/types";
+import { formatEventAudience } from "@/lib/content/event-audience";
 import { formatRange } from "@/lib/date";
 import { ArrowUpRight } from "@phosphor-icons/react/ssr";
 import type { EventLinkedCampSummary } from "@/components/main/EventCampPanel";
@@ -45,7 +46,11 @@ export function EventCard({
           <span className="absolute right-3 top-3 rounded-full bg-pine px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-paper">
             Camp
           </span>
-        ) : null}
+        ) : (
+          <span className="absolute right-3 top-3 rounded-full bg-paper/90 px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-ink">
+            {formatEventAudience(event.audience)}
+          </span>
+        )}
       </div>
       <div className={tone === "deep" ? "text-paper" : ""}>
         <div className={`text-xs uppercase tracking-[0.16em] ${tone === "deep" ? "text-paper/70" : "text-ink-soft"}`}>

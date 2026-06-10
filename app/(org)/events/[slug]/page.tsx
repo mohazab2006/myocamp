@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, CalendarBlank, MapPin, Tag } from "@phosphor-icons/react/ssr";
 import { getEvent, getEvents } from "@/lib/content/events";
+import { formatEventAudience } from "@/lib/content/event-audience";
 import { fetchPublicCampBySlug } from "@/lib/content/camps-public";
 import { formatRange, isUpcoming } from "@/lib/date";
 import { buildPageMetadata } from "@/lib/site";
@@ -96,7 +97,7 @@ export default async function EventPage({
               <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-brass">
                 <Tag size={14} /> Audience
               </div>
-              <div className="mt-2 text-base text-ink capitalize">{event.audience.join(", ")}</div>
+              <div className="mt-2 text-base text-ink">{formatEventAudience(event.audience)}</div>
             </div>
           </div>
 

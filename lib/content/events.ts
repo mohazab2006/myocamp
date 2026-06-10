@@ -14,7 +14,7 @@ const seedEvents: OrgEvent[] = [
     type: "campfire",
     startDate: "2026-05-16",
     location: "Rideau River Provincial Park",
-    audience: ["youth", "leaders"],
+    audience: ["all"],
     blurb:
       "Not your average Saturday. Trails, workshops, games, prizes, dinner, s'mores, and a bonfire under the night sky. Hosted by AYJ MSA with workshops by MYO. Ages 16+.",
     body: "An evening to unwind, reconnect, and enjoy meaningful time with your friends and community. Trails and outdoor activities, workshops + Islamic reminders, games and prizes, dinner with s'mores and snacks, and a bonfire under the night sky. 2:00 PM – 10:30 PM. Free, registration required. Supported by Islamic Relief Canada.",
@@ -30,7 +30,7 @@ const seedEvents: OrgEvent[] = [
     startDate: "2026-07-23",
     endDate: "2026-07-26",
     location: "Camp Smitty, Eganville",
-    audience: ["leaders"],
+    audience: ["all"],
     blurb:
       "Four-day leadership track for ages 17–19. Lighter logistics, more responsibility — meals, planning, and waking yourselves up.",
     body: "Staff arrive Wednesday at 6pm. LITs arrive Thursday morning. The session prepares senior youth to graduate into counsellor roles for the August main camp.",
@@ -46,7 +46,7 @@ const seedEvents: OrgEvent[] = [
     startDate: "2026-08-06",
     endDate: "2026-08-09",
     location: "Camp Smitty, Eganville",
-    audience: ["youth", "families"],
+    audience: ["all"],
     blurb:
       "Ages 9–16. The full MYO camp experience — cabins, skills stations, prayer, and fire circles — in a focused four-day session.",
     body:
@@ -63,7 +63,7 @@ const seedEvents: OrgEvent[] = [
     type: "campfire",
     startDate: "2025-08-23",
     location: "Camp Smitty, fire pit",
-    audience: ["youth"],
+    audience: ["brothers"],
     blurb:
       "Closed out the camp week with stories around the boys' fire pit. Twenty-eight campers, three counsellors, no marshmallows survived.",
     heroImage: "/Pictures/bFirePit.jpg"
@@ -74,7 +74,7 @@ const seedEvents: OrgEvent[] = [
     type: "hike",
     startDate: "2025-07-12",
     location: "Pinhey Forest",
-    audience: ["youth", "leaders"],
+    audience: ["sisters"],
     blurb:
       "Eight kilometres through Pinhey, navigation drills with a paper map and compass, lunch at the lookout.",
     heroImage: "/Pictures/trails.jpg"
