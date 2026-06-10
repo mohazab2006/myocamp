@@ -4,7 +4,7 @@ import { getCampSettings } from "@/lib/content/camp";
 import { getSiteSettings } from "@/lib/content/org";
 import { getEvents } from "@/lib/content/events";
 import { getBlogPosts } from "@/lib/content/blog";
-import { formatRange, isUpcoming } from "@/lib/date";
+import { formatPostDate, formatRange, isUpcoming } from "@/lib/date";
 import { BlogCard } from "@/components/main/BlogCard";
 import { EventCard } from "@/components/main/EventCard";
 import { OrgHero } from "@/components/main/OrgHero";
@@ -58,6 +58,7 @@ export default async function HomePage() {
     .sort((a, b) => +new Date(a.startDate) - +new Date(b.startDate));
   const teaserEvents = upcoming.slice(0, 3);
   const latestPosts = blogPosts.slice(0, 3);
+  const latestPostDate = latestPosts[0] ? formatPostDate(latestPosts[0].publishedAt) : null;
 
   const pillarIcons = [FlameIcon, SparkIcon, TentIcon] as const;
 
@@ -306,7 +307,7 @@ export default async function HomePage() {
 
         <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
           <SectionHeader
-            eyebrow="Adventure Blog"
+            eyebrow={latestPostDate ? `Latest · ${latestPostDate}` : "Adventure Blog"}
             title="From the trail and the field."
             description="Hike announcements, service days, and trip notes from MYO Monthly Adventures."
             scribbleColor="pine"
@@ -330,8 +331,8 @@ export default async function HomePage() {
             y={36}
             stagger={0.1}
           >
-            {latestPosts.map((post) => (
-              <BlogCard key={post.slug} post={post} />
+            {latestPosts.map((post, index) => (
+              <BlogCard key={post.slug} post={post} featured={index === 0} />
             ))}
           </RevealOnScroll>
         </div>
