@@ -97,7 +97,7 @@ Stats, quick links, Gmail poll warning if stale
 3. Whole account is searched — not just Primary tab
 4. **Poll Gmail now** → check `/admin/inbox`
 
-If OAuth fails: Google Cloud needs `https://myo.camp` + callback URL.
+If OAuth fails: Google Cloud needs `https://myo.camps` + callback URL.
 
 ---
 
