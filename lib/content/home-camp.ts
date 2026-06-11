@@ -24,6 +24,7 @@ export type HomeBigNewsLink = {
 };
 
 export type HomeBigNews = {
+  label?: string;
   message: string;
   highlight?: string;
   links: HomeBigNewsLink[];
@@ -78,6 +79,16 @@ function buildBigNews(
   legacy: CampSettings,
   events: OrgEvent[]
 ): HomeBigNews {
+  const override = legacy.announcementOverride;
+  if (override?.enabled) {
+    return {
+      label: override.label,
+      message: override.message,
+      highlight: override.highlight,
+      links: override.links ?? []
+    };
+  }
+
   if (openCamps.length > 0) {
     return {
       message: "Camp registration is now open",

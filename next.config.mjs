@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  serverActions: {
+    // Images can be up to 8 MB — raise the body limit to match.
+    bodySizeLimit: "8mb"
+  },
   async redirects() {
     return [
       { source: "/programs", destination: "/events", permanent: true },

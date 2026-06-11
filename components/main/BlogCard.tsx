@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { BlogPost } from "@/lib/types";
 import { formatPostDate } from "@/lib/date";
-import { ArrowUpRight } from "@phosphor-icons/react/ssr";
+import { ArrowRight, ArrowUpRight } from "@phosphor-icons/react/ssr";
 
 type BlogCardProps = {
   post: BlogPost;
@@ -41,6 +41,26 @@ export function BlogCard({ post, featured }: BlogCardProps) {
         <div className="mt-3 inline-flex items-center gap-1.5 text-sm text-ink">
           Read post <ArrowUpRight size={14} weight="bold" className="transition group-hover:translate-x-0.5" />
         </div>
+        {post.links && post.links.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2" onClick={(e) => e.preventDefault()}>
+            {post.links.map((link, idx) => (
+              <a
+                key={idx}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={
+                  idx === 0
+                    ? "inline-flex items-center gap-1 rounded-full bg-forest px-3 py-1.5 text-[11px] font-medium text-paper transition hover:bg-pine"
+                    : "inline-flex items-center gap-1 rounded-full border border-ink/20 bg-paper px-3 py-1.5 text-[11px] font-medium text-ink transition hover:border-pine hover:text-pine"
+                }
+              >
+                {link.label}
+                <ArrowRight size={10} weight="bold" />
+              </a>
+            ))}
+          </div>
+        )}
       </div>
     </Link>
   );

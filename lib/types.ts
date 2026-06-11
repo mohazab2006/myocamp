@@ -36,6 +36,11 @@ export interface OrgEvent {
   campSlug?: string;
 }
 
+export interface BlogLink {
+  url: string;
+  label: string;
+}
+
 export interface BlogPost {
   slug: string;
   title: string;
@@ -43,6 +48,7 @@ export interface BlogPost {
   excerpt: string;
   body?: string;
   heroImage?: string;
+  links?: BlogLink[];
 }
 
 export interface OrgProgram {
@@ -294,6 +300,20 @@ export interface ReminderLogRow {
   sentAt: string;
 }
 
+export interface AnnouncementLink {
+  href: string;
+  label: string;
+  primary?: boolean;
+}
+
+export interface AnnouncementOverride {
+  enabled: boolean;
+  label?: string;
+  message: string;
+  highlight?: string;
+  links: AnnouncementLink[];
+}
+
 export interface CampSettings {
   registrationStatus: "open" | "full" | "closed" | "opening-soon";
   registrationOpens?: string;
@@ -310,4 +330,5 @@ export interface CampSettings {
   pickUp: string;
   paymentEmail: string;
   paypalDonateId: string;
+  announcementOverride?: AnnouncementOverride;
 }

@@ -19,7 +19,22 @@ const campSeed: CampSettings = {
   dropOff: "Thursday morning",
   pickUp: "Sunday at 3pm",
   paymentEmail: "myoadmin@gmail.com",
-  paypalDonateId: "PVVD32WHTA9KE"
+  paypalDonateId: "PVVD32WHTA9KE",
+  announcementOverride: {
+    enabled: true,
+    label: "Announcement",
+    message:
+      "New Camps! Don't miss out on registration opening. Fill out the pre-registration survey and sign up for the newsletter.",
+    links: [
+      {
+        href: "https://www.jotform.com/form/261603186124047",
+        label: "Fill out the survey",
+        primary: true
+      },
+      { href: "http://eepurl.com/iXwvHk", label: "Join the newsletter" },
+      { href: "/blog", label: "See announcements" }
+    ]
+  }
 };
 
 export async function getCampSettings(): Promise<CampSettings> {

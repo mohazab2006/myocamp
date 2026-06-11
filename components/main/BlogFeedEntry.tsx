@@ -1,7 +1,7 @@
 import Link from "next/link";
 import type { BlogPost } from "@/lib/types";
 import { formatPostDate } from "@/lib/date";
-import { ArrowUpRight } from "@phosphor-icons/react/ssr";
+import { ArrowRight, ArrowUpRight } from "@phosphor-icons/react/ssr";
 import { BlogPostShareLink } from "@/components/main/BlogPostShareLink";
 
 type BlogFeedEntryProps = {
@@ -53,6 +53,27 @@ export function BlogFeedEntry({ post, index }: BlogFeedEntryProps) {
           </div>
         </div>
       </Link>
+
+      {post.links && post.links.length > 0 && (
+        <div className="mt-4 flex flex-wrap gap-2">
+          {post.links.map((link, idx) => (
+            <a
+              key={idx}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={
+                idx === 0
+                  ? "group inline-flex items-center gap-1.5 rounded-full bg-forest px-4 py-2 text-xs font-medium text-paper transition hover:bg-pine"
+                  : "group inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-paper px-4 py-2 text-xs font-medium text-ink transition hover:border-pine hover:text-pine"
+              }
+            >
+              {link.label}
+              <ArrowRight size={12} weight="bold" className="transition group-hover:translate-x-0.5" />
+            </a>
+          ))}
+        </div>
+      )}
 
       <div className="mt-4">
         <BlogPostShareLink post={post} />

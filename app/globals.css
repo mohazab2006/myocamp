@@ -188,3 +188,16 @@ body[data-theme="camp"] ::selection {
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Blog HTML body — rich content with inline images */
+.blog-html-body p { margin-bottom: 1.25em; }
+.blog-html-body h2 { font-size: 1.5rem; font-weight: 700; margin: 1.75em 0 0.75em; line-height: 1.25; }
+.blog-html-body h3 { font-size: 1.2rem; font-weight: 700; margin: 1.5em 0 0.5em; }
+.blog-html-body ul, .blog-html-body ol { padding-left: 1.5em; margin-bottom: 1em; }
+.blog-html-body li { margin-bottom: 0.3em; }
+.blog-html-body a { text-decoration: underline; text-underline-offset: 4px; }
+.blog-html-body a:hover { opacity: 0.75; }
+.blog-html-body img { max-width: 100%; height: auto; margin: 1.5em 0; display: block; }
+.blog-html-body strong { font-weight: 700; }
+.blog-html-body em { font-style: italic; }
+.blog-html-body blockquote { border-left: 3px solid oklch(74% 0.092 78); padding-left: 1em; margin: 1.25em 0; opacity: 0.85; }

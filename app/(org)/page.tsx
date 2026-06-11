@@ -69,7 +69,7 @@ export default async function HomePage() {
       <OrgHero />
 
       <AnnouncementBar
-        label="Big News"
+        label={bigNews.label ?? "Big News"}
         message={bigNews.message}
         highlight={bigNews.highlight}
         links={bigNews.links}

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, CalendarBlank } from "@phosphor-icons/react/ssr";
+import { ArrowLeft, ArrowRight, CalendarBlank } from "@phosphor-icons/react/ssr";
 import { BlogPostBody } from "@/components/main/BlogPostBody";
 import { BlogPostShareLink } from "@/components/main/BlogPostShareLink";
 import { getBlogPost, getBlogPosts } from "@/lib/content/blog";
@@ -66,6 +66,27 @@ export default async function BlogPostPage({
         )}
 
         <BlogPostBody body={post.body ?? post.excerpt} />
+
+        {post.links && post.links.length > 0 && (
+          <div className="mt-8 flex flex-wrap gap-3 border-t border-line pt-8">
+            {post.links.map((link, idx) => (
+              <a
+                key={idx}
+                href={link.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={
+                  idx === 0
+                    ? "group inline-flex items-center gap-1.5 rounded-full bg-forest px-5 py-2.5 text-sm font-medium text-paper transition hover:bg-pine"
+                    : "group inline-flex items-center gap-1.5 rounded-full border border-ink/20 bg-paper px-5 py-2.5 text-sm font-medium text-ink transition hover:border-pine hover:text-pine"
+                }
+              >
+                {link.label}
+                <ArrowRight size={14} weight="bold" className="transition group-hover:translate-x-0.5" />
+              </a>
+            ))}
+          </div>
+        )}
 
         <div className="mt-10 border-t border-line pt-8">
           <BlogPostShareLink post={post} />

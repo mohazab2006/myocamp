@@ -14,7 +14,16 @@ import {
   upsertSupabaseCampSettings,
   upsertSupabaseEvent
 } from "@/lib/supabase/content";
-import type { AudienceTag, BlogPost, CampSettings, EventType, OrgEvent } from "@/lib/types";
+import type {
+  AnnouncementLink,
+  AnnouncementOverride,
+  AudienceTag,
+  BlogLink,
+  BlogPost,
+  CampSettings,
+  EventType,
+  OrgEvent
+} from "@/lib/types";
 
 const eventTypes: EventType[] = [
   "hike",
@@ -240,13 +249,29 @@ export async function saveBlogPostAction(formData: FormData) {
     flash("/admin/blog", "error", "Blog post needs title, publish date, and excerpt.");
   }
 
+  let links: BlogLink[] = [];
+  const linksJsonRaw = value(formData, "linksJson");
+  if (linksJsonRaw) {
+    try {
+      const parsed = JSON.parse(linksJsonRaw);
+      if (Array.isArray(parsed)) {
+        links = parsed
+          .filter((l) => l && typeof l.url === "string" && l.url.trim())
+          .map((l) => ({ url: String(l.url).trim(), label: String(l.label ?? "").trim() || "Learn more" }));
+      }
+    } catch {
+      // malformed JSON — ignore
+    }
+  }
+
   const post = compact<BlogPost>({
     slug,
     title,
     publishedAt,
     excerpt,
     heroImage: value(formData, "heroImage"),
-    body: value(formData, "body")
+    body: value(formData, "body"),
+    links: links.length > 0 ? links : undefined
   });
 
   try {
@@ -288,6 +313,65 @@ export async function deleteBlogPostAction(formData: FormData) {
   revalidatePath("/blog");
   revalidatePath(`/blog/${slug}`);
   flash("/admin/blog", "success", "Blog post deleted.");
+}
+
+// ---------------------------------------------------------------------------
+// Announcement banner
+// ---------------------------------------------------------------------------
+
+export async function saveAnnouncementAction(formData: FormData) {
+  await requireAdmin("/admin/announcement");
+
+  const enabled = formData.get("enabled") === "on";
+  const label = value(formData, "label") || undefined;
+  const message = value(formData, "message");
+  const highlight = value(formData, "highlight") || undefined;
+
+  if (enabled && !message) {
+    flash("/admin/announcement", "error", "Message is required when the announcement is enabled.");
+  }
+
+  let links: AnnouncementLink[] = [];
+  const linksJsonRaw = value(formData, "linksJson");
+  if (linksJsonRaw) {
+    try {
+      const parsed = JSON.parse(linksJsonRaw);
+      if (Array.isArray(parsed)) {
+        links = parsed
+          .filter((l) => l && typeof l.href === "string" && l.href.trim())
+          .map((l, i) => ({
+            href: String(l.href).trim(),
+            label: String(l.label ?? "").trim() || "Learn more",
+            primary: i === 0
+          }));
+      }
+    } catch {
+      // malformed JSON — ignore
+    }
+  }
+
+  const override: AnnouncementOverride = {
+    enabled,
+    label,
+    message,
+    highlight,
+    links
+  };
+
+  try {
+    await upsertSupabaseCampSettings({ announcementOverride: override });
+  } catch (error) {
+    flash(
+      "/admin/announcement",
+      "error",
+      error instanceof Error ? error.message : "Could not save announcement."
+    );
+  }
+
+  revalidatePath("/admin");
+  revalidatePath("/admin/announcement");
+  revalidatePath("/");
+  flash("/admin/announcement", "success", "Announcement saved.");
 }
 
 // ---------------------------------------------------------------------------

@@ -43,11 +43,10 @@ export async function uploadContentImage(file: File, folder: string): Promise<Up
   const objectPath = `${safeFolder}/${Date.now()}-${randomUUID()}.${extension ?? "bin"}`;
 
   const supabase = createSupabaseAdminClient();
-  const buffer = Buffer.from(await file.arrayBuffer());
 
   const { error } = await supabase.storage
     .from(CONTENT_IMAGES_BUCKET)
-    .upload(objectPath, buffer, {
+    .upload(objectPath, file, {
       contentType: file.type,
       upsert: false
     });
