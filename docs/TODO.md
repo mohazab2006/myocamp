@@ -58,6 +58,19 @@
   - Capture his feedback in this file under a new "Mahfouthi feedback" section
   - Triage feedback into: (a) must-fix before launch, (b) v1.1, (c) won't-do
 
+## Completed (recent session)
+
+- [x] **Fixed image upload error** — "An unexpected response from the server" when uploading blog/event/camp hero images
+  - Root cause: Next.js server-action body limit defaulted to 1 MB; real photos hit 2–8 MB
+  - Fix: `serverActions.bodySizeLimit: "8mb"` in `next.config.mjs`; also removed `Buffer.from()` conversion in `lib/admin/media.ts` (now passes `File` directly to Supabase)
+- [x] **Blog links** — each blog post can now have multiple link buttons (label + URL); first is primary/green, rest outlined. Shown on post page, feed, and home-page cards
+- [x] **Inline body images** — "Insert image" toolbar in blog form uploads and inserts `<img>` at cursor; `BlogPostBody` auto-detects HTML and renders appropriately
+- [x] **Editable announcement banner** — `/admin/announcement` page with toggle, message, highlight, links. Default announcement pre-seeded with survey + newsletter + blog links
+- [x] **Registration page CTAs** — `/camp/register` "Not open yet" page now shows survey + newsletter buttons below existing content
+- [x] **Responsive padding** — fixed 8 instances of `px-6` missing the `px-4 sm:px-6` mobile step on camp register/selector pages
+- [x] **Unit tests** — 118 tests across 7 files (media validation, client uploader, blog links, HTML detection, announcement override, announcement form parsing, registration routing)
+- [x] **CLAUDE.md** — created root-level quick-reference for Claude Code
+
 ## Mahfouthi feedback
 
 _(to be filled in after review session)_

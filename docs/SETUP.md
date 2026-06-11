@@ -21,7 +21,8 @@ Everything below is in the **admin GUI** after env vars are set:
 | E-Transfer inbox | `/admin/inbox` | Match unmatched e-Transfer emails to invoices |
 | Email templates | `/admin/emails` | Edit all automated email copy + preview |
 | Events | `/admin/events` | Add/edit events, photos, link event → camp session, external register URLs |
-| Blog | `/admin/blog` | Add/edit blog posts + hero images |
+| Blog | `/admin/blog` | Add/edit blog posts + hero images + inline body images + action link buttons |
+| Banner | `/admin/announcement` | Edit or disable the home-page announcement banner; add survey/newsletter links |
 | Setup | `/admin/setup` | Status of all integrations, copy JotForm webhook URL |
 | Gmail | `/admin/setup/gmail` | Connect/disconnect payments inbox for auto-match |
 

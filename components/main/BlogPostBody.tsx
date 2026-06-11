@@ -1,5 +1,8 @@
 const URL_PATTERN = /(https?:\/\/[^\s]+)/g;
-const HTML_TAG_PATTERN = /<[a-zA-Z][\s\S]*?>/;
+// Match only real HTML tags — not URLs in angle-bracket citation style (<https://...>).
+// Covers every tag the admin body editor produces.
+const HTML_TAG_PATTERN =
+  /<(?:img|p|br|a|strong|em|b|i|ul|ol|li|h[1-6]|div|span|blockquote|hr|pre|code)\b/i;
 
 function renderParagraphText(text: string) {
   const parts = text.split(URL_PATTERN);

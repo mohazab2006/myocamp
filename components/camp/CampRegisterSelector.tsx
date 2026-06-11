@@ -41,7 +41,7 @@ export function CampRegisterSelector({ camps }: CampRegisterSelectorProps) {
     <>
       <section className="topo-bg relative isolate overflow-hidden bg-camp-paper">
         <SectionScatter variant="route" />
-        <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-20 md:gap-10 md:px-10 md:py-28">
+        <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-4 py-20 sm:px-6 md:gap-10 md:px-10 md:py-28">
           <div className="col-span-12 md:col-span-7">
             <div className="font-script text-2xl text-camp-flame">choose your session</div>
             <h1 className="font-camp mt-2 text-6xl leading-[0.92] text-camp-bark md:text-8xl">
@@ -86,7 +86,7 @@ export function CampRegisterSelector({ camps }: CampRegisterSelectorProps) {
 
       <section className="relative isolate overflow-hidden bg-camp-paper-soft">
         <SectionScatter variant="forest" />
-        <div className="mx-auto max-w-[1440px] px-6 py-16 md:px-10 md:py-24">
+        <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 md:px-10 md:py-24">
           <div className="text-center md:text-left">
             <div className="font-script text-2xl text-camp-flame">summer sessions</div>
             <h2 className="font-camp mt-1 text-4xl text-camp-bark md:text-5xl">
@@ -193,7 +193,7 @@ export function CampRegisterSelector({ camps }: CampRegisterSelectorProps) {
 
       <section className="relative isolate overflow-hidden bg-camp-bark text-camp-paper">
         <SectionScatter variant="dark" />
-        <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-16 md:gap-10 md:px-10 md:py-20">
+        <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-4 py-16 sm:px-6 md:gap-10 md:px-10 md:py-20">
           <div className="col-span-12 md:col-span-7">
             <div className="font-script text-2xl text-camp-amber">what happens next</div>
             <h2 className="font-camp mt-2 text-4xl leading-[0.95] md:text-5xl">
@@ -237,7 +237,7 @@ export function CampSwitchBanner({
   if (others.length === 0) return null;
 
   return (
-    <div className="relative border-b-2 border-camp-flame/50 bg-camp-amber/25 px-6 py-3.5 text-center text-sm text-camp-ink">
+    <div className="relative border-b-2 border-camp-flame/50 bg-camp-amber/25 px-4 py-3.5 text-center text-sm text-camp-ink sm:px-6">
       <Compass
         size={18}
         weight="duotone"

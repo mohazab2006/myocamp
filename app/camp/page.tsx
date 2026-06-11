@@ -187,7 +187,7 @@ export default async function CampHome() {
       {/* SPACES — illustrated photo cards */}
       <section className="relative isolate overflow-hidden bg-camp-paper">
         <SectionScatter variant="forest" />
-        <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
+        <div className="mx-auto max-w-[1440px] px-4 py-20 sm:px-6 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-5">
               <div className="font-script text-2xl text-camp-flame">around the grounds</div>
@@ -233,7 +233,7 @@ export default async function CampHome() {
       {/* CTA BAND */}
       <section className="relative isolate overflow-hidden bg-camp-bark text-camp-paper">
         <SectionScatter variant="dark" />
-        <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-20 md:gap-10 md:px-10 md:py-28">
+        <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-4 py-20 sm:px-6 md:gap-10 md:px-10 md:py-28">
           <div className="col-span-12 md:col-span-7">
             <div className="font-script text-2xl text-camp-amber">before camp begins</div>
             <h2 className="font-camp mt-2 text-5xl leading-[0.92] md:text-6xl">
