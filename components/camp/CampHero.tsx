@@ -23,8 +23,7 @@ import {
   SparkIcon,
   WaveIcon
 } from "./Illustrations";
-import { FloatingMyoIsland } from "./FloatingMyoIsland";
-
+import { CampHeroVideo } from "./CampHeroVideo";
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 type CampHeroProps = {
@@ -52,6 +51,12 @@ export function CampHero({ mainRange, litRange }: CampHeroProps) {
           y: 20,
           duration: 1.2,
           delay: 0.6,
+          ease: "expo.out"
+        });
+        gsap.from(".camp-hero-video", {
+          opacity: 0,
+          duration: 0.9,
+          delay: 0.85,
           ease: "expo.out"
         });
         gsap.from(".camp-hero-decoration", {
@@ -84,7 +89,7 @@ export function CampHero({ mainRange, litRange }: CampHeroProps) {
   return (
     <section
       ref={root}
-      className="topo-bg paper-grain relative overflow-visible bg-camp-paper"
+      className="topo-bg paper-grain relative overflow-x-clip bg-camp-paper"
     >
       <div className="absolute inset-0 bg-linear-to-b from-camp-sky/40 via-transparent to-camp-paper" />
 
@@ -117,20 +122,17 @@ export function CampHero({ mainRange, litRange }: CampHeroProps) {
         className="camp-hero-decoration absolute right-[6%] bottom-[6%] hidden text-camp-flame/80 md:block"
       />
 
-      <div className="camp-hero-island-layer hidden md:block" aria-hidden>
-        <FloatingMyoIsland
-          size="hero"
-          className="bottom-9 left-4 lg:bottom-10 lg:left-6"
-        />
-      </div>
-
-      <div className="camp-hero-content relative z-10 mx-auto max-w-[1440px] px-6 pb-24 pt-4 md:px-10 md:pb-36 md:pt-6">
-        <div className="flex items-center justify-between text-camp-bark">
-          <div className="font-script text-2xl md:text-3xl">est. Camp Smitty &middot; Eganville</div>
-          <div className="font-script text-xl md:text-2xl">two focused sessions · July &amp; August</div>
+      <div className="camp-hero-content relative z-10 mx-auto max-w-[1440px] px-4 pb-20 pt-3 sm:px-6 sm:pb-24 sm:pt-4 md:px-10 md:pb-36 md:pt-6">
+        <div className="flex flex-col items-center gap-1 text-center text-camp-bark sm:flex-row sm:items-center sm:justify-between sm:gap-3 sm:text-left">
+          <div className="font-script text-base leading-snug sm:text-xl md:text-2xl lg:text-3xl">
+            est. Camp Smitty &middot; Eganville
+          </div>
+          <div className="font-script text-sm leading-snug text-camp-bark/85 sm:text-lg md:text-xl lg:text-2xl">
+            two focused sessions &middot; July &amp; August
+          </div>
         </div>
 
-        <div className="relative mt-2 flex flex-nowrap items-end justify-center gap-x-3 whitespace-nowrap leading-[0.85] md:mt-3 md:gap-x-6">
+        <div className="relative mt-3 flex flex-col items-center gap-y-1 leading-[0.85] sm:mt-2 sm:flex-row sm:flex-wrap sm:items-end sm:justify-center sm:gap-x-3 md:gap-x-6">
           <FlameIcon
             size={64}
             className="camp-hero-decoration absolute left-[6%] top-[-12px] hidden text-camp-flame md:block"
@@ -199,13 +201,13 @@ export function CampHero({ mainRange, litRange }: CampHeroProps) {
           />
 
           {groups.map((group, gi) => (
-            <div key={gi} className="flex flex-nowrap items-end">
+            <div key={gi} className="flex items-end justify-center">
               {group.letters.map((l, i) => (
                 <span
                   key={`${gi}-${i}`}
                   className="camp-hero-letter font-camp inline-block text-camp-bark"
                   style={{
-                    fontSize: "clamp(54px, 12.5vw, 176px)",
+                    fontSize: "clamp(44px, 11.5vw, 176px)",
                     color: group.flameLetters.includes(l)
                       ? "var(--color-camp-flame)"
                       : undefined
@@ -218,34 +220,44 @@ export function CampHero({ mainRange, litRange }: CampHeroProps) {
           ))}
         </div>
 
-        <p className="camp-hero-script font-script mx-auto mt-2 max-w-3xl text-center text-3xl leading-tight text-camp-flame md:text-5xl">
-          four days of cabins, canoes &amp; campfires
+        <p className="camp-hero-script font-script mx-auto mt-3 max-w-xl text-balance px-1 text-center text-[1.65rem] leading-snug text-camp-flame sm:mt-2 sm:max-w-3xl sm:text-3xl md:text-5xl">
+          cabins, canoes &amp; campfires
         </p>
 
-        <div className="camp-hero-meta mx-auto mt-12 grid max-w-3xl grid-cols-1 gap-3 text-center sm:grid-cols-2 lg:grid-cols-4">
+        <CampHeroVideo />
+
+        <div className="camp-hero-meta mx-auto mt-8 grid w-full max-w-4xl grid-cols-1 gap-8 text-center sm:mt-10 lg:mt-12 lg:max-w-5xl lg:grid-cols-3 lg:gap-10">
           {[
-            ["Main camp", mainRange],
-            ...(litRange ? [["LIT session", litRange] as const] : []),
-            ["Where", "Camp Smitty, Eganville"],
-            ["Who", "Ages 9 – 19 · Boys & Girls"]
-          ].map(([k, v]) => (
-            <div key={k} className="border-t-2 border-dashed border-camp-bark/40 pt-3">
-              <div className="text-xs uppercase tracking-[0.18em] text-camp-bark/65">{k}</div>
-              <div className="font-camp mt-1 text-2xl text-camp-bark">{v}</div>
+            ...(litRange ? [{ label: "LIT session", value: litRange }] : []),
+            { label: "Youth camp", value: mainRange, detail: "Ages 9–16" },
+            { label: "Where", value: "Camp Smitty, Eganville" }
+          ].map((item) => (
+            <div key={item.label} className="border-t-2 border-dashed border-camp-bark/50 px-2 pt-4 md:pt-5">
+              <div className="font-camp text-[1.65rem] leading-tight tracking-tight text-camp-bark sm:text-3xl md:text-4xl lg:text-[2.75rem]">
+                {item.label}
+              </div>
+              <div className="font-camp mt-2 text-lg text-camp-bark/90 sm:mt-3 sm:text-xl md:mt-4 md:text-2xl">
+                {item.value}
+              </div>
+              {"detail" in item && item.detail ? (
+                <div className="font-camp mt-1.5 text-base text-camp-bark/85 sm:mt-2 sm:text-lg md:text-xl">
+                  {item.detail}
+                </div>
+              ) : null}
             </div>
           ))}
         </div>
 
-        <div className="camp-hero-meta mt-12 flex flex-wrap items-center justify-center gap-3">
+        <div className="camp-hero-meta mt-8 flex flex-col items-stretch justify-center gap-3 px-2 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:px-0 lg:mt-12">
           <a
             href="/camp/register"
-            className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink bg-camp-flame px-6 py-3 text-sm font-medium text-camp-paper transition hover:-translate-y-px hover:-rotate-1"
+            className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-camp-ink bg-camp-flame px-6 py-3 text-sm font-medium text-camp-paper transition hover:-translate-y-px hover:-rotate-1"
           >
             Open registration
           </a>
           <a
             href="/camp/story"
-            className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink/80 bg-camp-paper px-6 py-3 text-sm font-medium text-camp-ink transition hover:rotate-1"
+            className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-camp-ink/80 bg-camp-paper px-6 py-3 text-sm font-medium text-camp-ink transition hover:rotate-1"
           >
             What is this place?
           </a>

@@ -31,7 +31,7 @@ export default async function CampSupportPage() {
             </p>
           </div>
           <div className="col-span-12 md:col-span-5">
-            <div className="aspect-[4/5] overflow-hidden border-2 border-camp-bark/30">
+            <div className="aspect-4/5 overflow-hidden border-2 border-camp-bark/30">
               <img
                 src="/Pictures/basketball.jpg"
                 alt="Campers playing basketball at Camp Smitty"
@@ -51,22 +51,16 @@ export default async function CampSupportPage() {
             <div className="col-span-12 md:col-span-4">
               <div className="font-script text-2xl text-camp-flame">where it goes</div>
               <h2 className="font-camp mt-2 text-5xl leading-[0.95] text-camp-bark md:text-6xl">
-                Three lanes.
+                Two lanes.
               </h2>
             </div>
-            <div className="col-span-12 grid gap-5 md:col-span-8 md:grid-cols-3">
+            <div className="col-span-12 grid gap-5 md:col-span-8 md:grid-cols-2">
               {[
                 {
                   icon: "tent",
                   amt: "$400",
                   title: "Send a camper",
                   body: "Covers a full spot for one youth. Most-requested kind of donation."
-                },
-                {
-                  icon: "knife",
-                  amt: "$1,200",
-                  title: "Train counsellors",
-                  body: "First aid, lifeguard, food safety. We re-certify every year."
                 },
                 {
                   icon: "flame",
@@ -97,7 +91,7 @@ export default async function CampSupportPage() {
                 href={settings.donateUrl}
                 target="_blank"
                 rel="noopener"
-                className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink bg-camp-flame px-6 py-3 text-sm font-medium text-camp-paper transition hover:translate-y-[-1px]"
+                className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink bg-camp-flame px-6 py-3 text-sm font-medium text-camp-paper transition hover:-translate-y-px"
               >
                 Donate via PayPal
               </a>
@@ -105,7 +99,7 @@ export default async function CampSupportPage() {
                 href={settings.volunteerUrl}
                 target="_blank"
                 rel="noopener"
-                className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink/80 bg-camp-paper px-6 py-3 text-sm font-medium text-camp-ink transition hover:rotate-[1deg]"
+                className="inline-flex items-center gap-2 rounded-full border-2 border-camp-ink/80 bg-camp-paper px-6 py-3 text-sm font-medium text-camp-ink transition hover:rotate-1"
               >
                 Volunteer for camp
               </a>

@@ -13,15 +13,17 @@ import {
   getCampSettings
 } from "@/lib/content/camp";
 import { getPublicCampContext } from "@/lib/content/camps-public";
-import { formatRange } from "@/lib/date";
+import { formatRange, formatRangeNoYear } from "@/lib/date";
 
 export default async function CampHome() {
   const { legacy: camp, primary } = await getPublicCampContext();
-  const mainRange = primary
-    ? formatRange(primary.startDate, primary.endDate)
-    : formatRange(camp.campStart, camp.campEnd);
+  const mainStart = primary?.startDate ?? camp.campStart;
+  const mainEnd = primary?.endDate ?? camp.campEnd;
+  const mainRange = formatRangeNoYear(mainStart, mainEnd);
   const litRange =
-    camp.litStart && camp.litEnd ? formatRange(camp.litStart, camp.litEnd) : undefined;
+    camp.litStart && camp.litEnd
+      ? formatRangeNoYear(camp.litStart, camp.litEnd)
+      : undefined;
 
   return (
     <>
@@ -30,26 +32,28 @@ export default async function CampHome() {
       {/* WHY CAMP */}
       <section className="relative isolate overflow-hidden border-y-2 border-camp-bark/15 bg-camp-paper-soft">
         <SectionScatter variant="forest" />
-        <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-6 py-20 md:gap-10 md:px-10 md:py-28">
+        <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-4 py-16 sm:px-6 sm:py-20 md:gap-10 md:px-10 md:py-28">
           <div className="col-span-12 md:col-span-5">
-            <div className="font-script text-3xl text-camp-flame">field journal entry</div>
-            <h2 className="font-camp mt-3 text-5xl leading-[0.92] text-camp-bark md:text-6xl">
-              <span className="scribble-underline">A different rhythm.</span>
+            <div className="font-script text-2xl text-camp-flame sm:text-3xl">what&apos;s new</div>
+            <h2 className="font-camp mt-3 text-4xl leading-[0.95] text-camp-bark sm:text-5xl md:text-6xl">
+              <span className="scribble-underline">An expanded camp program.</span>
             </h2>
           </div>
-          <div className="col-span-12 space-y-5 text-lg leading-relaxed text-camp-ink/85 md:col-span-7">
+          <div className="col-span-12 space-y-4 text-base leading-relaxed text-camp-ink/85 sm:space-y-5 sm:text-lg md:col-span-7">
             <p>
-              Most kids spend the summer indoors. Phones, screens, AC. Camp is the opposite — four nights in
-              cabins, three meals around long wooden tables, a forest behind every door, and a lake that
-              wakes up before everyone else.
+              MYO is excited to share an expanded camp program this year. After years of growth in both our
+              campers and our Leadership-in-Training (LIT) participants, we&apos;re introducing a new structure
+              designed to serve each age group and open more doors for youth to participate.
             </p>
             <p>
-              Quran in the morning. Prayer at the dock. Knot drills in the rec hall. Canoes after lunch. Fire
-              circle at dusk. And the kind of friendships that turn into the next ten years of group chats.
+              Instead of a single camp week, we&apos;re offering a dedicated LIT camp, a dedicated youth camp,
+              and specialty outdoor skills weekends through the fall — focused programs across the summer and
+              fall, not everything packed into one week.
             </p>
             <p>
-              We&apos;re volunteer-led, which means it&apos;s also the kind of camp where the people running it
-              actually know your kid&apos;s name by Friday.
+              For many years, camp meant one weeklong session at Camp Smitty. This year we&apos;re piloting a
+              new format with multiple focused programs — more ways to show up, and more room for leadership
+              to grow.
             </p>
           </div>
         </div>
@@ -58,12 +62,12 @@ export default async function CampHome() {
       {/* 2026 SESSIONS */}
       <section className="relative isolate overflow-hidden bg-camp-paper">
         <SectionScatter variant="route" />
-        <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
+        <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 sm:py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-4">
-              <div className="font-script text-2xl text-camp-flame">summer 2026</div>
-              <h2 className="font-camp mt-2 text-5xl leading-[0.95] text-camp-bark md:text-6xl">
-                Two focused<br />four-day sessions.
+              <div className="font-script text-xl text-camp-flame sm:text-2xl">summer 2026</div>
+              <h2 className="font-camp mt-2 text-4xl leading-[0.95] text-camp-bark sm:text-5xl md:text-6xl">
+                Two focused<br className="hidden sm:block" /> four-day sessions.
               </h2>
               <p className="mt-6 max-w-[44ch] text-camp-ink/80">
                 Instead of one full week, we&apos;re running two shorter sessions at Camp Smitty — a dedicated
@@ -110,12 +114,12 @@ export default async function CampHome() {
       {/* ACTIVITIES — illustrated grid */}
       <section className="topo-bg relative isolate overflow-hidden bg-camp-paper">
         <SectionScatter variant="firey" />
-        <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
+        <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 sm:py-20 md:px-10 md:py-28">
           <div className="grid grid-cols-12 gap-6 md:gap-10">
             <div className="col-span-12 md:col-span-4">
-              <div className="font-script text-2xl text-camp-flame">what fills the days</div>
-              <h2 className="font-camp mt-2 text-5xl leading-[0.95] text-camp-bark md:text-6xl">
-                Skills you<br />actually use.
+              <div className="font-script text-xl text-camp-flame sm:text-2xl">what fills the days</div>
+              <h2 className="font-camp mt-2 text-4xl leading-[0.95] text-camp-bark sm:text-5xl md:text-6xl">
+                Skills you<br className="hidden sm:block" /> actually use.
               </h2>
               <p className="mt-6 max-w-[44ch] text-camp-ink/80">
                 Not a passive four days. Every camper rotates through real hands-on stations. By Sunday they tie
@@ -123,17 +127,17 @@ export default async function CampHome() {
               </p>
             </div>
             <div className="col-span-12 md:col-span-8">
-              <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+              <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4">
                 {campActivities.map((a, i) => (
                   <li
                     key={a.label}
-                    className="group relative overflow-hidden border-2 border-camp-bark/30 bg-camp-paper p-5 transition hover:-rotate-1 hover:border-camp-flame"
+                    className="group relative overflow-hidden border-2 border-camp-bark/30 bg-camp-paper p-4 transition hover:-rotate-1 hover:border-camp-flame sm:p-5"
                     style={{ rotate: `${i % 2 ? 0.6 : -0.6}deg` }}
                   >
                     <div className="text-camp-flame">
                       <CampIcon name={a.icon} size={40} />
                     </div>
-                    <div className="font-camp mt-3 text-2xl text-camp-bark">{a.label}</div>
+                    <div className="font-camp mt-2 text-xl text-camp-bark sm:mt-3 sm:text-2xl">{a.label}</div>
                   </li>
                 ))}
               </ul>
@@ -147,15 +151,15 @@ export default async function CampHome() {
       {/* WEEK RHYTHM */}
       <section className="relative isolate overflow-hidden bg-camp-paper-soft">
         <SectionScatter variant="water" />
-        <div className="mx-auto max-w-[1440px] px-6 py-20 md:px-10 md:py-28">
-          <div className="flex flex-wrap items-end justify-between gap-6">
+        <div className="mx-auto max-w-[1440px] px-4 py-16 sm:px-6 sm:py-20 md:px-10 md:py-28">
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end sm:justify-between sm:gap-6">
             <div>
-              <div className="font-script text-2xl text-camp-flame">the rhythm</div>
-              <h2 className="font-camp mt-2 text-5xl leading-[0.95] text-camp-bark md:text-6xl">
+              <div className="font-script text-xl text-camp-flame sm:text-2xl">the rhythm</div>
+              <h2 className="font-camp mt-2 text-4xl leading-[0.95] text-camp-bark sm:text-5xl md:text-6xl">
                 Main camp, day by day.
               </h2>
             </div>
-            <div className="font-script text-xl text-camp-bark/70">
+            <div className="font-script text-lg text-camp-bark/70 sm:text-xl">
               {formatRange(camp.campStart, camp.campEnd)}
             </div>
           </div>
@@ -167,9 +171,9 @@ export default async function CampHome() {
                 className="border-2 border-camp-bark/30 bg-camp-paper p-6"
                 style={{ rotate: `${i % 2 ? 0.4 : -0.4}deg` }}
               >
-                <div className="flex items-baseline justify-between">
-                  <div className="font-camp text-3xl text-camp-bark">{d.day}</div>
-                  <div className="font-script text-xl text-camp-flame">{d.title}</div>
+                <div className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between sm:gap-3">
+                  <div className="font-camp text-2xl text-camp-bark sm:text-3xl">{d.day}</div>
+                  <div className="font-script text-lg text-camp-flame sm:text-xl">{d.title}</div>
                 </div>
                 <p className="mt-3 leading-relaxed text-camp-ink/80">{d.body}</p>
               </li>

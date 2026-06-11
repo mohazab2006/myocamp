@@ -48,14 +48,14 @@ export function EventCampPanel({ camp, upcoming }: EventCampPanelProps) {
 
         {canRegister ? (
           <div className="mt-5 grid gap-2">
-            <ButtonLink href={camp.registerPath}>
-              {isWaitlist ? "Join waitlist" : "Register for this camp"}
+            <ButtonLink href="/camp">
+              {isWaitlist ? "Visit camp site · waitlist" : "Visit camp site · register"}
             </ButtonLink>
             <Link
-              href="/camp"
+              href={camp.registerPath}
               className="inline-flex items-center gap-1 text-sm text-pine underline underline-offset-4 hover:text-ink"
             >
-              Camp details <ArrowUpRight size={14} weight="bold" />
+              Register form <ArrowUpRight size={14} weight="bold" />
             </Link>
           </div>
         ) : (

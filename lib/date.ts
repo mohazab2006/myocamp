@@ -47,6 +47,20 @@ export const formatRange = (start: string, end?: string): string => {
   return `${monthShort[s.getMonth()]} ${s.getDate()}, ${s.getFullYear()} – ${monthShort[e.getMonth()]} ${e.getDate()}, ${e.getFullYear()}`;
 };
 
+/** Camp hero — dates without year (e.g. Aug 6–9). */
+export const formatRangeNoYear = (start: string, end?: string): string => {
+  const s = parseCalendarDate(start);
+  if (!end) {
+    return `${monthShort[s.getMonth()]} ${s.getDate()}`;
+  }
+  const e = parseCalendarDate(end);
+  const sameMonth = s.getMonth() === e.getMonth();
+  if (sameMonth) {
+    return `${monthShort[s.getMonth()]} ${s.getDate()}–${e.getDate()}`;
+  }
+  return `${monthShort[s.getMonth()]} ${s.getDate()} – ${monthShort[e.getMonth()]} ${e.getDate()}`;
+};
+
 export const formatMonthYear = (iso: string): string => {
   const d = parseCalendarDate(iso);
   return `${monthShort[d.getMonth()]} ${d.getFullYear()}`;

@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { ArrowUpRight, Flame } from "@phosphor-icons/react/ssr";
-import { getCampSettings } from "@/lib/content/camp";
-import { getSiteSettings } from "@/lib/content/org";
-import { getEvents } from "@/lib/content/events";
 import { getBlogPosts } from "@/lib/content/blog";
-import { formatPostDate, formatRange, isUpcoming } from "@/lib/date";
+import { getHomeCampSnapshot, sortHomeUpcomingEvents } from "@/lib/content/home-camp";
+import { formatPostDate } from "@/lib/date";
 import { BlogCard } from "@/components/main/BlogCard";
 import { EventCard } from "@/components/main/EventCard";
 import { OrgHero } from "@/components/main/OrgHero";
 import { RotatingGallery } from "@/components/main/RotatingGallery";
 import { SectionHeader } from "@/components/main/SectionHeader";
 import { AnnouncementBar } from "@/components/main/AnnouncementBar";
+import { HomeCampDates } from "@/components/main/HomeCampDates";
+import { HomeNewsletterStrip } from "@/components/main/HomeNewsletterStrip";
 import { RevealOnScroll } from "@/components/main/RevealOnScroll";
 import { Marquee } from "@/components/main/Marquee";
 import {
@@ -24,7 +24,13 @@ import {
   SparkIcon
 } from "@/components/camp/Illustrations";
 
-const pillars = [
+const pillarDefs = [
+  {
+    title: "Camp",
+    href: "/camp",
+    image: "/Pictures/verycoolcampfire.jpg",
+    note: "Two sessions this summer."
+  },
   {
     title: "Events",
     href: "/events",
@@ -37,30 +43,26 @@ const pillars = [
     image: "/Pictures/LITgroup.JPG",
     note: "Hikes, trips, and field notes.",
     objectPosition: "34% center"
-  },
-  {
-    title: "Camp",
-    href: "/camp",
-    image: "/Pictures/verycoolcampfire.jpg",
-    note: "Two sessions this summer."
   }
 ];
 
 export default async function HomePage() {
-  const [allEvents, blogPosts, camp, settings] = await Promise.all([
-    getEvents(),
-    getBlogPosts(),
-    getCampSettings(),
-    getSiteSettings()
-  ]);
-  const upcoming = allEvents
-    .filter((e) => isUpcoming(e))
-    .sort((a, b) => +new Date(a.startDate) - +new Date(b.startDate));
+  const [homeCamp, blogPosts] = await Promise.all([getHomeCampSnapshot(), getBlogPosts()]);
+  const { bigNews, campDates, registrationIsOpen, publishedCampSlugs, linkedCampsBySlug } =
+    homeCamp;
+
+  const upcoming = sortHomeUpcomingEvents(homeCamp.events, publishedCampSlugs);
   const teaserEvents = upcoming.slice(0, 3);
   const latestPosts = blogPosts.slice(0, 3);
   const latestPostDate = latestPosts[0] ? formatPostDate(latestPosts[0].publishedAt) : null;
 
-  const pillarIcons = [FlameIcon, SparkIcon, TentIcon] as const;
+  const pillars = pillarDefs.map((p) =>
+    p.title === "Camp" && registrationIsOpen
+      ? { ...p, note: "Registration is open — two sessions." }
+      : p
+  );
+
+  const pillarIcons = [TentIcon, FlameIcon, SparkIcon] as const;
 
   return (
     <>
@@ -68,11 +70,12 @@ export default async function HomePage() {
 
       <AnnouncementBar
         label="Big News"
-        message="MYO Summer Camp 2026 registration opens"
-        highlight={camp.registrationOpens ? formatRange(camp.registrationOpens) : undefined}
-        href={settings.newsletterUrl}
-        ctaText="Join the list"
+        message={bigNews.message}
+        highlight={bigNews.highlight}
+        links={bigNews.links}
       />
+
+      <HomeCampDates dates={campDates} registrationIsOpen={registrationIsOpen} />
 
       {/* THREE PILLARS — image-led with hover flourishes */}
       <section className="relative border-t border-line bg-paper">
@@ -147,7 +150,11 @@ export default async function HomePage() {
           <SectionHeader
             eyebrow="Upcoming"
             title="Coming up next."
-            description="Hikes, bonfires, service days — the next handful of things on the MYO calendar."
+            description={
+              registrationIsOpen
+                ? "Camp sessions and community events — tap a camp date for details, then head to the camp site to register."
+                : "Hikes, bonfires, service days — the next handful of things on the MYO calendar."
+            }
             scribbleColor="ember"
             action={
               <Link
@@ -170,7 +177,11 @@ export default async function HomePage() {
             stagger={0.1}
           >
             {teaserEvents.map((e) => (
-              <EventCard key={e.slug} event={e} />
+              <EventCard
+                key={e.slug}
+                event={e}
+                linkedCamp={e.campSlug ? linkedCampsBySlug[e.campSlug] ?? null : null}
+              />
             ))}
           </RevealOnScroll>
         </div>
@@ -233,7 +244,11 @@ export default async function HomePage() {
             scribbleColor="ember"
             eyebrow="Our biggest week of the year"
             title={<span className="font-camp">MYO Summer Camp</span>}
-            description="Camp Smitty, Eganville. Cabins, canoes, fire-circles, prayer, friendship."
+            description={
+              registrationIsOpen
+                ? "Camp Smitty, Eganville. Registration is open — cabins, canoes, fire-circles, prayer, friendship."
+                : "Camp Smitty, Eganville. Cabins, canoes, fire-circles, prayer, friendship."
+            }
             action={
               <>
                 <Link
@@ -245,13 +260,13 @@ export default async function HomePage() {
                     weight="fill"
                     className="transition group-hover:scale-110"
                   />
-                  Visit the camp site
+                  {registrationIsOpen ? "Camp site · register now" : "Visit the camp site"}
                 </Link>
                 <Link
-                  href="/camp/register"
+                  href={registrationIsOpen ? "/camp/register" : "/events"}
                   className="group inline-flex items-center gap-2 rounded-full border border-paper/35 px-6 py-3 text-sm font-medium text-paper transition hover:bg-paper/5"
                 >
-                  Registration
+                  {registrationIsOpen ? "Pick a session" : "See camp events"}
                   <ArrowUpRight
                     size={14}
                     weight="bold"
@@ -337,6 +352,8 @@ export default async function HomePage() {
           </RevealOnScroll>
         </div>
       </section>
+
+      <HomeNewsletterStrip />
 
       {/* SUPPORT — centered hero, image strip below */}
       <section className="relative overflow-hidden border-t border-line bg-paper-deep/50">
