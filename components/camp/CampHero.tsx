@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -249,18 +250,18 @@ export function CampHero({ mainRange, litRange }: CampHeroProps) {
         </div>
 
         <div className="camp-hero-meta mt-8 flex flex-col items-stretch justify-center gap-3 px-2 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:px-0 lg:mt-12">
-          <a
+          <Link
             href="/camp/register"
             className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-camp-ink bg-camp-flame px-6 py-3 text-sm font-medium text-camp-paper transition hover:-translate-y-px hover:-rotate-1"
           >
             Open registration
-          </a>
-          <a
+          </Link>
+          <Link
             href="/camp/story"
             className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-camp-ink/80 bg-camp-paper px-6 py-3 text-sm font-medium text-camp-ink transition hover:rotate-1"
           >
             What is this place?
-          </a>
+          </Link>
         </div>
       </div>
     </section>

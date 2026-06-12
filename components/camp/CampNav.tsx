@@ -137,7 +137,6 @@ export function CampNav() {
               })}
               <Link
                 href={registerHref}
-                onClick={() => setOpen(false)}
                 className={`mt-2 inline-flex items-center justify-center gap-2 rounded-full border-2 border-camp-ink px-4 py-3 text-sm font-medium transition ${
                   isActive(pathname, registerHref)
                     ? "bg-camp-amber text-camp-ink"
