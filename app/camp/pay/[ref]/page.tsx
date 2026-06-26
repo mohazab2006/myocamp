@@ -170,7 +170,7 @@ export default async function CampPayPage({
           />
         )}
 
-        <FooterHelp paymentEmail={paymentEmail} />
+        <FooterHelp paymentEmail={paymentEmail} paypalEnabled={isPayPalConfigured()} />
       </div>
     </main>
   );
@@ -296,11 +296,15 @@ function UnpaidState({
             )}
           </div>
           <div className="border border-line bg-paper-deep/40 p-4 text-xs text-ink-soft">
-            <p className="font-semibold uppercase tracking-[0.14em] text-ink">Three ways to pay</p>
+            <p className="font-semibold uppercase tracking-[0.14em] text-ink">
+              {paypalEnabled ? "Three ways to pay" : "Two ways to pay"}
+            </p>
             <ul className="mt-2 space-y-1.5">
-              <li className="flex items-center gap-1.5">
-                <Wallet size={12} weight="duotone" /> PayPal — instant
-              </li>
+              {paypalEnabled && (
+                <li className="flex items-center gap-1.5">
+                  <Wallet size={12} weight="duotone" /> PayPal — instant
+                </li>
+              )}
               <li className="flex items-center gap-1.5">
                 <PaperPlaneTilt size={12} weight="duotone" /> e-Transfer — overnight
               </li>
@@ -313,18 +317,18 @@ function UnpaidState({
       </section>
 
       {/* PayPal */}
-      <section className="mt-5 border border-line bg-paper p-6 md:p-8">
-        <div className="flex items-start gap-3">
-          <Wallet size={24} weight="duotone" className="mt-1 text-pine" />
-          <div className="flex-1">
-            <h3 className="font-display text-xl tracking-tight text-ink">Pay with PayPal</h3>
-            <p className="mt-1 text-sm text-ink-soft">
-              {isFamilyPayment
-                ? "One checkout covers every child listed above."
-                : "Fastest option — confirmation is instant."}
-            </p>
-            <div className="mt-4">
-              {paypalEnabled && paypalClientId ? (
+      {paypalEnabled && paypalClientId && (
+        <section className="mt-5 border border-line bg-paper p-6 md:p-8">
+          <div className="flex items-start gap-3">
+            <Wallet size={24} weight="duotone" className="mt-1 text-pine" />
+            <div className="flex-1">
+              <h3 className="font-display text-xl tracking-tight text-ink">Pay with PayPal</h3>
+              <p className="mt-1 text-sm text-ink-soft">
+                {isFamilyPayment
+                  ? "One checkout covers every child listed above."
+                  : "Fastest option — confirmation is instant."}
+              </p>
+              <div className="mt-4">
                 <PayPalButton
                   referenceCode={referenceCode}
                   clientId={paypalClientId}
@@ -332,15 +336,11 @@ function UnpaidState({
                   environment={getPayPalEnvironment()}
                   familyRefs={isFamilyPayment ? familyRefs : undefined}
                 />
-              ) : (
-                <div className="border border-dashed border-line bg-paper-deep/15 p-4 text-xs text-ink-soft">
-                  PayPal isn&apos;t available right now. You can pay by e-Transfer or cash below.
-                </div>
-              )}
+              </div>
             </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* e-Transfer */}
       <section className="mt-5 border border-line bg-paper p-6 md:p-8">
@@ -406,6 +406,7 @@ function UnpaidState({
                 <>
                   Bring <strong className="text-ink">{fmt(remaining)}</strong> in exact cash on
                   drop-off day. We&apos;ll mark you as paid right now and collect at camp.
+                  {paypalEnabled && " You can still pay by PayPal or e-Transfer above if you change your mind."}
                 </>
               )}
             </p>
@@ -433,7 +434,7 @@ function UnpaidState({
             ) : null}
             <p className="mt-3 text-xs text-ink-soft">
               By selecting cash you commit to paying at drop-off. If you change your mind, you can
-              come back to this page and pay by PayPal or e-Transfer instead.
+              come back to this page and pay by {paypalEnabled ? "PayPal or e-Transfer" : "e-Transfer"} instead.
             </p>
           </div>
         </div>
@@ -603,12 +604,14 @@ function ETransferField({
   );
 }
 
-function FooterHelp({ paymentEmail }: { paymentEmail: string | null }) {
+function FooterHelp({ paymentEmail, paypalEnabled }: { paymentEmail: string | null; paypalEnabled: boolean }) {
   return (
     <section className="mt-8 border-t border-line/60 pt-6 text-center text-xs text-ink-soft">
       <p className="inline-flex items-center gap-1.5">
         <ShieldCheck size={12} weight="duotone" />
-        Payments are processed by PayPal and Interac — we never see your card or banking info.
+        {paypalEnabled
+          ? "Payments are processed by PayPal and Interac — we never see your card or banking info."
+          : "Payments are processed by Interac e-Transfer — we never see your banking info."}
       </p>
       {paymentEmail ? (
         <p className="mt-2 inline-flex items-center gap-1.5">
