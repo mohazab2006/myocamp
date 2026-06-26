@@ -1,6 +1,7 @@
 import "./globals.css";
 
 import type { ReactNode } from "react";
+import { Analytics } from "@vercel/analytics/next";
 
 import { rootMetadata } from "@/lib/site";
 import { Caprasimo, Caveat, Fraunces, Geist } from "next/font/google";
@@ -42,6 +43,7 @@ export default function RootLayout({
     >
       <body data-theme="org" className="min-h-dvh antialiased">
         {children}
+        <Analytics />
       </body>
     </html>
   );
