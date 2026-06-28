@@ -241,6 +241,8 @@ function RegistrationsTab({
     paid: filterRegistrations(rows, "paid").length,
     unpaid: filterRegistrations(rows, "unpaid").length,
     partial: filterRegistrations(rows, "partial").length,
+    etransfer: filterRegistrations(rows, "etransfer").length,
+    "cash-paid": filterRegistrations(rows, "cash-paid").length,
     cash: filterRegistrations(rows, "cash").length,
     cancelled: filterRegistrations(rows, "cancelled").length
   };

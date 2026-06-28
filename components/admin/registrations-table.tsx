@@ -24,7 +24,7 @@ interface RegistrationsTableProps {
   filter: FilterKey;
 }
 
-export type FilterKey = "all" | "paid" | "unpaid" | "cash" | "partial" | "cancelled";
+export type FilterKey = "all" | "paid" | "unpaid" | "cash" | "partial" | "cancelled" | "etransfer" | "cash-paid";
 
 export const REGISTRATION_FILTERS: ReadonlyArray<{
   key: FilterKey;
@@ -34,6 +34,8 @@ export const REGISTRATION_FILTERS: ReadonlyArray<{
   { key: "unpaid", label: "Unpaid" },
   { key: "paid", label: "Paid" },
   { key: "partial", label: "Partial" },
+  { key: "etransfer", label: "e-Transfer" },
+  { key: "cash-paid", label: "Cash paid" },
   { key: "cash", label: "Cash to collect" },
   { key: "cancelled", label: "Cancelled" }
 ];
@@ -59,14 +61,25 @@ export function filterRegistrations(
       return rows.filter(
         (r) => r.registration.status !== "cancelled" && r.invoice?.status === "partial"
       );
+    case "etransfer":
+      return rows.filter(
+        (r) =>
+          r.registration.status !== "cancelled" &&
+          r.invoice?.status === "paid" &&
+          r.topPayment?.method === "etransfer"
+      );
+    case "cash-paid":
+      return rows.filter(
+        (r) =>
+          r.registration.status !== "cancelled" &&
+          r.invoice?.status === "paid" &&
+          r.topPayment?.method === "cash"
+      );
     case "cash":
-      // Any unpaid invoice whose top payment was a cash record awaiting pickup,
-      // OR an "active" registration whose method is cash and isn't fully paid.
+      // Unpaid cash pledge — selected "I'll bring cash" but not yet collected.
       return rows.filter((r) => {
         if (r.registration.status === "cancelled") return false;
-        const cashAwaiting =
-          r.topPayment?.method === "cash" && r.topPayment.cashReceived === false;
-        return cashAwaiting;
+        return r.topPayment?.method === "cash" && r.topPayment.cashReceived === false;
       });
     case "cancelled":
       return rows.filter((r) => r.registration.status === "cancelled");
