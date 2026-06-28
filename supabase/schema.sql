@@ -407,7 +407,7 @@ Thanks for registering **{{camper_name}}** for **{{camp_title}}** ({{camp_dates}
 
 Your reference code is **{{ref}}** and your balance is **{{amount}} CAD**.
 
-To pay now — PayPal, e-Transfer, or "I'll bring cash" — visit:
+To pay now — e-Transfer or cash — visit:
 
 [{{payment_url}}]({{payment_url}})
 
@@ -427,7 +427,7 @@ It's been a couple of days since you registered **{{camper_name}}** for **{{camp
 **Balance owing:** {{amount}} CAD
 **Reference:** {{ref}}
 
-Pay now — PayPal, e-Transfer, or cash at drop-off:
+Pay now — e-Transfer or cash at drop-off:
 
 [{{payment_url}}]({{payment_url}})
 
@@ -469,14 +469,14 @@ Open the link below to **review your offer** — you'll confirm on the next page
 
 [Review and confirm →]({{claim_url}})
 
-After you confirm on that page, you'll go straight to payment (PayPal, e-Transfer, or cash at drop-off).
+After you confirm on that page, you'll go straight to payment (e-Transfer or cash).
 
 — MYO Camp$$
   ),
   (
     'payment_confirmation',
     'Payment confirmation',
-    'Sent automatically when an invoice flips to paid (PayPal, matched e-Transfer, or cash pledge).',
+    'Sent automatically when an invoice flips to paid (matched e-Transfer or cash pledge).',
     'Paid in full · {{camper_name}} for {{camp_title}}',
     $$Hi {{parent_name}},
 
