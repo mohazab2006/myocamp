@@ -104,7 +104,7 @@ export async function recomputeInvoiceTotals(invoiceId: string): Promise<Invoice
 
   const { data: payRows, error: payErr } = await supabase
     .from("payments")
-    .select("amount, status, received_at")
+    .select("amount, status, received_at, cash_received")
     .eq("invoice_id", invoiceId);
 
   if (payErr) {
@@ -114,8 +114,9 @@ export async function recomputeInvoiceTotals(invoiceId: string): Promise<Invoice
 
   let paid = 0;
   let latestReceivedAt: string | null = null;
-  for (const row of payRows as Array<{ amount: number | string; status: string; received_at: string }>) {
-    if (row.status === "received") {
+  for (const row of payRows as Array<{ amount: number | string; status: string; received_at: string; cash_received: boolean | null }>) {
+    if (row.status === "received" && row.cash_received !== false) {
+      // Cash pledges (cash_received=false) don't count until admin physically collects.
       paid += Number(row.amount);
       if (!latestReceivedAt || row.received_at > latestReceivedAt) {
         latestReceivedAt = row.received_at;
@@ -223,13 +224,18 @@ export async function recordPayment(input: RecordPaymentInput): Promise<Payment>
   return rowToPayment(data as PaymentRow);
 }
 
-export async function updateCashReceived(paymentId: string, received: boolean): Promise<void> {
+export async function updateCashReceived(paymentId: string, received: boolean): Promise<string | null> {
   const supabase = createSupabaseAdminClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("payments")
     .update({ cash_received: received })
-    .eq("id", paymentId);
+    .eq("id", paymentId)
+    .select("invoice_id")
+    .maybeSingle();
   if (error) throw new Error(error.message);
+  const invoiceId = (data as { invoice_id: string | null } | null)?.invoice_id ?? null;
+  if (invoiceId) await recomputeInvoiceTotals(invoiceId);
+  return invoiceId;
 }
 
 export async function voidPayment(paymentId: string): Promise<void> {

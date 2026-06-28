@@ -407,14 +407,29 @@ export async function toggleCashReceivedAction(formData: FormData) {
     flash(regUrl(slug, registrationId), "error", "Missing payment id.");
   }
 
+  let invoiceId: string | null = null;
   try {
-    await updateCashReceived(paymentId, received);
+    invoiceId = await updateCashReceived(paymentId, received);
   } catch (err) {
     flash(
       regUrl(slug, registrationId),
       "error",
       err instanceof Error ? err.message : "Could not update."
     );
+  }
+
+  // Fire payment confirmation when admin marks cash as physically collected.
+  if (received && invoiceId) {
+    try {
+      const ctx = await loadRegistrationContextByInvoice(invoiceId);
+      if (ctx && ctx.invoice.status === "paid") {
+        void notify
+          .paymentConfirmation(ctx, { amountPaid: ctx.invoice.amountPaid, method: "cash" })
+          .catch((err) => console.warn("[toggleCashReceivedAction] notify failed:", err));
+      }
+    } catch (err) {
+      console.warn("[toggleCashReceivedAction] notify lookup failed:", err);
+    }
   }
 
   revalidatePath(regUrl(slug, registrationId));

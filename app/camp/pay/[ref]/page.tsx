@@ -87,6 +87,9 @@ export default async function CampPayPage({
   const isPaid = invoice.status === "paid";
   const isCancelled = registration.status === "cancelled";
   const isPartial = invoice.status === "partial";
+  const hasCashPledge = payments.some(
+    (p) => p.method === "cash" && p.cashReceived === false && p.status === "received"
+  );
 
   return (
     <main className="min-h-dvh bg-paper py-12 md:py-16">
@@ -167,6 +170,7 @@ export default async function CampPayPage({
             familyMemo={familyMemo}
             etransferMemo={etransferMemo}
             familyRefs={familyRefs}
+            hasCashPledge={hasCashPledge}
           />
         )}
 
@@ -250,7 +254,8 @@ function UnpaidState({
   isFamilyPayment,
   familyMemo,
   etransferMemo,
-  familyRefs
+  familyRefs,
+  hasCashPledge
 }: {
   referenceCode: string;
   remaining: number;
@@ -265,6 +270,7 @@ function UnpaidState({
   familyMemo: string;
   etransferMemo: string;
   familyRefs: string[];
+  hasCashPledge: boolean;
 }) {
   const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
   const paypalEnabled = isPayPalConfigured() && Boolean(paypalClientId);
@@ -273,6 +279,26 @@ function UnpaidState({
     <>
       {isFamilyPayment ? (
         <FamilyPaymentBanner lines={familyLines} familyRemaining={payRemaining} />
+      ) : null}
+
+      {hasCashPledge ? (
+        <section className="mt-5 border-2 border-brass/40 bg-brass/10 p-6 md:p-8">
+          <div className="flex items-start gap-3">
+            <Money size={24} weight="duotone" className="mt-1 text-brass" />
+            <div>
+              <h2 className="font-display text-xl text-ink">Cash pledge recorded — spot held.</h2>
+              <p className="mt-2 text-sm leading-relaxed text-ink-soft">
+                We've noted you'll bring{" "}
+                <strong className="text-ink">{fmt(isFamilyPayment ? payRemaining : remaining)}</strong>{" "}
+                in cash to drop-off. Your registration is confirmed. Your invoice will be marked{" "}
+                <strong className="text-ink">paid</strong> once we collect the cash at camp.
+              </p>
+              <p className="mt-3 text-xs text-ink-soft">
+                Changed your mind? Pay by e-Transfer below and your cash pledge will be cancelled automatically.
+              </p>
+            </div>
+          </div>
+        </section>
       ) : null}
 
       {/* Amount due */}
@@ -418,36 +444,45 @@ function UnpaidState({
               ) : (
                 <>
                   Bring <strong className="text-ink">{fmt(remaining)}</strong> in exact cash on
-                  drop-off day. We&apos;ll mark you as paid right now and collect at camp.
+                  drop-off day. Your spot is held and we&apos;ll mark you as paid when we collect at camp.
                 </>
               )}
             </p>
-            <form action={commitCashPaymentAction} className="mt-4">
-              <input type="hidden" name="ref" value={referenceCode} />
-              {isFamilyPayment ? (
-                <input type="hidden" name="familyRefs" value={familyRefs.join(",")} />
-              ) : null}
-              <button
-                type="submit"
-                className="inline-flex h-11 items-center gap-2 bg-forest px-5 text-sm font-semibold text-paper transition hover:bg-pine"
-              >
-                <Coins size={16} weight="bold" />
-                {isFamilyPayment
-                  ? "We'll bring cash for all children at drop-off"
-                  : "I'll bring cash to drop-off"}
-                <ArrowRight size={16} weight="bold" />
-              </button>
-            </form>
+            {hasCashPledge ? (
+              <p className="mt-4 inline-flex items-center gap-1.5 border border-brass/40 bg-brass/15 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.14em] text-ink">
+                <Money size={12} weight="duotone" />
+                Cash pledge already recorded
+              </p>
+            ) : (
+              <form action={commitCashPaymentAction} className="mt-4">
+                <input type="hidden" name="ref" value={referenceCode} />
+                {isFamilyPayment ? (
+                  <input type="hidden" name="familyRefs" value={familyRefs.join(",")} />
+                ) : null}
+                <button
+                  type="submit"
+                  className="inline-flex h-11 items-center gap-2 bg-forest px-5 text-sm font-semibold text-paper transition hover:bg-pine"
+                >
+                  <Coins size={16} weight="bold" />
+                  {isFamilyPayment
+                    ? "We'll bring cash for all children at drop-off"
+                    : "I'll bring cash to drop-off"}
+                  <ArrowRight size={16} weight="bold" />
+                </button>
+              </form>
+            )}
             {isFamilyPayment ? (
               <p className="mt-3 text-xs text-ink-soft">
                 Reference codes for staff:{" "}
                 <code className="font-mono text-ink">{familyMemo}</code>
               </p>
             ) : null}
-            <p className="mt-3 text-xs text-ink-soft">
-              By selecting cash you commit to paying at drop-off. If you change your mind, you can
-              come back to this page and pay by {paypalEnabled ? "PayPal or e-Transfer" : "e-Transfer"} instead.
-            </p>
+            {!hasCashPledge && (
+              <p className="mt-3 text-xs text-ink-soft">
+                By selecting cash you commit to paying at drop-off. If you change your mind, you can
+                come back to this page and pay by {paypalEnabled ? "PayPal or e-Transfer" : "e-Transfer"} instead.
+              </p>
+            )}
           </div>
         </div>
       </section>
@@ -547,7 +582,7 @@ function StatusBanner({ status, className }: { status: string; className?: strin
       tone: "ok",
       icon: <CheckCircle size={18} weight="fill" />,
       label:
-        "Got it. Bring cash to drop-off — you're all set, and we'll collect payment at camp."
+        "Got it — your spot is held. Bring cash to drop-off and we'll mark you as paid when we collect."
     },
     "already-paid": {
       tone: "info",

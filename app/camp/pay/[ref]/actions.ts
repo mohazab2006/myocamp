@@ -6,23 +6,11 @@ import { redirect } from "next/navigation";
 import { recordSplitFamilyPayment } from "@/lib/admin/family-billing";
 import { findByReferenceCode } from "@/lib/admin/payment-links";
 import { recordPayment } from "@/lib/admin/payments";
-import { loadRegistrationContextByInvoice, notify } from "@/lib/email/notifications";
 
 function value(formData: FormData, key: string) {
   return String(formData.get(key) ?? "").trim();
 }
 
-/**
- * Public cash payment action.
- *
- * Records a `cash` payment with `cash_received = false` so the invoice flips
- * to "paid" (we trust the parent will bring cash) but the owner sees it in
- * the "Cash to collect" filter until the cash is actually in hand.
- *
- * Confirmed in the user spec:
- *   "for cash it auto marks paid when they pick that option, it just assumes
- *    they will pay the cash and specifies its cash"
- */
 export async function commitCashPaymentAction(formData: FormData) {
   const ref = value(formData, "ref");
   if (!ref) redirect("/camp");
@@ -82,18 +70,6 @@ export async function commitCashPaymentAction(formData: FormData) {
         rawPayload: { _publicCashPledge: true, ref, familyRefs }
       });
 
-      for (const invoiceId of invoiceIds) {
-        const ctx = await loadRegistrationContextByInvoice(invoiceId);
-        const amountPaid = amountsByInvoice.get(invoiceId) ?? 0;
-        if (ctx && ctx.invoice.status === "paid" && amountPaid > 0) {
-          try {
-            await notify.paymentConfirmation(ctx, { amountPaid, method: "cash" });
-          } catch (err) {
-            console.warn("[commitCashPaymentAction] family notify failed:", err);
-          }
-        }
-      }
-
       revalidatePath(`/camp/pay/${ref}`);
       redirect(`/camp/pay/${ref}?status=cash-pledged`);
     }
@@ -113,15 +89,6 @@ export async function commitCashPaymentAction(formData: FormData) {
       notes: "Cash pledged via public payment page (collect at drop-off)",
       rawPayload: { _publicCashPledge: true, ref }
     });
-
-    const ctx = await loadRegistrationContextByInvoice(invoice.id);
-    if (ctx && ctx.invoice.status === "paid") {
-      try {
-        await notify.paymentConfirmation(ctx, { amountPaid: remaining, method: "cash" });
-      } catch (err) {
-        console.warn("[commitCashPaymentAction] notify failed:", err);
-      }
-    }
   } catch (err) {
     console.error("[commitCashPaymentAction] error:", err);
     redirect(`/camp/pay/${ref}?status=error`);
