@@ -72,8 +72,8 @@ export function filterRegistrations(
       return rows.filter(
         (r) =>
           r.registration.status !== "cancelled" &&
-          r.invoice?.status === "paid" &&
-          r.topPayment?.method === "cash"
+          r.topPayment?.method === "cash" &&
+          r.topPayment.cashReceived === true
       );
     case "cash":
       // Unpaid cash pledge — selected "I'll bring cash" but not yet collected.
