@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Envelope, HandCoins, Wallet } from "@phosphor-icons/react/ssr";
+import { Envelope, HandCoins } from "@phosphor-icons/react/ssr";
 import { formatRange } from "@/lib/date";
 import { PaintedDivider, SectionScatter } from "@/components/camp/Illustrations";
 import {
@@ -70,7 +70,7 @@ export function CampRegisterView({
             </h1>
             <p className="mt-6 max-w-[58ch] text-lg leading-relaxed text-camp-ink/85">
               Submit the form below. You&apos;ll go straight to the payment page with your reference
-              code — PayPal, e-Transfer, or cash at drop-off. We&apos;ll also email a confirmation if
+              code — e-Transfer or cash. We&apos;ll also email a confirmation if
               we have your address. E-transfers go to{" "}
               <a href={`mailto:${camp.paymentEmail}`} className="text-camp-flame underline">
                 {camp.paymentEmail}
@@ -126,13 +126,13 @@ export function CampRegisterView({
         <div className="mx-auto grid max-w-[1440px] grid-cols-12 gap-6 px-4 py-16 sm:px-6 md:gap-10 md:px-10 md:py-20">
           <div className="col-span-12 md:col-span-4">
             <div className="font-script text-2xl text-camp-flame">how to pay</div>
-            <h2 className="font-camp mt-2 text-4xl text-camp-bark md:text-5xl">Three ways.</h2>
+            <h2 className="font-camp mt-2 text-4xl text-camp-bark md:text-5xl">Two ways.</h2>
             <p className="mt-4 text-camp-ink/80">
               After you register, use the payment page right away (or the link in your confirmation
               email). Include your reference code in every e-Transfer memo.
             </p>
           </div>
-          <div className="col-span-12 grid gap-5 md:col-span-8 md:grid-cols-3">
+          <div className="col-span-12 grid gap-5 md:col-span-8 md:grid-cols-2">
             <div className="relative flex flex-col gap-3 border-2 border-camp-flame/60 bg-camp-paper p-6">
               <div className="absolute -right-2 -top-3 rotate-3 bg-camp-flame px-2 py-0.5 text-[10px] font-bold uppercase tracking-[0.2em] text-camp-paper">
                 preferred
@@ -149,13 +149,8 @@ export function CampRegisterView({
             </div>
             <div className="flex flex-col gap-3 border-2 border-camp-bark/30 bg-camp-paper p-6">
               <HandCoins size={32} weight="duotone" className="text-camp-flame" />
-              <div className="font-camp text-2xl text-camp-bark">Cash at drop-off</div>
-              <p className="text-camp-ink/80">Choose &quot;I&apos;ll bring cash&quot; on the payment page.</p>
-            </div>
-            <div className="flex flex-col gap-3 border-2 border-camp-bark/30 bg-camp-paper p-6">
-              <Wallet size={32} weight="duotone" className="text-camp-flame" />
-              <div className="font-camp text-2xl text-camp-bark">PayPal</div>
-              <p className="text-camp-ink/80">One-click on the payment page if e-Transfer isn&apos;t an option.</p>
+              <div className="font-camp text-2xl text-camp-bark">Cash</div>
+              <p className="text-camp-ink/80">Must email to arrange payment before camp for valid registration.</p>
             </div>
           </div>
         </div>

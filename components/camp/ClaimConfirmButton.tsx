@@ -85,8 +85,7 @@ export function ClaimConfirmButton({
         </p>
       ) : null}
       <p className="text-xs leading-relaxed text-ink-soft">
-        By confirming you agree to pay the registration fee on the next screen (PayPal,
-        e-Transfer, or cash at drop-off).
+        By confirming you agree to pay the registration fee on the next screen (e-Transfer or cash).
       </p>
     </div>
   );
