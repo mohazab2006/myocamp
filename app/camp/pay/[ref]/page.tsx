@@ -395,18 +395,30 @@ function UnpaidState({
           <Money size={24} weight="duotone" className="mt-1 text-pine" />
           <div className="flex-1">
             <h3 className="font-display text-xl tracking-tight text-ink">Pay cash at drop-off</h3>
-            <p className="mt-1 text-sm text-ink-soft">
+            <div className="mt-1 flex items-start gap-2 border-l-2 border-ember bg-ember/8 px-4 py-3 text-xs leading-relaxed text-ink">
+              <Info size={14} weight="duotone" className="mt-0.5 shrink-0 text-ember" />
+              <p>
+                Cash must be arranged via email before camp —{" "}
+                {paymentEmail ? (
+                  <a href={`mailto:${paymentEmail}`} className="text-pine underline underline-offset-4">
+                    {paymentEmail}
+                  </a>
+                ) : (
+                  "contact us"
+                )}{" "}
+                to confirm before selecting this option.
+              </p>
+            </div>
+            <p className="mt-3 text-sm text-ink-soft">
               {isFamilyPayment ? (
                 <>
                   Bring <strong className="text-ink">{fmt(payRemaining)}</strong> in exact cash for
-                  all children on drop-off day, or use PayPal / e-Transfer above for one combined
-                  payment.
+                  all children on drop-off day, or use e-Transfer above for one combined payment.
                 </>
               ) : (
                 <>
                   Bring <strong className="text-ink">{fmt(remaining)}</strong> in exact cash on
                   drop-off day. We&apos;ll mark you as paid right now and collect at camp.
-                  {paypalEnabled && " You can still pay by PayPal or e-Transfer above if you change your mind."}
                 </>
               )}
             </p>
