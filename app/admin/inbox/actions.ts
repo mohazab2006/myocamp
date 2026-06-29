@@ -95,42 +95,42 @@ export async function removeInboundFromQueueAction(formData: FormData) {
 
 export async function dismissUnrelatedInboundAction() {
   await requireAuthorizedAdmin();
+
+  let outcome: { type: "success" | "error"; message: string };
   try {
     const n = await dismissUnrelatedInboundEmails();
     revalidatePath("/admin/inbox");
-    flash(
-      "/admin/inbox?tab=unmatched",
-      "success",
-      n > 0
-        ? `Cleared ${n} personal e-Transfer${n === 1 ? "" : "s"} (no camp reference).`
-        : "No unrelated e-Transfers to clear."
-    );
+    outcome = {
+      type: "success",
+      message:
+        n > 0
+          ? `Cleared ${n} personal e-Transfer${n === 1 ? "" : "s"} (no camp reference).`
+          : "No unrelated e-Transfers to clear."
+    };
   } catch (err) {
-    flash(
-      "/admin/inbox?tab=unmatched",
-      "error",
-      err instanceof Error ? err.message : "Could not clear inbox."
-    );
+    outcome = { type: "error", message: err instanceof Error ? err.message : "Could not clear inbox." };
   }
+
+  flash("/admin/inbox?tab=unmatched", outcome.type, outcome.message);
 }
 
 export async function clearStaleMatchedAction() {
   await requireAuthorizedAdmin();
+
+  let outcome: { type: "success" | "error"; message: string };
   try {
     const n = await reconcileOrphanedInboundMatches();
     revalidatePath("/admin/inbox");
-    flash(
-      "/admin/inbox?tab=matched",
-      "success",
-      n > 0
-        ? `Cleared ${n} stale auto-match${n === 1 ? "" : "es"} (camp or invoice was removed).`
-        : "No stale auto-matches to clear."
-    );
+    outcome = {
+      type: "success",
+      message:
+        n > 0
+          ? `Cleared ${n} stale auto-match${n === 1 ? "" : "es"} (camp or invoice was removed).`
+          : "No stale auto-matches to clear."
+    };
   } catch (err) {
-    flash(
-      "/admin/inbox?tab=matched",
-      "error",
-      err instanceof Error ? err.message : "Could not clear stale matches."
-    );
+    outcome = { type: "error", message: err instanceof Error ? err.message : "Could not clear stale matches." };
   }
+
+  flash("/admin/inbox?tab=matched", outcome.type, outcome.message);
 }

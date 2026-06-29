@@ -28,6 +28,7 @@ function revalidateCronPaths() {
 export async function runDailyCronAction() {
   await requireAuthorizedAdmin();
 
+  let outcome: { type: "success" | "error"; message: string };
   try {
     const result = await runDailyCron();
     const gmail = result.gmail;
@@ -39,18 +40,15 @@ export async function runDailyCronAction() {
           : "Gmail: poll errored.";
 
     revalidateCronPaths();
-    flash(
-      "/admin/setup",
-      "success",
-      `Daily jobs done. ${gmailLine} Waitlist: ${result.waitlist.expired} expired. Camps: ${result.camps.closed} closed. Reminders: ${result.reminders.sent} sent, ${result.reminders.skipped} skipped.`
-    );
+    outcome = {
+      type: "success",
+      message: `Daily jobs done. ${gmailLine} Waitlist: ${result.waitlist.expired} expired. Camps: ${result.camps.closed} closed. Reminders: ${result.reminders.sent} sent, ${result.reminders.skipped} skipped.`
+    };
   } catch (err) {
-    flash(
-      "/admin/setup",
-      "error",
-      err instanceof Error ? err.message : "Daily jobs failed."
-    );
+    outcome = { type: "error", message: err instanceof Error ? err.message : "Daily jobs failed." };
   }
+
+  flash("/admin/setup", outcome.type, outcome.message);
 }
 
 export async function pollGmailNowAction() {
@@ -81,65 +79,62 @@ export async function pollGmailNowAction() {
 export async function expireWaitlistClaimsAction() {
   await requireAuthorizedAdmin();
 
+  let outcome: { type: "success" | "info" | "error"; message: string };
   try {
     const { expired } = await expireOverdueClaims();
     revalidateCronPaths();
-    flash(
-      "/admin/setup",
-      expired > 0 ? "success" : "info",
-      expired === 0
-        ? "No overdue waitlist claims to expire."
-        : `Expired ${expired} overdue waitlist claim${expired === 1 ? "" : "s"}.`
-    );
+    outcome = {
+      type: expired > 0 ? "success" : "info",
+      message:
+        expired === 0
+          ? "No overdue waitlist claims to expire."
+          : `Expired ${expired} overdue waitlist claim${expired === 1 ? "" : "s"}.`
+    };
   } catch (err) {
-    flash(
-      "/admin/setup",
-      "error",
-      err instanceof Error ? err.message : "Waitlist sweep failed."
-    );
+    outcome = { type: "error", message: err instanceof Error ? err.message : "Waitlist sweep failed." };
   }
+
+  flash("/admin/setup", outcome.type, outcome.message);
 }
 
 export async function closeOverdueCampsAction() {
   await requireAuthorizedAdmin();
 
+  let outcome: { type: "success" | "info" | "error"; message: string };
   try {
     const { closed } = await closeOverdueRegistrations();
     revalidateCronPaths();
-    flash(
-      "/admin/setup",
-      closed > 0 ? "success" : "info",
-      closed === 0
-        ? "No camps past their registration deadline."
-        : `Closed ${closed} camp${closed === 1 ? "" : "s"} past registration deadline.`
-    );
+    outcome = {
+      type: closed > 0 ? "success" : "info",
+      message:
+        closed === 0
+          ? "No camps past their registration deadline."
+          : `Closed ${closed} camp${closed === 1 ? "" : "s"} past registration deadline.`
+    };
   } catch (err) {
-    flash(
-      "/admin/setup",
-      "error",
-      err instanceof Error ? err.message : "Camp close sweep failed."
-    );
+    outcome = { type: "error", message: err instanceof Error ? err.message : "Camp close sweep failed." };
   }
+
+  flash("/admin/setup", outcome.type, outcome.message);
 }
 
 export async function sendPaymentRemindersAction() {
   await requireAuthorizedAdmin();
 
+  let outcome: { type: "success" | "info" | "error"; message: string };
   try {
     const summary = await runRemindersSweep();
     revalidateCronPaths();
-    flash(
-      "/admin/setup",
-      summary.sent > 0 ? "success" : "info",
-      summary.sent === 0
-        ? `No reminders sent (${summary.skipped} skipped, ${summary.failed} failed).`
-        : `Sent ${summary.sent} payment reminder${summary.sent === 1 ? "" : "s"} (${summary.skipped} skipped).`
-    );
+    outcome = {
+      type: summary.sent > 0 ? "success" : "info",
+      message:
+        summary.sent === 0
+          ? `No reminders sent (${summary.skipped} skipped, ${summary.failed} failed).`
+          : `Sent ${summary.sent} payment reminder${summary.sent === 1 ? "" : "s"} (${summary.skipped} skipped).`
+    };
   } catch (err) {
-    flash(
-      "/admin/setup",
-      "error",
-      err instanceof Error ? err.message : "Reminder sweep failed."
-    );
+    outcome = { type: "error", message: err instanceof Error ? err.message : "Reminder sweep failed." };
   }
+
+  flash("/admin/setup", outcome.type, outcome.message);
 }
