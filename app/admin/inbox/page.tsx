@@ -99,6 +99,37 @@ async function fetchOpenInvoices(limit = 200): Promise<InvoiceCandidate[]> {
   });
 }
 
+/** Reference code → camp title for ALL invoices (used for camp filter on inbox). */
+async function fetchRefToCampMap(): Promise<Map<string, string>> {
+  const supabase = createSupabaseAdminClient();
+  const { data } = await supabase
+    .from("invoices")
+    .select("reference_code, registrations ( camps ( title ) )")
+    .limit(1000);
+
+  const map = new Map<string, string>();
+  type RefRow = {
+    reference_code: string;
+    registrations:
+      | { camps: { title: string } | { title: string }[] | null }
+      | Array<{ camps: { title: string } | { title: string }[] | null }>
+      | null;
+  };
+  for (const row of (data ?? []) as RefRow[]) {
+    const ref = row.reference_code;
+    const reg = Array.isArray(row.registrations) ? row.registrations[0] : row.registrations;
+    const campJoin = reg?.camps;
+    const camp = Array.isArray(campJoin) ? campJoin[0] : campJoin;
+    if (ref && camp?.title) map.set(ref, camp.title);
+  }
+  return map;
+}
+
+function campForEmail(email: InboundEmail, refMap: Map<string, string>): string | null {
+  if (!email.parsedReferenceCode) return null;
+  return refMap.get(email.parsedReferenceCode) ?? null;
+}
+
 function fmt(n: number) {
   return n.toLocaleString("en-CA", { style: "currency", currency: "CAD" });
 }
@@ -135,16 +166,31 @@ export default async function AdminInboxPage({
 }) {
   await requireAuthorizedAdmin();
   const { message, type } = await resolveAdminFlashState(searchParams);
-  const sp = (searchParams ? await searchParams : {}) as { tab?: string };
+  const sp = (searchParams ? await searchParams : {}) as { tab?: string; camp?: string };
   const tab = pickTab(sp.tab);
+  const campFilter = sp.camp ?? "all"; // "all" | camp title | "unknown"
 
   await reconcileOrphanedInboundMatches();
 
-  const [creds, emails, invoices] = await Promise.all([
+  const [creds, emails, invoices, refMap] = await Promise.all([
     fetchGmailCredentials(),
     fetchInboundEmails({ statuses: statusesForTab(tab), limit: 100 }),
-    fetchOpenInvoices(200)
+    fetchOpenInvoices(200),
+    fetchRefToCampMap()
   ]);
+
+  // Build sorted list of distinct camp names across all emails for the filter pills.
+  const campNames = Array.from(
+    new Set(emails.map((e) => campForEmail(e, refMap)).filter((c): c is string => c !== null))
+  ).sort();
+
+  // Apply camp filter.
+  const filteredEmails =
+    campFilter === "all"
+      ? emails
+      : campFilter === "unknown"
+        ? emails.filter((e) => campForEmail(e, refMap) === null)
+        : emails.filter((e) => campForEmail(e, refMap) === campFilter);
 
   const counts = {
     unmatched: 0,
@@ -226,6 +272,32 @@ export default async function AdminInboxPage({
         })}
       </nav>
 
+      {campNames.length > 0 || emails.some((e) => campForEmail(e, refMap) === null) ? (
+        <div className="mt-4 flex flex-wrap items-center gap-2">
+          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-soft">Camp</span>
+          {[
+            { key: "all", label: "All camps" },
+            ...campNames.map((name) => ({ key: name, label: name })),
+            { key: "unknown", label: "Unknown" }
+          ].map(({ key, label }) => {
+            const active = campFilter === key;
+            return (
+              <Link
+                key={key}
+                href={`/admin/inbox?tab=${tab}&camp=${encodeURIComponent(key)}`}
+                className={
+                  active
+                    ? "inline-flex h-7 items-center border border-line bg-paper px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink"
+                    : "inline-flex h-7 items-center border border-transparent px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft transition hover:border-line hover:text-ink"
+                }
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </div>
+      ) : null}
+
       {tab === "matched" && counts.matched > 0 ? (
         <div className="mt-4 flex flex-wrap items-center gap-3 border border-line bg-paper-deep/35 px-4 py-3 text-sm text-ink-soft">
           <span>
@@ -249,10 +321,10 @@ export default async function AdminInboxPage({
       ) : null}
 
       <div className="mt-6 space-y-4">
-        {emails.length === 0 ? (
+        {filteredEmails.length === 0 ? (
           <EmptyState tab={tab} />
         ) : (
-          emails.map((email) => (
+          filteredEmails.map((email) => (
             <EmailCard key={email.id} email={email} invoices={invoices} tab={tab} />
           ))
         )}
