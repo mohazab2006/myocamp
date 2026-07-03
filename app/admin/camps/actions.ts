@@ -80,6 +80,8 @@ function parseInput(formData: FormData): { input: UpsertCampInput; error?: strin
       paymentEmail: optional(formData, "paymentEmail"),
       heroImage: optional(formData, "heroImage"),
       featuredOnEvents: formData.get("featuredOnEvents") === "on",
+      ageMin: numberOrNull(formData, "ageMin"),
+      ageMax: numberOrNull(formData, "ageMax"),
       notes: optional(formData, "notes")
     }
   };

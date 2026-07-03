@@ -10,6 +10,13 @@ import {
 } from "@/lib/content/camps-public";
 import { CampSwitchBanner } from "@/components/camp/CampRegisterSelector";
 
+function formatAgeRange(ageMin: number | null | undefined, ageMax: number | null | undefined): string | null {
+  if (!ageMin && !ageMax) return null;
+  if (ageMin && ageMax) return `Ages ${ageMin}–${ageMax}`;
+  if (ageMin) return `Ages ${ageMin}+`;
+  return null;
+}
+
 const statusCopy: Record<
   PublicRegistrationStatus,
   { tag: string; tone: string; line: string }
@@ -92,6 +99,12 @@ export function CampRegisterView({
                 ["Session", formatRange(camp.startDate, camp.endDate)],
                 ["Fee", `$${camp.feePerCamper.toFixed(0)} per camper`],
                 ...(camp.location ? [["Location", camp.location] as const] : []),
+                ...(formatAgeRange(camp.ageMin, camp.ageMax)
+                  ? [[
+                      "Age range",
+                      formatAgeRange(camp.ageMin, camp.ageMax) as string
+                    ] as const]
+                  : []),
                 ...(camp.registrationClosesAt
                   ? [
                       [

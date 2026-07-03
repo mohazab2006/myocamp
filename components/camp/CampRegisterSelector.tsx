@@ -17,7 +17,7 @@ const CARD_ICONS: CampIconName[] = ["tent", "flame", "lantern", "compass", "cano
 
 function statusLabel(camp: PublicCamp): { text: string; tone: string } {
   if (camp.registrationStatus === "open") {
-    return { text: "Open — spots available", tone: "bg-camp-moss text-camp-paper" };
+    return { text: "Open now", tone: "bg-camp-moss text-camp-paper" };
   }
   if (camp.registrationStatus === "full") {
     return { text: "Full — join waitlist", tone: "bg-camp-bark text-camp-paper" };
@@ -26,6 +26,13 @@ function statusLabel(camp: PublicCamp): { text: string; tone: string } {
     return { text: "Coming soon", tone: "bg-camp-flame text-camp-paper" };
   }
   return { text: camp.registrationStatus, tone: "bg-camp-bark/70 text-camp-paper" };
+}
+
+function formatAgeRange(ageMin: number | null | undefined, ageMax: number | null | undefined): string | null {
+  if (!ageMin && !ageMax) return null;
+  if (ageMin && ageMax) return `Ages ${ageMin}–${ageMax}`;
+  if (ageMin) return `Ages ${ageMin}+`;
+  return null;
 }
 
 function sessionNumber(index: number): string {
@@ -177,16 +184,21 @@ export function CampRegisterSelector({ camps }: CampRegisterSelectorProps) {
                         {camp.title}
                       </h3>
 
-                      <p className="mt-3 flex-1 text-sm leading-relaxed text-camp-ink/80">
-                        ${camp.feePerCamper.toFixed(0)} per camper
-                        {isWaitlist ? " · waitlist only" : isOpen ? " · spots available" : camp.registrationStatus === "opening-soon" ? " · registration opening soon" : ""}
-                        {camp.registrationClosesAt
-                          ? ` · closes ${new Date(camp.registrationClosesAt).toLocaleDateString("en-CA", {
-                              month: "short",
-                              day: "numeric"
-                            })}`
-                          : ""}
-                      </p>
+                      <div className="mt-3 flex-1 space-y-1">
+                        <p className="text-sm leading-relaxed text-camp-ink/80">
+                          ${camp.feePerCamper.toFixed(0)} per camper
+                          {isWaitlist ? " · waitlist only" : isOpen ? " · spots available" : camp.registrationStatus === "opening-soon" ? " · registration opening soon" : ""}
+                          {camp.registrationClosesAt
+                            ? ` · closes ${new Date(camp.registrationClosesAt).toLocaleDateString("en-CA", {
+                                month: "short",
+                                day: "numeric"
+                              })}`
+                            : ""}
+                        </p>
+                        {formatAgeRange(camp.ageMin, camp.ageMax) ? (
+                          <p className="text-sm text-camp-ink/70">{formatAgeRange(camp.ageMin, camp.ageMax)}</p>
+                        ) : null}
+                      </div>
 
                       <div className="mt-6 flex items-center justify-between border-t border-dashed border-camp-bark/30 pt-4">
                         <span className="font-camp text-xl text-camp-flame">

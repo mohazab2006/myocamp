@@ -104,6 +104,8 @@ export interface Camp {
   paymentEmail: string | null;
   heroImage: string | null;
   featuredOnEvents: boolean;
+  ageMin: number | null;
+  ageMax: number | null;
   notes: string | null;
   createdAt: string;
   updatedAt: string;

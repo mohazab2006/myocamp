@@ -409,6 +409,8 @@ export async function loadRegistrationContextByInvoice(
       paymentEmail: campData.paymentEmail,
       heroImage: campData.heroImage,
       featuredOnEvents: campData.featuredOnEvents,
+      ageMin: campData.ageMin,
+      ageMax: campData.ageMax,
       notes: (camp.notes as string | null) ?? null,
       createdAt: camp.created_at as string,
       updatedAt: camp.updated_at as string

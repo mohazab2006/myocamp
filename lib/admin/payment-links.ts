@@ -90,6 +90,8 @@ function rowToCamp(row: CampRow): Camp {
     paymentEmail: data.paymentEmail,
     heroImage: data.heroImage,
     featuredOnEvents: data.featuredOnEvents,
+    ageMin: data.ageMin,
+    ageMax: data.ageMax,
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at

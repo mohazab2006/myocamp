@@ -27,6 +27,8 @@ export interface PublicCamp {
   registerPath: string;
   heroImage: string | null;
   featuredOnEvents: boolean;
+  ageMin: number | null;
+  ageMax: number | null;
   /** Active camper slots (filled at read time for public pages). */
   activeCamperCount: number;
 }
@@ -103,6 +105,8 @@ function rowToPublicCamp(row: CampRow, activeCamperCount = 0): PublicCamp {
     registerPath: `/camp/${row.slug}/register`,
     heroImage: data.heroImage,
     featuredOnEvents: data.featuredOnEvents,
+    ageMin: data.ageMin,
+    ageMax: data.ageMax,
     activeCamperCount
   };
 }
@@ -240,6 +244,8 @@ export function campToPublicShape(camp: Camp, paymentEmail?: string | null): Pub
     registerPath: `/camp/${camp.slug}/register`,
     heroImage: camp.heroImage,
     featuredOnEvents: camp.featuredOnEvents,
+    ageMin: camp.ageMin,
+    ageMax: camp.ageMax,
     activeCamperCount: 0
   };
 }

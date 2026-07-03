@@ -40,6 +40,13 @@ function formatDateRange(start: string, end: string) {
   }
 }
 
+function formatAgeRange(ageMin: number | null | undefined, ageMax: number | null | undefined): string | null {
+  if (!ageMin && !ageMax) return null;
+  if (ageMin && ageMax) return `Ages ${ageMin}–${ageMax}`;
+  if (ageMin) return `Ages ${ageMin}+`;
+  return null;
+}
+
 function formatCurrency(cents: number) {
   return new Intl.NumberFormat("en-CA", {
     style: "currency",
@@ -118,6 +125,9 @@ export default async function AdminCampsPage({
                     </h2>
                     {camp.location ? (
                       <p className="mt-1 text-sm text-ink-soft">{camp.location}</p>
+                    ) : null}
+                    {formatAgeRange(camp.ageMin, camp.ageMax) ? (
+                      <p className="mt-0.5 text-sm text-ink-soft">{formatAgeRange(camp.ageMin, camp.ageMax)}</p>
                     ) : null}
                   </div>
                   <span

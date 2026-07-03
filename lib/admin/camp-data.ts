@@ -4,6 +4,8 @@ export type CampDataFields = {
   paymentEmail: string | null;
   heroImage: string | null;
   featuredOnEvents: boolean;
+  ageMin: number | null;
+  ageMax: number | null;
 };
 
 export function parseCampData(data: Record<string, unknown> | null): CampDataFields {
@@ -15,10 +17,16 @@ export function parseCampData(data: Record<string, unknown> | null): CampDataFie
     data && typeof data.heroImage === "string" && data.heroImage.trim()
       ? data.heroImage.trim()
       : null;
+  const ageMin =
+    data && typeof data.ageMin === "number" && Number.isFinite(data.ageMin) ? data.ageMin : null;
+  const ageMax =
+    data && typeof data.ageMax === "number" && Number.isFinite(data.ageMax) ? data.ageMax : null;
   return {
     paymentEmail,
     heroImage,
-    featuredOnEvents: data?.featuredOnEvents === true
+    featuredOnEvents: data?.featuredOnEvents === true,
+    ageMin,
+    ageMax
   };
 }
 
@@ -36,6 +44,12 @@ export function mergeCampData(
 
   if (fields.featuredOnEvents) merged.featuredOnEvents = true;
   else delete merged.featuredOnEvents;
+
+  if (fields.ageMin != null) merged.ageMin = fields.ageMin;
+  else delete merged.ageMin;
+
+  if (fields.ageMax != null) merged.ageMax = fields.ageMax;
+  else delete merged.ageMax;
 
   return merged;
 }

@@ -45,6 +45,8 @@ function rowToCamp(row: CampRow): Camp {
     paymentEmail: data.paymentEmail,
     heroImage: data.heroImage,
     featuredOnEvents: data.featuredOnEvents,
+    ageMin: data.ageMin,
+    ageMax: data.ageMax,
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at
@@ -99,6 +101,8 @@ export type UpsertCampInput = {
   paymentEmail: string | null;
   heroImage: string | null;
   featuredOnEvents: boolean;
+  ageMin: number | null;
+  ageMax: number | null;
   notes: string | null;
 };
 
@@ -106,7 +110,9 @@ function campDataFromInput(input: UpsertCampInput) {
   return {
     paymentEmail: input.paymentEmail,
     heroImage: input.heroImage,
-    featuredOnEvents: input.featuredOnEvents
+    featuredOnEvents: input.featuredOnEvents,
+    ageMin: input.ageMin,
+    ageMax: input.ageMax
   };
 }
 

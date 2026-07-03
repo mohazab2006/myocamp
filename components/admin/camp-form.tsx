@@ -109,6 +109,31 @@ export function CampForm({ camp }: CampFormProps) {
         />
       </AdminField>
 
+      <div className="grid gap-4 md:grid-cols-2">
+        <AdminField label="Min age" hint="e.g. 9 — leave both blank to hide age range.">
+          <input
+            className={adminInputClass}
+            name="ageMin"
+            type="number"
+            min={1}
+            max={99}
+            defaultValue={camp?.ageMin ?? ""}
+            placeholder="9"
+          />
+        </AdminField>
+        <AdminField label="Max age" hint="e.g. 16 — leave blank for '15+' style (min only).">
+          <input
+            className={adminInputClass}
+            name="ageMax"
+            type="number"
+            min={1}
+            max={99}
+            defaultValue={camp?.ageMax ?? ""}
+            placeholder="16"
+          />
+        </AdminField>
+      </div>
+
       <AdminField
         label="Hero image"
         hint="Shown on the events page when an event is linked to this camp, and on the camp registration picker."
