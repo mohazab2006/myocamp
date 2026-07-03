@@ -14,11 +14,13 @@ export const dynamic = "force-dynamic";
 export default async function CampRegisterPage() {
   const camps = await fetchRegisterablePublicCamps();
 
-  if (camps.length === 1) {
+  // Only bypass the selector when there's exactly one camp and it's actually open.
+  // A draft ("coming soon") camp should still show the selector so parents see the preview.
+  if (camps.length === 1 && camps[0].registrationStatus !== "opening-soon") {
     redirect(camps[0].registerPath);
   }
 
-  if (camps.length > 1) {
+  if (camps.length > 0) {
     return <CampRegisterSelector camps={camps} />;
   }
 

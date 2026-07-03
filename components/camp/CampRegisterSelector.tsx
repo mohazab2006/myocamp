@@ -22,6 +22,9 @@ function statusLabel(camp: PublicCamp): { text: string; tone: string } {
   if (camp.registrationStatus === "full") {
     return { text: "Full — join waitlist", tone: "bg-camp-bark text-camp-paper" };
   }
+  if (camp.registrationStatus === "opening-soon") {
+    return { text: "Coming soon", tone: "bg-camp-flame text-camp-paper" };
+  }
   return { text: camp.registrationStatus, tone: "bg-camp-bark/70 text-camp-paper" };
 }
 
@@ -37,6 +40,17 @@ export function CampRegisterSelector({ camps }: CampRegisterSelectorProps) {
         ? "md:grid-cols-2"
         : "md:grid-cols-2 lg:grid-cols-3";
 
+  const openCount = camps.filter((c) => c.registrationStatus === "open" || c.registrationStatus === "full").length;
+  const comingSoonCount = camps.filter((c) => c.registrationStatus === "opening-soon").length;
+  const hasMixed = openCount > 0 && comingSoonCount > 0;
+  const allComingSoon = openCount === 0 && comingSoonCount > 0;
+
+  const sessionSummary = hasMixed
+    ? `${openCount} open · ${comingSoonCount} coming soon`
+    : allComingSoon
+      ? `${comingSoonCount} session${comingSoonCount === 1 ? "" : "s"} coming soon`
+      : `${openCount} session${openCount === 1 ? "" : "s"} open · tap a card to continue`;
+
   return (
     <>
       <section className="topo-bg relative isolate overflow-hidden bg-camp-paper">
@@ -49,14 +63,15 @@ export function CampRegisterSelector({ camps }: CampRegisterSelectorProps) {
               <span className="scribble-underline">registering for?</span>
             </h1>
             <p className="mt-6 max-w-[58ch] text-lg leading-relaxed text-camp-ink/85">
-              More than one session is open right now. Choose which camp you&apos;re registering for —
-              each session has its own form, reference code, and payment link.
+              {hasMixed
+                ? "One session is open now and another is coming soon. Register for the open session, or tap a coming-soon card to see details."
+                : allComingSoon
+                  ? "Registration isn't open yet, but here's what's coming this summer. Check back soon — we'll open registration right here."
+                  : "More than one session is open right now. Choose which camp you're registering for — each session has its own form, reference code, and payment link."}
             </p>
             <div className="mt-8 flex items-center gap-3 text-camp-bark/70">
               <Compass size={28} weight="duotone" className="shrink-0 text-camp-flame" />
-              <p className="font-script text-xl">
-                {camps.length} session{camps.length === 1 ? "" : "s"} open · tap a card to continue
-              </p>
+              <p className="font-script text-xl">{sessionSummary}</p>
             </div>
           </div>
 
@@ -164,7 +179,7 @@ export function CampRegisterSelector({ camps }: CampRegisterSelectorProps) {
 
                       <p className="mt-3 flex-1 text-sm leading-relaxed text-camp-ink/80">
                         ${camp.feePerCamper.toFixed(0)} per camper
-                        {isWaitlist ? " · waitlist only" : isOpen ? " · spots available" : ""}
+                        {isWaitlist ? " · waitlist only" : isOpen ? " · spots available" : camp.registrationStatus === "opening-soon" ? " · registration opening soon" : ""}
                         {camp.registrationClosesAt
                           ? ` · closes ${new Date(camp.registrationClosesAt).toLocaleDateString("en-CA", {
                               month: "short",
