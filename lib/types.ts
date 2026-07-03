@@ -85,7 +85,7 @@ export interface SiteSettings {
 // Camps + registrations + payments (0002 schema)
 // =============================================================================
 
-export type CampStatus = "draft" | "open" | "full" | "closed" | "archived";
+export type CampStatus = "draft" | "coming-soon" | "open" | "full" | "closed" | "archived";
 
 export interface Camp {
   id: string;

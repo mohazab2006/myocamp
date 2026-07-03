@@ -60,6 +60,8 @@ function mapStatus(status: CampStatus, activeCamperCount: number, capacity: numb
       return "closed";
     case "archived":
       return "closed";
+    case "coming-soon":
+      return "opening-soon";
     case "draft":
     default:
       return "opening-soon";
@@ -111,7 +113,7 @@ async function enrichPublicCamps(rows: CampRow[]): Promise<PublicCamp[]> {
 }
 
 function isPubliclyJoinable(camp: PublicCamp): boolean {
-  if (camp.status === "draft") return true; // show as "coming soon"
+  if (camp.status === "coming-soon") return true; // show as "coming soon"
   if (camp.status === "open" || camp.status === "full") return true;
   if (camp.status === "closed" && isCampAtCapacity(camp) && camp.waitlistFormJotformId) {
     return true;
@@ -130,7 +132,7 @@ export async function fetchPublicCampBySlug(slug: string): Promise<PublicCamp | 
 
   if (error || !data) return null;
   const row = data as CampRow;
-  if (row.status === "archived") return null;
+  if (row.status === "archived" || row.status === "draft") return null;
   const count = await countActiveCampers(row.id);
   return rowToPublicCamp(row, count);
 }
@@ -144,7 +146,7 @@ export async function fetchRegisterablePublicCamps(): Promise<PublicCamp[]> {
   const { data, error } = await supabase
     .from("camps")
     .select("*")
-    .in("status", ["draft", "open", "full", "closed"])
+    .in("status", ["coming-soon", "open", "full", "closed"])
     .order("start_date", { ascending: true });
 
   if (error || !data) return [];

@@ -151,7 +151,7 @@ create table if not exists public.camps (
   slug                            text        unique not null,
   title                           text        not null,
   status                          text        not null default 'draft'
-                                              check (status in ('draft', 'open', 'full', 'closed', 'archived')),
+                                              check (status in ('draft', 'coming-soon', 'open', 'full', 'closed', 'archived')),
   capacity                        integer,
   start_date                      date        not null,
   end_date                        date        not null,

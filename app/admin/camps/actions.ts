@@ -175,11 +175,11 @@ export async function deleteCampAction(formData: FormData) {
   // Safety: confirm there's no data we'd nuke. If there is, refuse and tell the
   // owner to archive instead.
   const existing = slug ? await fetchCampBySlug(slug) : null;
-  if (existing && existing.status !== "archived" && existing.status !== "draft") {
+  if (existing && existing.status !== "archived" && existing.status !== "draft" && existing.status !== "coming-soon") {
     flash(
       `/admin/camps/${slug}`,
       "error",
-      "Active camps can't be hard-deleted. Archive it first, or change its status to Draft."
+      "Active camps can't be hard-deleted. Archive it first, or change its status to Draft or Coming Soon."
     );
   }
 

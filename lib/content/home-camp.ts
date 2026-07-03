@@ -63,7 +63,7 @@ function buildCampDates(
   legacy: CampSettings,
   events: OrgEvent[]
 ): HomeCampDate[] {
-  const visible = camps.filter((c) => c.status !== "archived");
+  const visible = camps.filter((c) => c.status !== "archived" && c.status !== "draft");
   if (visible.length === 0) return legacyCampDates(legacy, events);
 
   return visible.map((camp) => ({
@@ -130,7 +130,7 @@ export async function getHomeCampSnapshot() {
 
   const openCamps = registerable.filter(isRegisterable);
   const publishedCampSlugs = new Set(
-    allCamps.filter((c) => c.status !== "archived").map((c) => c.slug)
+    allCamps.filter((c) => c.status !== "archived" && c.status !== "draft").map((c) => c.slug)
   );
   const campDates = buildCampDates(allCamps, legacy, events);
   const bigNews = buildBigNews(openCamps, legacy, events);

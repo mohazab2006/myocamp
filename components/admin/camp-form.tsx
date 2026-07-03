@@ -9,15 +9,12 @@ import type { Camp } from "@/lib/types";
 import { createCampAction, updateCampAction } from "@/app/admin/camps/actions";
 
 const statusOptions: { value: Camp["status"]; label: string; hint: string }[] = [
-  { value: "draft", label: "Draft", hint: "Not visible on the public site yet." },
+  { value: "draft", label: "Draft", hint: "Private — not visible on the public site at all." },
+  { value: "coming-soon", label: "Coming Soon", hint: "Shows publicly with all details (dates, fee, age) — no registration form yet." },
   { value: "open", label: "Open", hint: "Registration form is live on /camp." },
   { value: "full", label: "Full", hint: "Registration closed; waitlist form is live." },
   { value: "closed", label: "Closed", hint: "Registration closed. Waitlist stays open if the camp is at capacity." },
-  {
-    value: "archived",
-    label: "Archived",
-    hint: "Past camp, kept for records. Not shown on /camp."
-  }
+  { value: "archived", label: "Archived", hint: "Past camp, kept for records. Not shown on /camp." }
 ];
 
 type CampFormProps = {

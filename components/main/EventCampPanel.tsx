@@ -7,6 +7,7 @@ import { ButtonLink } from "@/components/main/Button";
 const statusLabels: Record<PublicCamp["status"], string> = {
   open: "Registration open",
   full: "Waitlist open",
+  "coming-soon": "Coming soon",
   closed: "Registration closed",
   draft: "Opening soon",
   archived: "Archived"

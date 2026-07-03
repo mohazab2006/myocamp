@@ -45,6 +45,7 @@ type AdminCampDetailSearch = Promise<{
 const statusStyle: Record<Camp["status"], string> = {
   open: "border-pine/40 bg-sky/55 text-forest",
   full: "border-brass/40 bg-brass/15 text-ink",
+  "coming-soon": "border-brass/40 bg-brass/10 text-brass",
   draft: "border-line bg-paper-deep/60 text-ink-soft",
   closed: "border-line bg-paper-deep/60 text-ink-soft",
   archived: "border-line bg-paper-deep/30 text-ink-soft"
