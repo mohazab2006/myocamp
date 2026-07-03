@@ -78,7 +78,7 @@ export default async function CampHome() {
                 {
                   title: "LIT leadership track",
                   dates: litRange ?? "July 23–26, 2026",
-                  body: "Ages 17–19. Lighter logistics, more responsibility — meals, activity planning, and waking yourselves up. Some LITs may graduate into counsellor roles for main camp."
+                  body: "Ages 15+. Lighter logistics, more responsibility — meals, activity planning, and waking yourselves up. Some LITs may graduate into counsellor roles for main camp."
                 },
                 {
                   title: "Main camp · core program",
