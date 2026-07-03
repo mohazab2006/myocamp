@@ -16,10 +16,8 @@ import { getPublicCampContext } from "@/lib/content/camps-public";
 import { formatRange, formatRangeNoYear } from "@/lib/date";
 
 export default async function CampHome() {
-  const { legacy: camp, primary } = await getPublicCampContext();
-  const mainStart = primary?.startDate ?? camp.campStart;
-  const mainEnd = primary?.endDate ?? camp.campEnd;
-  const mainRange = formatRangeNoYear(mainStart, mainEnd);
+  const { legacy: camp } = await getPublicCampContext();
+  const mainRange = formatRangeNoYear(camp.campStart, camp.campEnd);
   const litRange =
     camp.litStart && camp.litEnd
       ? formatRangeNoYear(camp.litStart, camp.litEnd)
