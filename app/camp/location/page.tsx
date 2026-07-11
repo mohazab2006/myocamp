@@ -37,13 +37,13 @@ export default async function CampLocationPage() {
                 <span className="text-camp-flame">Eganville.</span>
               </h1>
               <p className="mt-6 max-w-[58ch] text-lg leading-relaxed text-camp-ink/85">
-                About two hours west of Ottawa. The drive in is mostly highway, then a long quiet road past Lac
+                About an hour and twenty minutes west of Ottawa. The drive in is mostly highway, then a long quiet road past Lac
                 des Loups. You&apos;ll know you&apos;re close when the cell signal drops.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 {[
-                  { stat: "~2 hr", label: "from Ottawa" },
-                  { stat: "210 km", label: "city centre" },
+                  { stat: "~1 hr 20 min", label: "from Ottawa" },
+                  { stat: "120 km", label: "city centre" },
                   { stat: "Patchy", label: "phone signal" }
                 ].map((item) => (
                   <div
@@ -105,7 +105,7 @@ export default async function CampLocationPage() {
               <div className="font-script text-2xl text-camp-flame">the actual address</div>
               <h2 className="font-camp mt-2 text-4xl text-camp-bark md:text-5xl">98 Mink Lake Road</h2>
               <p className="mt-2 text-lg text-camp-ink/80">Eganville, Ontario</p>
-              <p className="mt-1 text-sm text-camp-ink/65">~210 km from Ottawa city centre</p>
+              <p className="mt-1 text-sm text-camp-ink/65">~120 km from Ottawa city centre</p>
               <a
                 href="https://maps.google.com/?q=Camp+Smitty+98+Mink+Lake+Rd+Eganville"
                 target="_blank"

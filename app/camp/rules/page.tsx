@@ -22,7 +22,7 @@ export default function CampRulesPage() {
             <div className="font-script text-2xl text-camp-flame">cabin rules · packing list</div>
             <h1 className="font-camp mt-2 text-6xl leading-[0.92] text-camp-bark md:text-8xl">
               Read this twice<br />
-              <span className="text-camp-flame">before Sunday.</span>
+              <span className="text-camp-flame">before you come.</span>
             </h1>
             <p className="mt-6 max-w-[60ch] text-lg leading-relaxed text-camp-ink/85">
               Clear expectations make the week easier on everyone — campers, parents, counsellors. Most of
