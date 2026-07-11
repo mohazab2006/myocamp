@@ -489,6 +489,27 @@ We'll send drop-off details closer to the date. Reply to this email if anything 
 
 — MYO Camp$$
   )
+  (
+    'invoice_updated',
+    'Invoice updated',
+    'Sent manually when an admin changes the fee for one or more campers on a registration.',
+    'Your MYO Camp invoice has been updated · {{ref}}',
+    $$Hi {{parent_name}},
+
+We've updated the invoice for **{{camper_name}}**'s registration at **{{camp_title}}** ({{camp_dates}}).
+
+**Updated total: {{new_amount}} CAD**
+
+Your payment link is the same as before:
+
+[Pay now →]({{payment_url}})
+
+Reference: **{{ref}}**
+
+If you've already paid part of the original amount, reply to this email and we'll sort it out.
+
+— MYO Camp$$
+  )
 on conflict (slug) do nothing;
 
 commit;

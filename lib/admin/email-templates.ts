@@ -7,7 +7,8 @@ export type EmailTemplateSlug =
   | "payment_followup"
   | "invoice_reminder"
   | "waitlist_promoted"
-  | "payment_confirmation";
+  | "payment_confirmation"
+  | "invoice_updated";
 
 export interface EmailTemplate {
   slug: EmailTemplateSlug;
@@ -92,6 +93,15 @@ export const TEMPLATE_PLACEHOLDERS: Record<EmailTemplateSlug, string[]> = {
     "ref",
     "amount_paid",
     "payment_method"
+  ],
+  invoice_updated: [
+    "parent_name",
+    "camper_name",
+    "camp_title",
+    "camp_dates",
+    "ref",
+    "new_amount",
+    "payment_url"
   ]
 };
 

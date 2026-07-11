@@ -343,6 +343,28 @@ export const notify = {
     });
   },
 
+  /** Sent when admin updates per-camper fees on a registration. */
+  async invoiceUpdated(ctx: RegistrationContext): Promise<SendResult> {
+    const paymentUrl = buildPaymentUrl(ctx.invoice.referenceCode, ctx.origin);
+    return dispatch({
+      slug: "invoice_updated",
+      reminderNumber: "invoice_updated" as never,
+      trigger: "manual",
+      recipient: ctx.registration.parentEmail,
+      invoiceId: ctx.invoice.id,
+      registrationId: ctx.registration.id,
+      values: {
+        parent_name: ctx.registration.parentName ?? "there",
+        camper_name: firstCamperName(ctx.registration),
+        camp_title: ctx.camp.title,
+        camp_dates: formatDateRange(ctx.camp.startDate, ctx.camp.endDate),
+        ref: ctx.invoice.referenceCode,
+        new_amount: formatMoney(ctx.invoice.amountDue),
+        payment_url: paymentUrl
+      }
+    });
+  },
+
   /** Sent when an invoice flips to paid. */
   async paymentConfirmation(
     ctx: RegistrationContext,

@@ -33,6 +33,7 @@ import {
   sendRegistrationEmailAction,
   toggleCashReceivedAction,
   toggleRemindersPausedAction,
+  updateCamperFeesAction,
   updateRegistrationDetailsAction,
   voidPaymentAction
 } from "../actions";
@@ -144,7 +145,12 @@ export default async function AdminRegistrationDetailPage({
 
           <DetailsForm slug={slug} registration={registration} />
 
-          <CampersCard registration={registration} />
+          <CampersCard
+            slug={slug}
+            registration={registration}
+            invoice={invoice}
+            standardFee={camp.feePerCamper}
+          />
         </div>
 
         {/* Right column: invoice tools */}
@@ -588,10 +594,20 @@ function DetailsForm({ slug, registration }: { slug: string; registration: Regis
 }
 
 // ---------------------------------------------------------------------------
-// Campers
+// Campers + per-camper fee editor
 // ---------------------------------------------------------------------------
 
-function CampersCard({ registration }: { registration: Registration }) {
+function CampersCard({
+  slug,
+  registration,
+  invoice,
+  standardFee
+}: {
+  slug: string;
+  registration: Registration;
+  invoice: Invoice | null;
+  standardFee: number;
+}) {
   if (registration.campers.length === 0) {
     return (
       <div className="border border-dashed border-line bg-paper-deep/15 p-5 text-sm text-ink-soft">
@@ -599,19 +615,97 @@ function CampersCard({ registration }: { registration: Registration }) {
       </div>
     );
   }
+
+  const currentTotal = registration.campers.reduce(
+    (sum, c) => sum + (c.customFee ?? standardFee),
+    0
+  );
+
   return (
     <div className="border border-line bg-paper p-5">
       <p className="eyebrow text-brass">Campers</p>
-      <ul className="mt-3 grid gap-2 md:grid-cols-2">
-        {registration.campers.map((c, idx) => (
-          <li key={idx} className="border border-line bg-paper-deep/35 p-3 text-sm text-ink">
-            <p className="font-semibold">{c.name ?? `Camper ${idx + 1}`}</p>
-            {c.age != null ? <p className="text-xs text-ink-soft">Age {c.age}</p> : null}
-            {c.allergies ? <p className="mt-1 text-xs text-ink-soft">Allergies: {c.allergies}</p> : null}
-            {c.medical ? <p className="text-xs text-ink-soft">Medical: {c.medical}</p> : null}
-          </li>
-        ))}
-      </ul>
+      <h3 className="mt-2 font-display text-xl tracking-tight text-ink">Fees per camper</h3>
+      <p className="mt-1 text-xs leading-relaxed text-ink-soft">
+        Standard fee: <strong className="text-ink">{fmt(standardFee)}</strong>. Change a camper's
+        fee below to apply a discount. Leave at standard to remove a custom fee.
+      </p>
+
+      <form action={updateCamperFeesAction} className="mt-4 space-y-4">
+        <input type="hidden" name="slug" value={slug} />
+        <input type="hidden" name="registrationId" value={registration.id} />
+        {invoice ? <input type="hidden" name="invoiceId" value={invoice.id} /> : null}
+        <input type="hidden" name="camperCount" value={registration.campers.length} />
+        <input type="hidden" name="standardFee" value={standardFee} />
+
+        <ul className="grid gap-3 md:grid-cols-2">
+          {registration.campers.map((c, idx) => (
+            <li key={idx} className="border border-line bg-paper-deep/35 p-3">
+              <p className="text-sm font-semibold text-ink">{c.name ?? `Camper ${idx + 1}`}</p>
+              {c.age != null ? (
+                <p className="text-xs text-ink-soft">Age {c.age}</p>
+              ) : null}
+              {c.allergies ? (
+                <p className="mt-0.5 text-xs text-ink-soft">Allergies: {c.allergies}</p>
+              ) : null}
+              {c.medical ? (
+                <p className="text-xs text-ink-soft">Medical: {c.medical}</p>
+              ) : null}
+              <div className="mt-2">
+                <AdminField
+                  label="Fee (CAD)"
+                  hint={
+                    c.customFee != null && c.customFee !== standardFee
+                      ? `Custom · standard is ${fmt(standardFee)}`
+                      : `Standard · set lower for a discount`
+                  }
+                >
+                  <input
+                    name={`fee_${idx}`}
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    defaultValue={c.customFee ?? standardFee}
+                    className={adminInputClass}
+                  />
+                </AdminField>
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        <div className="border-t border-line/60 pt-3 text-sm">
+          <span className="text-ink-soft">Current total:</span>{" "}
+          <strong className="text-ink">{fmt(currentTotal)}</strong>
+          {invoice && invoice.amountDue !== currentTotal ? (
+            <span className="ml-2 text-xs text-ink-soft">
+              (invoice shows {fmt(invoice.amountDue)} — save to sync)
+            </span>
+          ) : null}
+        </div>
+
+        <label className="inline-flex items-center gap-2 text-xs text-ink-soft">
+          <input
+            type="checkbox"
+            name="sendEmail"
+            value="1"
+            defaultChecked
+            className="h-4 w-4 accent-pine"
+          />
+          Email parent about updated invoice amount
+        </label>
+
+        {invoice ? (
+          <AdminSubmitButton
+            idleLabel="Save fees"
+            pendingLabel="Saving…"
+            variant="secondary"
+          />
+        ) : (
+          <p className="text-xs text-ember">
+            No invoice on file — fees cannot be saved yet.
+          </p>
+        )}
+      </form>
     </div>
   );
 }

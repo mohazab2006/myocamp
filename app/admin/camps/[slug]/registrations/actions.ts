@@ -11,6 +11,7 @@ import {
   createRegistrationWithInvoice,
   fetchRegistrationById,
   reactivateRegistration,
+  updateCamperCustomFees,
   updateRegistrationContact,
   updateRegistrationNotes
 } from "@/lib/admin/registrations";
@@ -467,6 +468,63 @@ export async function voidPaymentAction(formData: FormData) {
   revalidatePath(`/admin/camps/${slug}`);
   revalidatePath(regUrl(slug, registrationId));
   flash(regUrl(slug, registrationId, "payments"), "success", "Payment voided.");
+}
+
+// ---------------------------------------------------------------------------
+// Update per-camper fees + optionally email the parent
+// ---------------------------------------------------------------------------
+
+export async function updateCamperFeesAction(formData: FormData) {
+  await requireAuthorizedAdmin();
+
+  const slug = value(formData, "slug");
+  const registrationId = value(formData, "registrationId");
+  const invoiceId = value(formData, "invoiceId");
+  const camperCount = numberOrNull(formData, "camperCount") ?? 0;
+  const standardFee = numberOrNull(formData, "standardFee") ?? 0;
+  const sendEmail = formData.get("sendEmail") === "1";
+
+  if (!registrationId || !invoiceId) {
+    flash(regUrl(slug, registrationId), "error", "Missing registration or invoice id.");
+  }
+
+  const fees: (number | null)[] = [];
+  for (let i = 0; i < camperCount; i++) {
+    const raw = numberOrNull(formData, `fee_${i}`);
+    fees.push(raw !== null && raw !== standardFee ? raw : null);
+  }
+
+  try {
+    await updateCamperCustomFees(registrationId, invoiceId, fees, standardFee);
+    await recomputeInvoiceTotals(invoiceId);
+  } catch (err) {
+    flash(
+      regUrl(slug, registrationId),
+      "error",
+      err instanceof Error ? err.message : "Could not update fees."
+    );
+  }
+
+  if (sendEmail) {
+    try {
+      const ctx = await loadRegistrationContextByInvoice(invoiceId);
+      if (ctx) {
+        void notify
+          .invoiceUpdated(ctx)
+          .catch((err) => console.warn("[updateCamperFeesAction] notify failed:", err));
+      }
+    } catch (err) {
+      console.warn("[updateCamperFeesAction] notify lookup failed:", err);
+    }
+  }
+
+  revalidatePath(`/admin/camps/${slug}`);
+  revalidatePath(regUrl(slug, registrationId));
+  flash(
+    regUrl(slug, registrationId),
+    "success",
+    sendEmail ? "Fees updated and parent notified by email." : "Fees updated."
+  );
 }
 
 // ---------------------------------------------------------------------------

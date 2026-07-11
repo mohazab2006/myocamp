@@ -371,3 +371,52 @@ export async function updateRegistrationNotes(id: string, notes: string | null):
     .eq("id", id);
   if (error) throw new Error(error.message);
 }
+
+/**
+ * Update per-camper custom fees on a registration and recalculate the invoice
+ * amount_due. Pass null for a camper's fee to revert to the camp standard fee.
+ * Returns the new amount_due.
+ */
+export async function updateCamperCustomFees(
+  registrationId: string,
+  invoiceId: string,
+  /** Map of camper index → custom fee (null = use standard fee) */
+  fees: (number | null)[],
+  standardFeePerCamper: number
+): Promise<number> {
+  const supabase = createSupabaseAdminClient();
+
+  const { data: regRow, error: regErr } = await supabase
+    .from("registrations")
+    .select("campers")
+    .eq("id", registrationId)
+    .maybeSingle();
+  if (regErr || !regRow) throw new Error(regErr?.message ?? "Registration not found.");
+
+  const campers = (regRow.campers as CamperInfo[]).map((c, i) => {
+    const fee = fees[i] ?? null;
+    if (fee !== null) return { ...c, customFee: fee };
+    const { customFee: _removed, ...rest } = c;
+    void _removed;
+    return rest as CamperInfo;
+  });
+
+  const newAmountDue = campers.reduce(
+    (sum, c) => sum + (c.customFee ?? standardFeePerCamper),
+    0
+  );
+
+  const { error: regUpdateErr } = await supabase
+    .from("registrations")
+    .update({ campers })
+    .eq("id", registrationId);
+  if (regUpdateErr) throw new Error(regUpdateErr.message);
+
+  const { error: invErr } = await supabase
+    .from("invoices")
+    .update({ amount_due: newAmountDue })
+    .eq("id", invoiceId);
+  if (invErr) throw new Error(invErr.message);
+
+  return newAmountDue;
+}

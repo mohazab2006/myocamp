@@ -35,7 +35,8 @@ const TEMPLATE_SLUGS: EmailTemplateSlug[] = [
   "payment_followup",
   "invoice_reminder",
   "waitlist_promoted",
-  "payment_confirmation"
+  "payment_confirmation",
+  "invoice_updated"
 ];
 
 const SAMPLE_VALUES: Record<EmailTemplateSlug, Record<string, string>> = {
@@ -86,6 +87,15 @@ const SAMPLE_VALUES: Record<EmailTemplateSlug, Record<string, string>> = {
     ref: "MYO-2026-A7X2",
     amount_paid: "$325.00",
     payment_method: "Interac e-Transfer"
+  },
+  invoice_updated: {
+    parent_name: "Sarah Patel",
+    camper_name: "Omar Patel",
+    camp_title: "Main Camp 2026",
+    camp_dates: "July 6 – July 12, 2026",
+    ref: "MYO-2026-A7X2",
+    new_amount: "$200.00",
+    payment_url: "https://myo.camp/camp/pay/MYO-2026-A7X2"
   }
 };
 

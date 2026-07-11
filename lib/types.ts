@@ -128,6 +128,7 @@ export interface CamperInfo {
   age?: number | string;
   allergies?: string;
   medical?: string;
+  customFee?: number;
   [key: string]: unknown;
 }
 
