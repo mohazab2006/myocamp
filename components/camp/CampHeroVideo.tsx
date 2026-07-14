@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-const VIDEO_SRC = "/Pictures/MYO%20New%20Camps.mp4";
+const VIDEO_SRC = "https://pub-44fc3accd09344768f1d772ac3cc9ad2.r2.dev/MYO%20New%20Camps.mp4";
 
 type CampVideoProps = {
   videoRef: React.RefObject<HTMLVideoElement | null>;
