@@ -22,7 +22,7 @@ import { fetchGmailCredentials } from "@/lib/admin/gmail";
 import { fetchInboundEmails, reconcileOrphanedInboundMatches } from "@/lib/admin/inbound-emails";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { InboundEmail, InboundEmailMatchStatus } from "@/lib/types";
-import { matchInboundEmailAction, dismissUnrelatedInboundAction, markNotPaymentAction, removeInboundFromQueueAction, clearStaleMatchedAction } from "./actions";
+import { matchInboundEmailAction, dismissUnrelatedInboundAction, markNotPaymentAction, removeInboundFromQueueAction, clearStaleMatchedAction, relinkOrphanedMatchAction } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -497,7 +497,23 @@ function EmailCard({
         ) : null}
       </div>
 
-      {canMatchManually ? (
+      {email.matchStatus === "not_payment" &&
+      email.errorMessage === "Linked camp or registration was removed." ? (
+        <footer className="border-t border-line/60 bg-brass/10 px-5 py-4">
+          <p className="text-xs leading-relaxed text-ink">
+            <strong>Payment already recorded.</strong> This email was wrongly flagged — the payment
+            is correctly applied on the registration. Click Re-link to fix the inbox display.
+          </p>
+          <form action={relinkOrphanedMatchAction} className="mt-3">
+            <input type="hidden" name="inboundId" value={email.id} />
+            <AdminSubmitButton
+              idleLabel="Re-link to existing payment"
+              pendingLabel="Re-linking…"
+              icon={<CheckCircle size={14} weight="bold" />}
+            />
+          </form>
+        </footer>
+      ) : canMatchManually ? (
         <footer className="border-t border-line/60 bg-paper-deep/15 px-5 py-4">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-ink-soft">
             Match to invoice
@@ -553,6 +569,7 @@ function EmailCard({
           Matched to a registration payment — open the camp registration to void if needed.
         </footer>
       ) : null}
+
     </article>
   );
 }

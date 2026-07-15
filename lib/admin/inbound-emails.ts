@@ -628,12 +628,24 @@ export async function reconcileOrphanedInboundMatches(): Promise<number> {
     }
 
     if (!orphan && row.parsed_reference_code) {
-      const { data: refInvoice } = await supabase
-        .from("invoices")
-        .select("id")
-        .eq("reference_code", row.parsed_reference_code)
-        .maybeSingle();
-      if (!refInvoice) orphan = true;
+      // parsed_reference_code may be comma-separated for multi-kid e-transfers
+      const codes = row.parsed_reference_code
+        .split(",")
+        .map((c) => c.trim())
+        .filter(Boolean);
+      let anyFound = false;
+      for (const code of codes) {
+        const { data: refInvoice } = await supabase
+          .from("invoices")
+          .select("id")
+          .eq("reference_code", code)
+          .maybeSingle();
+        if (refInvoice) {
+          anyFound = true;
+          break;
+        }
+      }
+      if (!anyFound) orphan = true;
     }
 
     if (!orphan) continue;

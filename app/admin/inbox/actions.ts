@@ -11,8 +11,10 @@ import {
   fetchInboundEmailById,
   markInboundEmailNotPayment,
   matchInboundEmailToInvoice,
-  reconcileOrphanedInboundMatches
+  reconcileOrphanedInboundMatches,
+  updateInboundEmailMatch
 } from "@/lib/admin/inbound-emails";
+import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import { findByReferenceCode } from "@/lib/admin/payment-links";
 
 function flash(base: string, type: "success" | "error" | "info", message: string): never {
@@ -112,6 +114,48 @@ export async function dismissUnrelatedInboundAction() {
   }
 
   flash("/admin/inbox?tab=unmatched", outcome.type, outcome.message);
+}
+
+/**
+ * Re-link an inbox email that was wrongly marked as "not_payment" by the
+ * reconcile bug (multi-ref-code e-transfers). Finds the payment already
+ * recorded via this email's Gmail message ID and re-links it.
+ */
+export async function relinkOrphanedMatchAction(formData: FormData) {
+  await requireAuthorizedAdmin();
+  const inboundId = value(formData, "inboundId");
+  if (!inboundId) flash("/admin/inbox?tab=all", "error", "Missing inbound id.");
+
+  const email = await fetchInboundEmailById(inboundId);
+  if (!email) flash("/admin/inbox?tab=all", "error", "Email not found.");
+
+  const supabase = createSupabaseAdminClient();
+  const { data: payment } = await supabase
+    .from("payments")
+    .select("id")
+    .eq("external_ref", email!.gmailMessageId)
+    .maybeSingle();
+
+  if (!payment) {
+    flash(
+      "/admin/inbox?tab=all",
+      "error",
+      "No payment found for this email — the payment may not have been recorded yet. Match it manually from Needs match."
+    );
+  }
+
+  try {
+    await updateInboundEmailMatch(inboundId, {
+      matchStatus: "matched",
+      matchedPaymentId: (payment as { id: string }).id,
+      errorMessage: null
+    });
+  } catch (err) {
+    flash("/admin/inbox?tab=all", "error", err instanceof Error ? err.message : "Could not re-link.");
+  }
+
+  revalidatePath("/admin/inbox");
+  flash("/admin/inbox?tab=matched", "success", "Re-linked to the existing payment record.");
 }
 
 export async function clearStaleMatchedAction() {
