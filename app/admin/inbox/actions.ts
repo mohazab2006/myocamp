@@ -117,9 +117,9 @@ export async function dismissUnrelatedInboundAction() {
 }
 
 /**
- * Re-link an inbox email that was wrongly marked as "not_payment" by the
- * reconcile bug (multi-ref-code e-transfers). Finds the payment already
- * recorded via this email's Gmail message ID and re-links it.
+ * Re-link an inbox email that was wrongly flagged as orphaned.
+ * First tries by Gmail message ID (auto-matched payments), then falls back to
+ * searching by reference code → invoice → most recent payment (for manually-recorded ones).
  */
 export async function relinkOrphanedMatchAction(formData: FormData) {
   await requireAuthorizedAdmin();
@@ -130,17 +130,49 @@ export async function relinkOrphanedMatchAction(formData: FormData) {
   if (!email) flash("/admin/inbox?tab=all", "error", "Email not found.");
 
   const supabase = createSupabaseAdminClient();
-  const { data: payment } = await supabase
+
+  // 1. Try by Gmail message ID (set on auto-matched payments as external_ref).
+  let payment: { id: string } | null = null;
+  const { data: byGmailRef } = await supabase
     .from("payments")
     .select("id")
     .eq("external_ref", email!.gmailMessageId)
     .maybeSingle();
+  payment = byGmailRef;
+
+  // 2. Fall back: look up via reference code → invoice → most recent payment.
+  //    Covers manually-recorded payments (which don't set external_ref = gmailMessageId).
+  if (!payment && email!.parsedReferenceCode) {
+    const refCodes = email!.parsedReferenceCode
+      .split(",")
+      .map((c) => c.trim())
+      .filter(Boolean);
+    for (const code of refCodes) {
+      const { data: inv } = await supabase
+        .from("invoices")
+        .select("id")
+        .eq("reference_code", code)
+        .maybeSingle();
+      if (!inv) continue;
+      const { data: pmt } = await supabase
+        .from("payments")
+        .select("id")
+        .eq("invoice_id", inv.id)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (pmt) {
+        payment = pmt;
+        break;
+      }
+    }
+  }
 
   if (!payment) {
     flash(
       "/admin/inbox?tab=all",
       "error",
-      "No payment found for this email — the payment may not have been recorded yet. Match it manually from Needs match."
+      "No payment found for this email. If you recorded the payment manually on the registration, click \"Confirm handled\" to dismiss this notice."
     );
   }
 
@@ -156,6 +188,35 @@ export async function relinkOrphanedMatchAction(formData: FormData) {
 
   revalidatePath("/admin/inbox");
   flash("/admin/inbox?tab=matched", "success", "Re-linked to the existing payment record.");
+}
+
+/**
+ * Dismiss the orphan warning for an inbox email whose payment was recorded directly
+ * on the registration (not via the inbox match flow). Clears the error notice while
+ * keeping the email visible in All for the audit trail.
+ */
+export async function confirmHandledAction(formData: FormData) {
+  await requireAuthorizedAdmin();
+  const inboundId = value(formData, "inboundId");
+  if (!inboundId) flash("/admin/inbox?tab=all", "error", "Missing inbound id.");
+
+  const supabase = createSupabaseAdminClient();
+  const { error } = await supabase
+    .from("inbound_emails")
+    .update({
+      error_message: "Confirmed handled by admin — payment recorded directly on the registration.",
+      processed_at: new Date().toISOString()
+    })
+    .eq("id", inboundId);
+
+  if (error) flash("/admin/inbox?tab=all", "error", error.message);
+
+  revalidatePath("/admin/inbox");
+  flash(
+    "/admin/inbox?tab=all",
+    "success",
+    "Marked as handled. Entry stays in All for your records."
+  );
 }
 
 export async function clearStaleMatchedAction() {

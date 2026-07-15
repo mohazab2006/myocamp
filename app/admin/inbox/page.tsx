@@ -22,7 +22,16 @@ import { fetchGmailCredentials } from "@/lib/admin/gmail";
 import { fetchInboundEmails, reconcileOrphanedInboundMatches } from "@/lib/admin/inbound-emails";
 import { createSupabaseAdminClient } from "@/lib/supabase/admin";
 import type { InboundEmail, InboundEmailMatchStatus } from "@/lib/types";
-import { matchInboundEmailAction, dismissUnrelatedInboundAction, markNotPaymentAction, removeInboundFromQueueAction, clearStaleMatchedAction, relinkOrphanedMatchAction } from "./actions";
+import {
+  matchInboundEmailAction,
+  dismissUnrelatedInboundAction,
+  markNotPaymentAction,
+  removeInboundFromQueueAction,
+  clearStaleMatchedAction,
+  relinkOrphanedMatchAction,
+  confirmHandledAction
+} from "./actions";
+import { CampFilterSelect } from "./CampFilterSelect";
 
 export const dynamic = "force-dynamic";
 
@@ -127,7 +136,13 @@ async function fetchRefToCampMap(): Promise<Map<string, string>> {
 
 function campForEmail(email: InboundEmail, refMap: Map<string, string>): string | null {
   if (!email.parsedReferenceCode) return null;
-  return refMap.get(email.parsedReferenceCode) ?? null;
+  // parsedReferenceCode may be comma-separated for multi-kid e-transfers
+  const codes = email.parsedReferenceCode.split(",").map((c) => c.trim()).filter(Boolean);
+  for (const code of codes) {
+    const camp = refMap.get(code);
+    if (camp) return camp;
+  }
+  return null;
 }
 
 function fmt(n: number) {
@@ -273,28 +288,19 @@ export default async function AdminInboxPage({
       </nav>
 
       {campNames.length > 0 || emails.some((e) => campForEmail(e, refMap) === null) ? (
-        <div className="mt-4 flex flex-wrap items-center gap-2">
-          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-soft">Camp</span>
-          {[
-            { key: "all", label: "All camps" },
-            ...campNames.map((name) => ({ key: name, label: name })),
-            { key: "unknown", label: "Unknown" }
-          ].map(({ key, label }) => {
-            const active = campFilter === key;
-            return (
-              <Link
-                key={key}
-                href={`/admin/inbox?tab=${tab}&camp=${encodeURIComponent(key)}`}
-                className={
-                  active
-                    ? "inline-flex h-7 items-center border border-line bg-paper px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink"
-                    : "inline-flex h-7 items-center border border-transparent px-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-ink-soft transition hover:border-line hover:text-ink"
-                }
-              >
-                {label}
-              </Link>
-            );
-          })}
+        <div className="mt-4 flex items-center gap-2">
+          <label
+            htmlFor="camp-filter"
+            className="text-[10px] font-semibold uppercase tracking-[0.18em] text-ink-soft"
+          >
+            Camp
+          </label>
+          <CampFilterSelect
+            campNames={campNames}
+            hasUnknown={emails.some((e) => campForEmail(e, refMap) === null)}
+            currentFilter={campFilter}
+            tab={tab}
+          />
         </div>
       ) : null}
 
@@ -501,17 +507,29 @@ function EmailCard({
       email.errorMessage === "Linked camp or registration was removed." ? (
         <footer className="border-t border-line/60 bg-brass/10 px-5 py-4">
           <p className="text-xs leading-relaxed text-ink">
-            <strong>Payment already recorded.</strong> This email was wrongly flagged — the payment
-            is correctly applied on the registration. Click Re-link to fix the inbox display.
+            <strong>Payment already recorded.</strong> This email was flagged when a camp or
+            registration was removed. If the payment is on the registration, use{" "}
+            <strong>Re-link</strong> to fix the inbox display, or{" "}
+            <strong>Confirm handled</strong> if you recorded it manually.
           </p>
-          <form action={relinkOrphanedMatchAction} className="mt-3">
-            <input type="hidden" name="inboundId" value={email.id} />
-            <AdminSubmitButton
-              idleLabel="Re-link to existing payment"
-              pendingLabel="Re-linking…"
-              icon={<CheckCircle size={14} weight="bold" />}
-            />
-          </form>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <form action={relinkOrphanedMatchAction}>
+              <input type="hidden" name="inboundId" value={email.id} />
+              <AdminSubmitButton
+                idleLabel="Re-link to existing payment"
+                pendingLabel="Re-linking…"
+                icon={<CheckCircle size={14} weight="bold" />}
+              />
+            </form>
+            <form action={confirmHandledAction}>
+              <input type="hidden" name="inboundId" value={email.id} />
+              <AdminSubmitButton
+                idleLabel="Confirm handled"
+                pendingLabel="Saving…"
+                variant="secondary"
+              />
+            </form>
+          </div>
         </footer>
       ) : canMatchManually ? (
         <footer className="border-t border-line/60 bg-paper-deep/15 px-5 py-4">
