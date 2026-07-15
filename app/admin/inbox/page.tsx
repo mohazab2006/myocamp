@@ -36,25 +36,30 @@ import { CampFilterSelect } from "./CampFilterSelect";
 export const dynamic = "force-dynamic";
 
 const tabs = [
-  { key: "unmatched", label: "Needs match" },
-  { key: "error", label: "Errors" },
+  { key: "all", label: "All" },
+  { key: "error", label: "Error" },
   { key: "matched", label: "Auto-matched" },
-  { key: "all", label: "All" }
+  { key: "unmatched", label: "Needs match" },
+  { key: "other", label: "Other" }
 ] as const;
 
 type TabKey = (typeof tabs)[number]["key"];
 
 function pickTab(value: string | undefined): TabKey {
-  if (value === "error" || value === "matched" || value === "all") return value;
-  return "unmatched";
+  if (value === "error" || value === "matched" || value === "unmatched" || value === "other")
+    return value;
+  return "all";
 }
 
 function statusesForTab(tab: TabKey): InboundEmailMatchStatus[] | undefined {
-  if (tab === "unmatched") return ["unmatched", "pending"];
   if (tab === "error") return ["error"];
   if (tab === "matched") return ["matched"];
+  if (tab === "unmatched") return ["unmatched", "pending"];
+  if (tab === "other") return ["not_payment", "duplicate"];
   return undefined; // all
 }
+
+const CAMP_FILTER_TABS: TabKey[] = ["all", "matched", "unmatched"];
 
 interface InvoiceCandidate {
   id: string;
@@ -207,19 +212,15 @@ export default async function AdminInboxPage({
         ? emails.filter((e) => campForEmail(e, refMap) === null)
         : emails.filter((e) => campForEmail(e, refMap) === campFilter);
 
-  const counts = {
-    unmatched: 0,
-    matched: 0,
-    error: 0,
-    all: 0
-  };
+  const counts = { all: 0, error: 0, matched: 0, unmatched: 0, other: 0 };
   // Cheap recount (single query) so the badges aren't tied to the active filter.
   const allEmails = await fetchInboundEmails({ limit: 500 });
   for (const e of allEmails) {
     counts.all += 1;
-    if (e.matchStatus === "unmatched" || e.matchStatus === "pending") counts.unmatched += 1;
+    if (e.matchStatus === "error") counts.error += 1;
     else if (e.matchStatus === "matched") counts.matched += 1;
-    else if (e.matchStatus === "error") counts.error += 1;
+    else if (e.matchStatus === "unmatched" || e.matchStatus === "pending") counts.unmatched += 1;
+    else counts.other += 1; // not_payment, duplicate, etc.
   }
 
   return (
@@ -287,7 +288,7 @@ export default async function AdminInboxPage({
         })}
       </nav>
 
-      {campNames.length > 0 || emails.some((e) => campForEmail(e, refMap) === null) ? (
+      {CAMP_FILTER_TABS.includes(tab) && campNames.length > 0 ? (
         <div className="mt-4 flex items-center gap-2">
           <label
             htmlFor="camp-filter"
@@ -297,7 +298,7 @@ export default async function AdminInboxPage({
           </label>
           <CampFilterSelect
             campNames={campNames}
-            hasUnknown={emails.some((e) => campForEmail(e, refMap) === null)}
+            hasUnknown={false}
             currentFilter={campFilter}
             tab={tab}
           />
@@ -318,7 +319,7 @@ export default async function AdminInboxPage({
       {tab === "unmatched" && counts.unmatched > 0 ? (
         <div className="mt-4 flex flex-wrap items-center gap-3 border border-line bg-paper-deep/35 px-4 py-3 text-sm text-ink-soft">
           <span>
-            Seeing personal e-Transfers? Clear items with no camp reference from this list.
+            Seeing personal e-Transfers in this list? Clear items with no camp reference.
           </span>
           <form action={dismissUnrelatedInboundAction}>
             <AdminSubmitButton idleLabel="Clear unrelated" variant="secondary" />
@@ -345,10 +346,10 @@ export default async function AdminInboxPage({
 
 function EmptyState({ tab }: { tab: TabKey }) {
   const copy: Record<TabKey, { icon: React.ReactNode; title: string; body: string }> = {
-    unmatched: {
-      icon: <CheckCircle size={28} weight="duotone" className="text-pine" />,
-      title: "Nothing waiting",
-      body: "All polled e-transfers were either auto-matched or aren't payments."
+    all: {
+      icon: <Info size={28} weight="duotone" className="text-pine" />,
+      title: "No emails polled yet",
+      body: "Connect Gmail and click Poll now in /admin/setup/gmail to start."
     },
     error: {
       icon: <CheckCircle size={28} weight="duotone" className="text-pine" />,
@@ -358,12 +359,17 @@ function EmptyState({ tab }: { tab: TabKey }) {
     matched: {
       icon: <Info size={28} weight="duotone" className="text-pine" />,
       title: "No auto-matches yet",
-      body: "Once parents send e-Transfers with the right reference code, they'll show up here."
+      body: "Once parents send e-Transfers with a MYO reference code, they'll show up here."
     },
-    all: {
-      icon: <Info size={28} weight="duotone" className="text-pine" />,
-      title: "No emails polled yet",
-      body: "Click 'Poll now' in /admin/setup/gmail to test."
+    unmatched: {
+      icon: <CheckCircle size={28} weight="duotone" className="text-pine" />,
+      title: "Nothing needs matching",
+      body: "All polled e-transfers were auto-matched or filtered out."
+    },
+    other: {
+      icon: <CheckCircle size={28} weight="duotone" className="text-pine" />,
+      title: "Nothing here",
+      body: "No personal transfers or unrelated emails on file."
     }
   };
   const c = copy[tab];
