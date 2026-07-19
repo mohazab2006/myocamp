@@ -77,8 +77,8 @@ function normalizeWhitespace(text: string): string {
 function cleanSenderName(raw: string | null): string | null {
   if (!raw) return null;
   let s = raw.trim();
-  // Drop stray trailing words like "has", "sent", noise.
-  s = s.replace(/\s+(has|sent|on|to|a money)\b.*$/i, "").trim();
+  // Drop trailing connector words and everything after: "and it has been…", "has been…", "sent you…"
+  s = s.replace(/\s+(and|has|sent|on|to|a money)\b.*$/i, "").trim();
   // Collapse whitespace.
   s = s.replace(/\s+/g, " ").trim();
   // Title-case all-caps names — "SAMIR ABDELRAHMAN" → "Samir Abdelrahman".

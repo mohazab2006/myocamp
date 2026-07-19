@@ -226,18 +226,24 @@ export async function findInvoiceByReferenceCode(
   };
 }
 
-/** Open invoice whose parent email + remaining balance match an e-Transfer without a MYO ref. */
+/**
+ * Open invoice whose parent email OR parent name + remaining balance match an
+ * e-Transfer without a MYO ref. Interac notifications often omit the sender's
+ * actual email, so name matching is used as a reliable fallback.
+ */
 async function isLikelyCampPaymentWithoutRef(
   senderEmail: string | null,
+  senderName: string | null,
   amount: number | null
 ): Promise<boolean> {
-  const email = senderEmail?.trim();
-  if (!email || amount == null || amount <= 0) return false;
+  const email = senderEmail?.trim().toLowerCase() ?? null;
+  const name = senderName?.trim().toLowerCase() ?? null;
+  if ((!email && !name) || amount == null || amount <= 0) return false;
 
   const supabase = createSupabaseAdminClient();
   const { data, error } = await supabase
     .from("invoices")
-    .select("amount_due, amount_paid, status, registrations ( parent_email )")
+    .select("amount_due, amount_paid, status, registrations ( parent_email, parent_name )")
     .in("status", ["pending", "partial"]);
 
   if (error || !data) return false;
@@ -247,20 +253,21 @@ async function isLikelyCampPaymentWithoutRef(
     amount_paid: number | string;
     status: string;
     registrations:
-      | { parent_email: string | null }
-      | Array<{ parent_email: string | null }>
+      | { parent_email: string | null; parent_name: string | null }
+      | Array<{ parent_email: string | null; parent_name: string | null }>
       | null;
   };
 
-  const needle = email.toLowerCase();
   for (const row of data as Row[]) {
     const reg = Array.isArray(row.registrations) ? row.registrations[0] : row.registrations;
     const parentEmail = reg?.parent_email?.trim().toLowerCase();
-    if (!parentEmail || parentEmail !== needle) continue;
+    const parentName = reg?.parent_name?.trim().toLowerCase();
 
-    const remaining = Number(
-      (Number(row.amount_due) - Number(row.amount_paid)).toFixed(2)
-    );
+    const emailMatch = email && parentEmail && parentEmail === email;
+    const nameMatch = name && parentName && parentName === name;
+    if (!emailMatch && !nameMatch) continue;
+
+    const remaining = Number((Number(row.amount_due) - Number(row.amount_paid)).toFixed(2));
     if (remaining <= 0) continue;
     if (Math.abs(remaining - amount) <= 0.01) return true;
   }
@@ -356,6 +363,7 @@ export async function ingestEtransferEmail(input: AutoMatchInput): Promise<AutoM
   if (referenceCodes.length === 0) {
     const likelyCamp = await isLikelyCampPaymentWithoutRef(
       input.parsed.senderEmail,
+      input.parsed.senderName,
       input.parsed.amount
     );
     if (!likelyCamp) {
