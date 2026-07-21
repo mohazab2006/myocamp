@@ -219,6 +219,21 @@ export async function confirmHandledAction(formData: FormData) {
   );
 }
 
+export async function deleteInboundEmailAction(formData: FormData) {
+  await requireAuthorizedAdmin();
+  const inboundId = value(formData, "inboundId");
+  const tab = value(formData, "tab") || "other";
+  if (!inboundId) flash(`/admin/inbox?tab=${tab}`, "error", "Missing inbound id.");
+
+  const supabase = createSupabaseAdminClient();
+  const { error } = await supabase.from("inbound_emails").delete().eq("id", inboundId);
+
+  if (error) flash(`/admin/inbox?tab=${tab}`, "error", error.message);
+
+  revalidatePath("/admin/inbox");
+  flash(`/admin/inbox?tab=${tab}`, "success", "Email deleted.");
+}
+
 export async function clearStaleMatchedAction() {
   await requireAuthorizedAdmin();
 

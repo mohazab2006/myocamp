@@ -29,7 +29,8 @@ import {
   removeInboundFromQueueAction,
   clearStaleMatchedAction,
   relinkOrphanedMatchAction,
-  confirmHandledAction
+  confirmHandledAction,
+  deleteInboundEmailAction
 } from "./actions";
 import { CampFilterSelect } from "./CampFilterSelect";
 
@@ -206,11 +207,9 @@ export default async function AdminInboxPage({
 
   // Apply camp filter.
   const filteredEmails =
-    campFilter === "all"
+    !CAMP_FILTER_TABS.includes(tab) || campFilter === "all"
       ? emails
-      : campFilter === "unknown"
-        ? emails.filter((e) => campForEmail(e, refMap) === null)
-        : emails.filter((e) => campForEmail(e, refMap) === campFilter);
+      : emails.filter((e) => campForEmail(e, refMap) === campFilter);
 
   const counts = { all: 0, error: 0, matched: 0, unmatched: 0, other: 0 };
   // Cheap recount (single query) so the badges aren't tied to the active filter.
@@ -475,6 +474,16 @@ function EmailCard({
               />
             </form>
           ) : null}
+          <form action={deleteInboundEmailAction}>
+            <input type="hidden" name="inboundId" value={email.id} />
+            <input type="hidden" name="tab" value={tab} />
+            <AdminSubmitButton
+              idleLabel="Delete"
+              pendingLabel="Deleting…"
+              variant="ghost"
+              icon={<Trash size={12} weight="bold" />}
+            />
+          </form>
         </div>
       </header>
 
