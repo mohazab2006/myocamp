@@ -127,6 +127,7 @@ async function enrichPublicCamps(rows: CampRow[]): Promise<PublicCamp[]> {
 function isPubliclyJoinable(camp: PublicCamp): boolean {
   if (camp.status === "coming-soon") return true; // show as "coming soon"
   if (camp.status === "open" || camp.status === "full") return true;
+  if (camp.status === "registration-closed" && camp.waitlistFormJotformId) return true;
   if (camp.status === "closed" && isCampAtCapacity(camp) && camp.waitlistFormJotformId) {
     return true;
   }
@@ -159,7 +160,7 @@ export async function fetchRegisterablePublicCamps(): Promise<PublicCamp[]> {
   const { data, error } = await supabase
     .from("camps")
     .select("*")
-    .in("status", ["coming-soon", "open", "full", "closed"])
+    .in("status", ["coming-soon", "open", "full", "registration-closed", "closed"])
     .order("start_date", { ascending: true });
 
   if (error || !data) return [];
