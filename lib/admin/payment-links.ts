@@ -92,6 +92,9 @@ function rowToCamp(row: CampRow): Camp {
     featuredOnEvents: data.featuredOnEvents,
     ageMin: data.ageMin,
     ageMax: data.ageMax,
+    dropOffDetails: data.dropOffDetails,
+    pickupDetails: data.pickupDetails,
+    rulesUrl: data.rulesUrl,
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at

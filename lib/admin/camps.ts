@@ -47,6 +47,9 @@ function rowToCamp(row: CampRow): Camp {
     featuredOnEvents: data.featuredOnEvents,
     ageMin: data.ageMin,
     ageMax: data.ageMax,
+    dropOffDetails: data.dropOffDetails,
+    pickupDetails: data.pickupDetails,
+    rulesUrl: data.rulesUrl,
     notes: row.notes,
     createdAt: row.created_at,
     updatedAt: row.updated_at
@@ -103,6 +106,9 @@ export type UpsertCampInput = {
   featuredOnEvents: boolean;
   ageMin: number | null;
   ageMax: number | null;
+  dropOffDetails: string | null;
+  pickupDetails: string | null;
+  rulesUrl: string | null;
   notes: string | null;
 };
 
@@ -112,7 +118,10 @@ function campDataFromInput(input: UpsertCampInput) {
     heroImage: input.heroImage,
     featuredOnEvents: input.featuredOnEvents,
     ageMin: input.ageMin,
-    ageMax: input.ageMax
+    ageMax: input.ageMax,
+    dropOffDetails: input.dropOffDetails,
+    pickupDetails: input.pickupDetails,
+    rulesUrl: input.rulesUrl
   };
 }
 

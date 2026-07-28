@@ -31,6 +31,11 @@ const statusCopy: Record<
     tone: "bg-camp-bark text-camp-paper",
     line: "We're at capacity. Join the waitlist and we'll email you if a spot opens."
   },
+  "registration-closed": {
+    tag: "Registration closed",
+    tone: "bg-camp-bark/70 text-camp-paper",
+    line: "Registration is closed — see drop-off and pickup details below."
+  },
   closed: {
     tag: "Closed",
     tone: "bg-camp-bark/70 text-camp-paper",
@@ -117,7 +122,9 @@ export function CampRegisterView({
                         })
                       ] as const
                     ]
-                  : [])
+                  : []),
+                ...(camp.dropOffDetails ? [["Drop-off / Check-in", camp.dropOffDetails] as const] : []),
+                ...(camp.pickupDetails ? [["Pickup / Ceremony", camp.pickupDetails] as const] : [])
               ].map(([k, v]) => (
                 <div
                   key={k}
@@ -127,6 +134,19 @@ export function CampRegisterView({
                   <span className="font-camp text-xl text-camp-bark">{v}</span>
                 </div>
               ))}
+              {camp.rulesUrl ? (
+                <div className="flex items-baseline justify-between border-b border-dashed border-camp-bark/40 pb-2">
+                  <span className="font-script text-lg text-camp-bark/70">Rules &amp; what to bring</span>
+                  <a
+                    href={camp.rulesUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-camp text-xl text-camp-flame underline decoration-2 underline-offset-2"
+                  >
+                    View →
+                  </a>
+                </div>
+              ) : null}
             </div>
           </div>
         </div>
@@ -197,13 +217,19 @@ export function CampRegisterView({
             </>
           ) : (
             <div className="mx-auto mt-8 max-w-xl border-2 border-camp-bark/30 bg-camp-paper-soft p-8 text-center">
-              <p className="font-camp text-2xl text-camp-bark">Registration isn&apos;t open right now.</p>
+              <p className="font-camp text-2xl text-camp-bark">
+                {camp.registrationStatus === "registration-closed"
+                  ? "Registration is closed."
+                  : "Registration isn’t open right now."}
+              </p>
               <p className="mt-3 text-camp-ink/80">
                 {camp.registrationStatus === "full"
                   ? "Registration is full, but you can still join the waitlist below."
-                  : camp.status === "closed"
-                    ? "This session is closed. Contact us if you have questions."
-                    : "Check back soon or email us for help."}
+                  : camp.registrationStatus === "registration-closed"
+                    ? "The form is closed but camp is on! See drop-off and pickup times in the panel above."
+                    : camp.status === "closed"
+                      ? "This session is closed. Contact us if you have questions."
+                      : "Check back soon or email us for help."}
               </p>
               <Link
                 href="/contact"

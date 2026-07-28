@@ -82,6 +82,9 @@ function parseInput(formData: FormData): { input: UpsertCampInput; error?: strin
       featuredOnEvents: formData.get("featuredOnEvents") === "on",
       ageMin: numberOrNull(formData, "ageMin"),
       ageMax: numberOrNull(formData, "ageMax"),
+      dropOffDetails: optional(formData, "dropOffDetails"),
+      pickupDetails: optional(formData, "pickupDetails"),
+      rulesUrl: optional(formData, "rulesUrl"),
       notes: optional(formData, "notes")
     }
   };

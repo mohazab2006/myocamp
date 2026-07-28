@@ -8,6 +8,7 @@ const statusLabels: Record<PublicCamp["status"], string> = {
   open: "Registration open",
   full: "Waitlist open",
   "coming-soon": "Coming soon",
+  "registration-closed": "Registration closed",
   closed: "Registration closed",
   draft: "Opening soon",
   archived: "Archived"

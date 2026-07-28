@@ -13,6 +13,7 @@ const statusOptions: { value: Camp["status"]; label: string; hint: string }[] = 
   { value: "coming-soon", label: "Coming Soon", hint: "Shows publicly with all details (dates, fee, age) — no registration form yet." },
   { value: "open", label: "Open", hint: "Registration form is live on /camp." },
   { value: "full", label: "Full", hint: "Registration closed; waitlist form is live." },
+  { value: "registration-closed", label: "Registration Closed", hint: "Registration form closed; camp page, dates, and day-of info stay visible for registered families." },
   { value: "closed", label: "Closed", hint: "Registration closed. Waitlist stays open if the camp is at capacity." },
   { value: "archived", label: "Archived", hint: "Past camp, kept for records. Not shown on /camp." }
 ];
@@ -223,6 +224,46 @@ export function CampForm({ camp }: CampFormProps) {
             Flip status to Full when capacity is reached
           </label>
         </AdminField>
+      </div>
+
+      <div className="border border-line bg-paper p-5">
+        <p className="eyebrow text-brass">Camp day info</p>
+        <h3 className="mt-2 font-display text-xl tracking-tight text-ink">
+          Drop-off, pick-up &amp; rules
+        </h3>
+        <p className="mt-2 text-xs leading-relaxed text-ink-soft">
+          Shown on the public camp page when status is <strong>Registration Closed</strong> (or earlier).
+          Families need this even after the form closes.
+        </p>
+        <div className="mt-5 grid gap-4 md:grid-cols-2">
+          <AdminField label="Drop-off / Check-in" hint="e.g. Aug 6, 8am–10am">
+            <input
+              className={adminInputClass}
+              name="dropOffDetails"
+              defaultValue={camp?.dropOffDetails ?? ""}
+              placeholder="Aug 6, 8am–10am"
+            />
+          </AdminField>
+          <AdminField label="Pickup / Ceremony" hint="e.g. Aug 9, 11am–12pm">
+            <input
+              className={adminInputClass}
+              name="pickupDetails"
+              defaultValue={camp?.pickupDetails ?? ""}
+              placeholder="Aug 9, 11am–12pm"
+            />
+          </AdminField>
+        </div>
+        <div className="mt-4">
+          <AdminField label="Rules / What to Bring URL" hint="Link to a PDF or page with packing list and rules.">
+            <input
+              className={adminInputClass}
+              name="rulesUrl"
+              type="url"
+              defaultValue={camp?.rulesUrl ?? ""}
+              placeholder="https://..."
+            />
+          </AdminField>
+        </div>
       </div>
 
       <AdminField label="Internal notes" hint="Only visible in the admin. Helpful for handoff.">

@@ -6,27 +6,27 @@ export type CampDataFields = {
   featuredOnEvents: boolean;
   ageMin: number | null;
   ageMax: number | null;
+  dropOffDetails: string | null;
+  pickupDetails: string | null;
+  rulesUrl: string | null;
 };
 
 export function parseCampData(data: Record<string, unknown> | null): CampDataFields {
-  const paymentEmail =
-    data && typeof data.paymentEmail === "string" && data.paymentEmail.trim()
-      ? data.paymentEmail.trim()
+  const str = (key: string) =>
+    data && typeof data[key] === "string" && (data[key] as string).trim()
+      ? (data[key] as string).trim()
       : null;
-  const heroImage =
-    data && typeof data.heroImage === "string" && data.heroImage.trim()
-      ? data.heroImage.trim()
-      : null;
-  const ageMin =
-    data && typeof data.ageMin === "number" && Number.isFinite(data.ageMin) ? data.ageMin : null;
-  const ageMax =
-    data && typeof data.ageMax === "number" && Number.isFinite(data.ageMax) ? data.ageMax : null;
+  const num = (key: string) =>
+    data && typeof data[key] === "number" && Number.isFinite(data[key]) ? (data[key] as number) : null;
   return {
-    paymentEmail,
-    heroImage,
+    paymentEmail: str("paymentEmail"),
+    heroImage: str("heroImage"),
     featuredOnEvents: data?.featuredOnEvents === true,
-    ageMin,
-    ageMax
+    ageMin: num("ageMin"),
+    ageMax: num("ageMax"),
+    dropOffDetails: str("dropOffDetails"),
+    pickupDetails: str("pickupDetails"),
+    rulesUrl: str("rulesUrl")
   };
 }
 
@@ -36,20 +36,19 @@ export function mergeCampData(
 ): Record<string, unknown> {
   const merged: Record<string, unknown> = { ...(existing ?? {}) };
 
-  if (fields.paymentEmail) merged.paymentEmail = fields.paymentEmail;
-  else delete merged.paymentEmail;
+  const setOrDel = (key: string, val: string | number | boolean | null | undefined) => {
+    if (val != null && val !== "" && val !== false) merged[key] = val;
+    else delete merged[key];
+  };
 
-  if (fields.heroImage) merged.heroImage = fields.heroImage;
-  else delete merged.heroImage;
-
-  if (fields.featuredOnEvents) merged.featuredOnEvents = true;
-  else delete merged.featuredOnEvents;
-
-  if (fields.ageMin != null) merged.ageMin = fields.ageMin;
-  else delete merged.ageMin;
-
-  if (fields.ageMax != null) merged.ageMax = fields.ageMax;
-  else delete merged.ageMax;
+  setOrDel("paymentEmail", fields.paymentEmail);
+  setOrDel("heroImage", fields.heroImage);
+  setOrDel("featuredOnEvents", fields.featuredOnEvents || undefined);
+  setOrDel("ageMin", fields.ageMin);
+  setOrDel("ageMax", fields.ageMax);
+  setOrDel("dropOffDetails", fields.dropOffDetails);
+  setOrDel("pickupDetails", fields.pickupDetails);
+  setOrDel("rulesUrl", fields.rulesUrl);
 
   return merged;
 }

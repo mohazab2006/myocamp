@@ -7,7 +7,7 @@ import { getCampSettings } from "@/lib/content/camp";
 import { SITE_URL } from "@/lib/site";
 import type { Camp, CampStatus } from "@/lib/types";
 
-export type PublicRegistrationStatus = "open" | "full" | "closed" | "opening-soon";
+export type PublicRegistrationStatus = "open" | "full" | "closed" | "registration-closed" | "opening-soon";
 
 export interface PublicCamp {
   id: string;
@@ -29,6 +29,9 @@ export interface PublicCamp {
   featuredOnEvents: boolean;
   ageMin: number | null;
   ageMax: number | null;
+  dropOffDetails: string | null;
+  pickupDetails: string | null;
+  rulesUrl: string | null;
   /** Active camper slots (filled at read time for public pages). */
   activeCamperCount: number;
 }
@@ -55,6 +58,8 @@ function mapStatus(status: CampStatus, activeCamperCount: number, capacity: numb
       return "open";
     case "full":
       return "full";
+    case "registration-closed":
+      return "registration-closed";
     case "closed":
       if (capacity != null && capacity > 0 && activeCamperCount >= capacity) {
         return "full";
@@ -107,6 +112,9 @@ function rowToPublicCamp(row: CampRow, activeCamperCount = 0): PublicCamp {
     featuredOnEvents: data.featuredOnEvents,
     ageMin: data.ageMin,
     ageMax: data.ageMax,
+    dropOffDetails: data.dropOffDetails,
+    pickupDetails: data.pickupDetails,
+    rulesUrl: data.rulesUrl,
     activeCamperCount
   };
 }
@@ -137,6 +145,7 @@ export async function fetchPublicCampBySlug(slug: string): Promise<PublicCamp | 
   if (error || !data) return null;
   const row = data as CampRow;
   if (row.status === "archived" || row.status === "draft") return null;
+  // "registration-closed" stays accessible by direct URL (families need drop-off/pickup info).
   const count = await countActiveCampers(row.id);
   return rowToPublicCamp(row, count);
 }
@@ -246,6 +255,9 @@ export function campToPublicShape(camp: Camp, paymentEmail?: string | null): Pub
     featuredOnEvents: camp.featuredOnEvents,
     ageMin: camp.ageMin,
     ageMax: camp.ageMax,
+    dropOffDetails: camp.dropOffDetails,
+    pickupDetails: camp.pickupDetails,
+    rulesUrl: camp.rulesUrl,
     activeCamperCount: 0
   };
 }
