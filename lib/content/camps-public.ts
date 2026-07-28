@@ -223,6 +223,9 @@ export function activeFormForCamp(camp: PublicCamp): {
   if (camp.status === "open" && camp.registrationFormJotformId) {
     return { formId: camp.registrationFormJotformId, mode: "registration" };
   }
+  if (camp.status === "registration-closed" && camp.waitlistFormJotformId) {
+    return { formId: camp.waitlistFormJotformId, mode: "waitlist" };
+  }
   if (isCampAtCapacity(camp) && camp.waitlistFormJotformId) {
     return { formId: camp.waitlistFormJotformId, mode: "waitlist" };
   }

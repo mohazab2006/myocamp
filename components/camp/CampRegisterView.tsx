@@ -34,7 +34,7 @@ const statusCopy: Record<
   "registration-closed": {
     tag: "Registration closed",
     tone: "bg-camp-bark/70 text-camp-paper",
-    line: "Registration is closed — see drop-off and pickup details below."
+    line: "Registration is closed — join the waitlist below or see the day-of details."
   },
   closed: {
     tag: "Closed",
