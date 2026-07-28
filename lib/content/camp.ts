@@ -16,8 +16,8 @@ const campSeed: CampSettings = {
   formUrl: "https://form.jotform.com/241729323092253",
   feeCamper: 400,
   feeLit: 400,
-  dropOff: "Thursday morning",
-  pickUp: "Sunday at 3pm",
+  dropOff: "8am–10am",
+  pickUp: "11am–12pm",
   paymentEmail: "myoadmin@gmail.com",
   paypalDonateId: "PVVD32WHTA9KE",
   announcementOverride: {

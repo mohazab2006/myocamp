@@ -147,8 +147,8 @@ export default async function CampLocationPage() {
                 Plan the drive once. Show up calm.
               </h2>
               <p className="mt-6 max-w-[44ch] text-camp-ink/80">
-                Exact Thursday morning times and closing-assembly details go out to registered families closer
-                to camp. Use this page for the route, the address, and what to expect at the gate.
+                Drop-off is Thursday 8–10am; closing assembly and pickup Sunday 11am–12pm.
+                Use this page for the route, the address, and what to expect at the gate.
               </p>
             </div>
 
@@ -158,18 +158,18 @@ export default async function CampLocationPage() {
                   icon: "tent",
                   title: "Drop-off",
                   detail: camp.dropOff,
-                  note: "Thursday morning — exact time emailed to families closer to camp."
+                  note: "Don't be late — program starts 10am sharp."
                 },
                 {
                   icon: "spark",
                   title: "Pickup",
                   detail: camp.pickUp,
-                  note: "Closing assembly first, then pickup. Plan to be there by 11:45."
+                  note: "Closing assembly first, then pickup. Plan to be there by 11:00am."
                 },
                 {
                   icon: "compass",
                   title: "From Ottawa",
-                  detail: "~2.0 hours via Hwy 17",
+                  detail: "~1.5 hours via Hwy 17",
                   note: "Carpools coordinated by cabin group. We share a sheet by July."
                 },
                 {
