@@ -306,6 +306,6 @@ export const campWeekRhythm = [
   {
     day: "Sunday",
     title: "Pack out & closing",
-    body: "Open swim and canoe. Cabin clean-up, closing assembly, pickup at 3pm."
+    body: "Camp-wide activities. Cabin clean-up, closing assembly, starting at 11am. All campers and their families must be off site by 12pm."
   }
 ];
