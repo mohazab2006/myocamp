@@ -84,6 +84,24 @@ export function EventForm({ event, camps = [] }: EventFormProps) {
         <AdminField label="End date" hint="Leave blank for single-day events.">
           <input className={adminInputClass} name="endDate" type="date" defaultValue={event?.endDate} />
         </AdminField>
+        <AdminField label="Start time" hint="e.g. 10:00am">
+          <input
+            className={adminInputClass}
+            name="startTime"
+            type="text"
+            defaultValue={event?.startTime}
+            placeholder="10:00am"
+          />
+        </AdminField>
+        <AdminField label="End time" hint="e.g. 12:00pm">
+          <input
+            className={adminInputClass}
+            name="endTime"
+            type="text"
+            defaultValue={event?.endTime}
+            placeholder="12:00pm"
+          />
+        </AdminField>
       </div>
 
       <AdminField label="Location" required>

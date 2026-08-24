@@ -179,6 +179,8 @@ export async function saveEventAction(formData: FormData) {
     type,
     startDate,
     endDate: value(formData, "endDate"),
+    startTime: value(formData, "startTime"),
+    endTime: value(formData, "endTime"),
     location,
     audience,
     blurb,

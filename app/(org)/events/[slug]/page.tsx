@@ -85,7 +85,12 @@ export default async function EventPage({
               <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-brass">
                 <CalendarBlank size={14} /> When
               </div>
-              <div className="mt-2 text-base text-ink">{formatRange(event.startDate, event.endDate)}</div>
+                <div className="mt-2 text-base text-ink">{formatRange(event.startDate, event.endDate)}</div>
+              {(event.startTime || event.endTime) && (
+                <div className="mt-1 text-sm text-ink-soft">
+                  {event.startTime}{event.startTime && event.endTime ? "–" : ""}{event.endTime}
+                </div>
+              )}
             </div>
             <div className="border-t border-line pt-4">
               <div className="flex items-center gap-2 text-xs uppercase tracking-[0.16em] text-brass">
@@ -103,7 +108,13 @@ export default async function EventPage({
 
           <div className="prose prose-stone max-w-none">
             <p className="text-lg leading-relaxed text-ink">{event.blurb}</p>
-            {event.body && <p className="text-ink-soft">{event.body}</p>}
+            {event.body && (
+              <div className="mt-4 space-y-4">
+                {event.body.split(/\n+/).filter(Boolean).map((para, i) => (
+                  <p key={i} className="text-ink-soft">{para}</p>
+                ))}
+              </div>
+            )}
             {!linkedCamp && event.type === "camp" && isInternalHref(event.registerUrl ?? "") && (
               <div className="mt-6 flex flex-wrap gap-3">
                 <ButtonLink href="/camp" variant="secondary">
@@ -126,7 +137,7 @@ export default async function EventPage({
         <aside className="col-span-12 space-y-6 md:col-span-4">
           {linkedCamp ? (
             <EventCampPanel camp={linkedCamp} upcoming={upcoming} />
-          ) : (
+          ) : (event.registerUrl || event.cost) ? (
             <div className="border border-line bg-paper-deep/40 p-6">
               <div className="text-xs uppercase tracking-[0.16em] text-brass">Sign up</div>
               <div className="font-display mt-2 text-2xl tracking-tight">
@@ -153,17 +164,9 @@ export default async function EventPage({
                   </Link>
                   .
                 </p>
-              ) : (
-                <p className="mt-4 text-sm text-ink-soft">
-                  Email{" "}
-                  <a href="mailto:myoadmin@gmail.com" className="text-pine underline">
-                    myoadmin@gmail.com
-                  </a>{" "}
-                  to be added.
-                </p>
-              )}
+              ) : null}
             </div>
-          )}
+          ) : null}
         </aside>
       </section>
     </article>

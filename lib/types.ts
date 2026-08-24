@@ -22,6 +22,8 @@ export interface OrgEvent {
   type: EventType;
   startDate: string;
   endDate?: string;
+  startTime?: string;
+  endTime?: string;
   location: string;
   audience: AudienceTag[];
   blurb: string;
