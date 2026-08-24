@@ -137,12 +137,16 @@ export default async function EventPage({
         <aside className="col-span-12 space-y-6 md:col-span-4">
           {linkedCamp ? (
             <EventCampPanel camp={linkedCamp} upcoming={upcoming} />
-          ) : (event.registerUrl || event.cost) ? (
+          ) : (event.registerUrl || event.capacity || event.cost) ? (
             <div className="border border-line bg-paper-deep/40 p-6">
-              <div className="text-xs uppercase tracking-[0.16em] text-brass">Sign up</div>
-              <div className="font-display mt-2 text-2xl tracking-tight">
-                {upcoming ? "Spot still available" : "This event has wrapped"}
+              <div className="text-xs uppercase tracking-[0.16em] text-brass">
+                {event.registerUrl ? "Sign up" : event.capacity ? "Limited spots" : "Details"}
               </div>
+              {event.capacity && !event.registerUrl && (
+                <div className="font-display mt-2 text-2xl tracking-tight">
+                  {upcoming ? "Spot still available" : "This event has wrapped"}
+                </div>
+              )}
               {event.cost && (
                 <div className="mt-3 text-sm text-ink-soft">Cost: {event.cost}</div>
               )}
@@ -156,6 +160,14 @@ export default async function EventPage({
                     </ButtonAnchor>
                   )}
                 </div>
+              ) : upcoming && event.capacity && !event.registerUrl ? (
+                <p className="mt-4 text-sm text-ink-soft">
+                  Email{" "}
+                  <a href="mailto:myoadmin@gmail.com" className="text-pine underline">
+                    myoadmin@gmail.com
+                  </a>{" "}
+                  to be added.
+                </p>
               ) : !upcoming ? (
                 <p className="mt-4 text-sm text-ink-soft">
                   Want to join the next one like this?{" "}

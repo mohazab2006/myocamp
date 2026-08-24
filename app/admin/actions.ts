@@ -191,6 +191,7 @@ export async function saveEventAction(formData: FormData) {
     registerOpens: value(formData, "registerOpens"),
     registerCloses: value(formData, "registerCloses"),
     cost: value(formData, "cost"),
+    capacity: value(formData, "capacity") ? Number(value(formData, "capacity")) : undefined,
     archived: formData.get("archived") === "on" ? true : undefined
   });
 

@@ -33,6 +33,7 @@ export interface OrgEvent {
   registerOpens?: string;
   registerCloses?: string;
   cost?: string;
+  capacity?: number;
   archived?: boolean;
   /** Links this event page to a camp in /admin/camps (registration, image, etc.). */
   campSlug?: string;

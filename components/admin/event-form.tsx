@@ -64,12 +64,22 @@ export function EventForm({ event, camps = [] }: EventFormProps) {
             ))}
           </select>
         </AdminField>
-        <AdminField label="Cost" hint='"Free", "$25", "TBD" — shown next to the event title.'>
+        <AdminField label="Cost" hint='"Free", "$25", "TBD" — shown on the event page.'>
           <input
             className={adminInputClass}
             name="cost"
             defaultValue={event?.cost}
             placeholder="Free"
+          />
+        </AdminField>
+        <AdminField label="Capacity" hint="Limited spots? Set a number. Only shown if no registration link is set.">
+          <input
+            className={adminInputClass}
+            name="capacity"
+            type="number"
+            min={1}
+            defaultValue={event?.capacity ?? ""}
+            placeholder="30"
           />
         </AdminField>
         <AdminField label="Start date" required>
