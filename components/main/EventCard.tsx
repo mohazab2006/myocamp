@@ -54,7 +54,11 @@ export function EventCard({
       </div>
       <div className={tone === "deep" ? "text-paper" : ""}>
         <div className={`text-xs uppercase tracking-[0.16em] ${tone === "deep" ? "text-paper/70" : "text-ink-soft"}`}>
-          {formatRange(event.startDate, event.endDate)} · {event.location}
+          {formatRange(event.startDate, event.endDate)}
+          {event.startTime && (
+            <> · {event.startTime}{event.endTime ? `–${event.endTime}` : ""}</>
+          )}
+          {" · "}{event.location}
         </div>
         <h3 className="font-display mt-2 text-2xl leading-tight tracking-tight">
           {event.title}
