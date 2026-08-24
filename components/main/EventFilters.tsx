@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import type { EventType, OrgEvent } from "@/lib/types";
+import type { OrgEvent } from "@/lib/types";
 import {
   EVENT_AUDIENCE_OPTIONS,
   eventMatchesAudienceFilter,
@@ -11,17 +11,7 @@ import { isPast, isUpcoming } from "@/lib/date";
 import { EventCard } from "./EventCard";
 import type { EventLinkedCampSummary } from "./EventCampPanel";
 
-const typeOptions: { value: EventType; label: string }[] = [
-  { value: "hike", label: "Hike" },
-  { value: "campfire", label: "Campfire" },
-  { value: "fundraiser", label: "Fundraiser" },
-  { value: "social", label: "Social" },
-  { value: "service", label: "Service" },
-  { value: "camp", label: "Camp" },
-  { value: "workshop", label: "Workshop" }
-];
-
-type EventCategory = "all" | "camp" | "community";
+type EventCategory = "all" | "community";
 
 function isCampEvent(event: OrgEvent): boolean {
   return Boolean(event.campSlug);
@@ -59,37 +49,28 @@ export function EventFilters({
   const [bucket, setBucket] = useState<"upcoming" | "past">("upcoming");
   const [category, setCategory] = useState<EventCategory>("all");
   const [audience, setAudience] = useState<EventAudienceFilter>("all");
-  const [types, setTypes] = useState<EventType[]>([]);
 
   const filtered = useMemo(() => {
     const now = new Date();
     let list = events.filter((e) =>
       bucket === "upcoming" ? isUpcoming(e, now) : isPast(e, now)
     );
-    if (category === "camp") list = list.filter(isCampEvent);
     if (category === "community") list = list.filter((e) => !isCampEvent(e));
     if (audience !== "all") {
       list = list.filter((e) => eventMatchesAudienceFilter(e.audience, audience));
     }
-    if (types.length > 0) list = list.filter((e) => types.includes(e.type));
     return list.sort((a, b) => {
       const ta = +new Date(a.startDate);
       const tb = +new Date(b.startDate);
       return bucket === "upcoming" ? ta - tb : tb - ta;
     });
-  }, [events, bucket, category, audience, types]);
+  }, [events, bucket, category, audience]);
 
   const campEvents = filtered.filter(isCampEvent);
   const communityEvents = filtered.filter((e) => !isCampEvent(e));
 
-  const toggleType = (t: EventType) =>
-    setTypes((prev) =>
-      prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
-    );
-
   const upcomingCount = events.filter((e) => isUpcoming(e)).length;
   const pastCount = events.length - upcomingCount;
-  const campCount = events.filter((e) => isUpcoming(e) && isCampEvent(e)).length;
   const communityCount = events.filter((e) => isUpcoming(e) && !isCampEvent(e)).length;
 
   const showSplit = category === "all" && campEvents.length > 0 && communityEvents.length > 0;
@@ -124,7 +105,6 @@ export function EventFilters({
         {(
           [
             { value: "all" as const, label: "Everything" },
-            { value: "camp" as const, label: `Camp sessions · ${campCount}` },
             { value: "community" as const, label: `Community events · ${communityCount}` }
           ] as const
         ).map((opt) => (
@@ -169,33 +149,6 @@ export function EventFilters({
         ))}
       </div>
 
-      <div className="no-scrollbar mt-4 flex gap-2 overflow-x-auto pb-2">
-        {typeOptions.map((t) => {
-          const active = types.includes(t.value);
-          return (
-            <button
-              key={t.value}
-              onClick={() => toggleType(t.value)}
-              className={`whitespace-nowrap rounded-full border px-3 py-1 text-xs uppercase tracking-[0.16em] transition ${
-                active
-                  ? "border-pine bg-pine text-paper"
-                  : "border-line text-ink-soft hover:border-pine"
-              }`}
-            >
-              {t.label}
-            </button>
-          );
-        })}
-        {types.length > 0 && (
-          <button
-            onClick={() => setTypes([])}
-            className="whitespace-nowrap rounded-full px-3 py-1 text-xs uppercase tracking-[0.16em] text-ink-soft hover:text-ink"
-          >
-            Clear
-          </button>
-        )}
-      </div>
-
       {filtered.length === 0 ? (
         <div className="mt-16 border border-dashed border-line p-12 text-center text-ink-soft">
           <div className="font-display text-2xl text-ink">Nothing here yet.</div>
@@ -233,11 +186,6 @@ export function EventFilters({
         </div>
       ) : (
         <div className="mt-12">
-          {category === "camp" ? (
-            <p className="mb-8 max-w-2xl text-sm text-ink-soft">
-              Camp session event pages — each one connects to a camp registration form.
-            </p>
-          ) : null}
           {category === "community" ? (
             <p className="mb-8 max-w-2xl text-sm text-ink-soft">
               Regular MYO events — bonfires, hikes, service days, and socials.
