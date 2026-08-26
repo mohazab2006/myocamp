@@ -58,12 +58,22 @@ function legacyCampDates(legacy: CampSettings, events: OrgEvent[]): HomeCampDate
   return rows;
 }
 
+function isCampUpcoming(camp: PublicCamp): boolean {
+  const end = camp.endDate ?? camp.startDate;
+  const [year, month, day] = end.split("-").map(Number);
+  const endDate = new Date(year, month - 1, day);
+  endDate.setHours(23, 59, 59, 999);
+  return endDate >= new Date();
+}
+
 function buildCampDates(
   camps: PublicCamp[],
   legacy: CampSettings,
   events: OrgEvent[]
 ): HomeCampDate[] {
-  const visible = camps.filter((c) => c.status !== "archived" && c.status !== "draft");
+  const visible = camps.filter(
+    (c) => c.status !== "archived" && c.status !== "draft" && isCampUpcoming(c)
+  );
   if (visible.length === 0) return legacyCampDates(legacy, events);
 
   return visible.map((camp) => ({
