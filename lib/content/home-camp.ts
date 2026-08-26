@@ -63,6 +63,7 @@ function isCampUpcoming(camp: PublicCamp): boolean {
   const [year, month, day] = end.split("-").map(Number);
   const endDate = new Date(year, month - 1, day);
   endDate.setHours(23, 59, 59, 999);
+  endDate.setDate(endDate.getDate() + 14);
   return endDate >= new Date();
 }
 
