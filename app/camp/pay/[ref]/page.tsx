@@ -12,13 +12,11 @@ import {
   PaperPlaneTilt,
   ShieldCheck,
   Tent,
-  Wallet,
   Warning,
   XCircle
 } from "@phosphor-icons/react/ssr";
 
 import { CopyButton } from "@/components/admin/copy-button";
-import { PayPalButton } from "@/components/payment/paypal-button";
 import {
   familyReferenceCodes,
   familyTotalRemaining,
@@ -29,7 +27,6 @@ import {
 } from "@/lib/admin/family-billing";
 import { findByReferenceCode } from "@/lib/admin/payment-links";
 import { fetchPaymentsForInvoice } from "@/lib/admin/payments";
-import { isPayPalConfigured, getPayPalEnvironment } from "@/lib/admin/paypal";
 import type { Invoice, Payment, Registration } from "@/lib/types";
 import { commitCashPaymentAction } from "./actions";
 
@@ -174,7 +171,7 @@ export default async function CampPayPage({
           />
         )}
 
-        <FooterHelp paymentEmail={paymentEmail} paypalEnabled={isPayPalConfigured()} />
+        <FooterHelp paymentEmail={paymentEmail} />
       </div>
     </main>
   );
@@ -272,9 +269,6 @@ function UnpaidState({
   familyRefs: string[];
   hasCashPledge: boolean;
 }) {
-  const paypalClientId = process.env.NEXT_PUBLIC_PAYPAL_CLIENT_ID;
-  const paypalEnabled = isPayPalConfigured() && Boolean(paypalClientId);
-
   return (
     <>
       {isFamilyPayment ? (
@@ -323,14 +317,9 @@ function UnpaidState({
           </div>
           <div className="border border-line bg-paper-deep/40 p-4 text-xs text-ink-soft">
             <p className="font-semibold uppercase tracking-[0.14em] text-ink">
-              {paypalEnabled ? "Three ways to pay" : "Two ways to pay"}
+              Two ways to pay
             </p>
             <ul className="mt-2 space-y-1.5">
-              {paypalEnabled && (
-                <li className="flex items-center gap-1.5">
-                  <Wallet size={12} weight="duotone" /> PayPal — instant
-                </li>
-              )}
               <li className="flex items-center gap-1.5">
                 <PaperPlaneTilt size={12} weight="duotone" /> e-Transfer — overnight
               </li>
@@ -341,32 +330,6 @@ function UnpaidState({
           </div>
         </div>
       </section>
-
-      {/* PayPal */}
-      {paypalEnabled && paypalClientId && (
-        <section className="mt-5 border border-line bg-paper p-6 md:p-8">
-          <div className="flex items-start gap-3">
-            <Wallet size={24} weight="duotone" className="mt-1 text-pine" />
-            <div className="flex-1">
-              <h3 className="font-display text-xl tracking-tight text-ink">Pay with PayPal</h3>
-              <p className="mt-1 text-sm text-ink-soft">
-                {isFamilyPayment
-                  ? "One checkout covers every child listed above."
-                  : "Fastest option — confirmation is instant."}
-              </p>
-              <div className="mt-4">
-                <PayPalButton
-                  referenceCode={referenceCode}
-                  clientId={paypalClientId}
-                  amount={payRemaining}
-                  environment={getPayPalEnvironment()}
-                  familyRefs={isFamilyPayment ? familyRefs : undefined}
-                />
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* e-Transfer */}
       <section className="mt-5 border border-line bg-paper p-6 md:p-8">
@@ -480,7 +443,7 @@ function UnpaidState({
             {!hasCashPledge && (
               <p className="mt-3 text-xs text-ink-soft">
                 By selecting cash you commit to paying at drop-off. If you change your mind, you can
-                come back to this page and pay by {paypalEnabled ? "PayPal or e-Transfer" : "e-Transfer"} instead.
+                come back to this page and pay by e-Transfer instead.
               </p>
             )}
           </div>
@@ -651,14 +614,12 @@ function ETransferField({
   );
 }
 
-function FooterHelp({ paymentEmail, paypalEnabled }: { paymentEmail: string | null; paypalEnabled: boolean }) {
+function FooterHelp({ paymentEmail }: { paymentEmail: string | null }) {
   return (
     <section className="mt-8 border-t border-line/60 pt-6 text-center text-xs text-ink-soft">
       <p className="inline-flex items-center gap-1.5">
         <ShieldCheck size={12} weight="duotone" />
-        {paypalEnabled
-          ? "Payments are processed by PayPal and Interac — we never see your card or banking info."
-          : "Payments are processed by Interac e-Transfer — we never see your banking info."}
+        Payments are processed by Interac e-Transfer — we never see your banking info.
       </p>
       {paymentEmail ? (
         <p className="mt-2 inline-flex items-center gap-1.5">
