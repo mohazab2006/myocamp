@@ -16,7 +16,8 @@ const VALID_SLUGS: EmailTemplateSlug[] = [
   "payment_followup",
   "invoice_reminder",
   "waitlist_promoted",
-  "payment_confirmation"
+  "payment_confirmation",
+  "invoice_updated"
 ];
 
 function value(formData: FormData, key: string): string {
